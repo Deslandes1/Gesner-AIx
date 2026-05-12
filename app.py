@@ -8,6 +8,8 @@ import hashlib
 import re
 import base64
 import requests
+import csv
+import io
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime
@@ -29,7 +31,7 @@ st.markdown(
         background: linear-gradient(180deg, #0f3460 0%, #1a1a2e 100%);
         border-right: 2px solid #e94560;
     }
-    .stMarkdown, .stTextInput label, .stSelectbox label, .stButton button, .stCaption,
+    .stMarkdown, .stTextInput label, .stTextArea label, .stSelectbox label, .stButton button, .stCaption,
     h1, h2, h3, h4, h5, h6, p, li, div, span, strong, em, .footer,
     [data-testid="stSidebar"] * {
         color: #ffffff !important;
@@ -88,6 +90,26 @@ st.markdown(
         padding: 1rem;
         border-top: 1px solid #e94560;
     }
+    .char-picker {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .char-btn {
+        background-color: #2a5298;
+        border: none;
+        border-radius: 20px;
+        padding: 5px 12px;
+        color: white;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: 0.2s;
+        margin-right: 5px;
+    }
+    .char-btn:hover {
+        background-color: #e94560;
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -118,7 +140,7 @@ TEXTS = {
         "pricing_table": "| License | Price (one‑time) |\n|---------|------------------|\n| **Personal** | $49 |\n| **Business** | $299 |\n| **Enterprise / Source** | $999 |\n",
         "unlock_training": "🔐 Unlock Training Center",
         "api_key_label": "Enter API Key",
-        "training_section": "🔧 Training Center (Dictionaries & Voice)",
+        "training_section": "🔧 Training Center",
         "dict_title": "📖 Dictionaries",
         "dict_ht": "Kreyòl Ayisyen",
         "dict_fr": "Français",
@@ -137,6 +159,14 @@ TEXTS = {
         "record_btn": "🔴 Record",
         "stop_btn": "⏹️ Stop",
         "download_btn": "💾 Download",
+        "bulk_training_title": "🚀 Bulk Training (Fast Import)",
+        "bulk_csv_label": "Upload CSV file (columns: question, answer OR one column 'fact')",
+        "bulk_json_label": "Upload JSON file (array of strings)",
+        "bulk_text_label": "Paste text (one fact per line)",
+        "bulk_import_button": "Import All Facts",
+        "manage_facts": "📚 Manage Trained Facts",
+        "edit_save": "✏️ Save",
+        "delete": "🗑️ Delete",
         "footer": "© GlobalInternet.py – Gesner AI | Public chat always free, training protected by API key"
     },
     "fr": {
@@ -155,7 +185,7 @@ TEXTS = {
         "pricing_table": "| Licence | Prix (unique) |\n|---------|---------------|\n| **Personnelle** | 49 $ |\n| **Entreprise** | 299 $ |\n| **Entreprise / Code source** | 999 $ |\n",
         "unlock_training": "🔐 Déverrouiller le centre d'entraînement",
         "api_key_label": "Entrez la clé API",
-        "training_section": "🔧 Centre d'entraînement (Dictionnaires & Voix)",
+        "training_section": "🔧 Centre d'entraînement",
         "dict_title": "📖 Dictionnaires",
         "dict_ht": "Kreyòl Ayisyen",
         "dict_fr": "Français",
@@ -174,6 +204,14 @@ TEXTS = {
         "record_btn": "🔴 Enregistrer",
         "stop_btn": "⏹️ Arrêter",
         "download_btn": "💾 Télécharger",
+        "bulk_training_title": "🚀 Entraînement groupé (import rapide)",
+        "bulk_csv_label": "Télécharger fichier CSV (colonnes: question, réponse OU une colonne 'fact')",
+        "bulk_json_label": "Télécharger fichier JSON (tableau de chaînes)",
+        "bulk_text_label": "Coller du texte (une ligne = un fait)",
+        "bulk_import_button": "Importer tous les faits",
+        "manage_facts": "📚 Gérer les faits appris",
+        "edit_save": "✏️ Enregistrer",
+        "delete": "🗑️ Supprimer",
         "footer": "© GlobalInternet.py – Gesner IA | Chat public toujours gratuit, entraînement protégé par clé API"
     },
     "ht": {
@@ -192,7 +230,7 @@ TEXTS = {
         "pricing_table": "| Lisans | Pri (yon fwa) |\n|--------|---------------|\n| **Pèsonèl** | $49 |\n| **Biznis** | $299 |\n| **Antrepriz / Kòd sous** | $999 |\n",
         "unlock_training": "🔐 Débloke sant fòmasyon",
         "api_key_label": "Antre kle API",
-        "training_section": "🔧 Sant Fòmasyon (Diksyonè & Vwa)",
+        "training_section": "🔧 Sant Fòmasyon",
         "dict_title": "📖 Diksyonè",
         "dict_ht": "Kreyòl Ayisyen",
         "dict_fr": "Français",
@@ -211,6 +249,14 @@ TEXTS = {
         "record_btn": "🔴 Anrejistre",
         "stop_btn": "⏹️ Sispann",
         "download_btn": "💾 Telechaje",
+        "bulk_training_title": "🚀 Antreman an mas (enpòtasyon rapid)",
+        "bulk_csv_label": "Chaje fichye CSV (kolòn: kesyon, repons OSWA yon sèl kolòn 'fact')",
+        "bulk_json_label": "Chaje fichye JSON (tablo chèn karaktè)",
+        "bulk_text_label": "Kole tèks (yon liy = yon reyalite)",
+        "bulk_import_button": "Enpòte tout reyalite yo",
+        "manage_facts": "📚 Jere Reyalite Aprann",
+        "edit_save": "✏️ Sove",
+        "delete": "🗑️ Efase",
         "footer": "© GlobalInternet.py – Gesner AI | Chat piblik tou gratis, fòmasyon pwoteje pa kle API"
     },
     "es": {
@@ -229,7 +275,7 @@ TEXTS = {
         "pricing_table": "| Licencia | Precio (único) |\n|----------|----------------|\n| **Personal** | $49 |\n| **Negocios** | $299 |\n| **Empresa / Código fuente** | $999 |\n",
         "unlock_training": "🔐 Desbloquear centro de entrenamiento",
         "api_key_label": "Ingrese la clave API",
-        "training_section": "🔧 Centro de Entrenamiento (Diccionarios & Voz)",
+        "training_section": "🔧 Centro de Entrenamiento",
         "dict_title": "📖 Diccionarios",
         "dict_ht": "Kreyòl Ayisyen",
         "dict_fr": "Français",
@@ -248,6 +294,14 @@ TEXTS = {
         "record_btn": "🔴 Grabar",
         "stop_btn": "⏹️ Detener",
         "download_btn": "💾 Descargar",
+        "bulk_training_title": "🚀 Entrenamiento masivo (importación rápida)",
+        "bulk_csv_label": "Subir archivo CSV (columnas: pregunta, respuesta O una columna 'fact')",
+        "bulk_json_label": "Subir archivo JSON (arreglo de cadenas)",
+        "bulk_text_label": "Pegar texto (una línea = un hecho)",
+        "bulk_import_button": "Importar todos los hechos",
+        "manage_facts": "📚 Gestionar hechos aprendidos",
+        "edit_save": "✏️ Guardar",
+        "delete": "🗑️ Eliminar",
         "footer": "© GlobalInternet.py – Gesner AI | Chat público siempre gratuito, entrenamiento protegido por clave API"
     }
 }
@@ -260,6 +314,8 @@ if "embedding_model" not in st.session_state:
         st.session_state.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
     st.session_state.index = None
     st.session_state.texts = []
+if "training_data" not in st.session_state:
+    st.session_state.training_data = []
 if "dictionaries" not in st.session_state:
     st.session_state.dictionaries = {"ht": {}, "fr": {}, "en": {}}
 if "training_access" not in st.session_state:
@@ -271,7 +327,52 @@ if "tfidf_vectorizer" not in st.session_state:
 if "tfidf_matrix" not in st.session_state:
     st.session_state.tfidf_matrix = None
 
-# ---------- VOICE CACHE (in memory) ----------
+# ---------- HELPER FUNCTIONS ----------
+def build_tfidf():
+    if st.session_state.texts:
+        st.session_state.tfidf_vectorizer = TfidfVectorizer(stop_words=None)
+        st.session_state.tfidf_matrix = st.session_state.tfidf_vectorizer.fit_transform(st.session_state.texts)
+
+def rebuild_index():
+    if st.session_state.training_data:
+        st.session_state.texts = [item["text"] for item in st.session_state.training_data]
+        embeddings = [np.array(item["embedding"], dtype=np.float32) for item in st.session_state.training_data]
+        dim = len(embeddings[0])
+        st.session_state.index = faiss.IndexFlatL2(dim)
+        st.session_state.index.add(np.array(embeddings))
+        build_tfidf()
+    else:
+        st.session_state.index = None
+        st.session_state.texts = []
+        st.session_state.tfidf_vectorizer = None
+        st.session_state.tfidf_matrix = None
+
+def add_to_training(text):
+    if not text.strip():
+        return False
+    embedding = st.session_state.embedding_model.encode([text])[0]
+    st.session_state.training_data.append({"text": text, "embedding": embedding.tolist()})
+    rebuild_index()
+    return True
+
+def update_training_item(idx, new_text):
+    if not new_text.strip():
+        return False
+    embedding = st.session_state.embedding_model.encode([new_text])[0]
+    st.session_state.training_data[idx] = {"text": new_text, "embedding": embedding.tolist()}
+    rebuild_index()
+    return True
+
+def delete_training_item(idx):
+    st.session_state.training_data.pop(idx)
+    rebuild_index()
+
+def ensure_intro_text():
+    intro = "Non pa mw se Gesner L’IA, kreyatè mw an se Gesner Deslandes nan GlobalInternet.py."
+    if not any(item["text"] == intro for item in st.session_state.training_data):
+        add_to_training(intro)
+
+# ---------- VOICE CACHE ----------
 VOICE_CACHE = {}
 
 def get_voice_filename(text):
@@ -288,178 +389,114 @@ def get_voice_for_text(text):
     key = get_voice_filename(text)
     return VOICE_CACHE.get(key)
 
-# ---------- HYBRID RETRIEVAL ----------
-def build_tfidf():
-    if st.session_state.texts:
-        st.session_state.tfidf_vectorizer = TfidfVectorizer(stop_words=None)
-        st.session_state.tfidf_matrix = st.session_state.tfidf_vectorizer.fit_transform(st.session_state.texts)
+# ---------- CHARACTER PICKER (Kreyòl letters) ----------
+def character_picker(key_prefix, label="Insert Kreyòl characters:"):
+    chars = [
+        "e", "è", "E", "È", "o", "ò", "O", "Ò",
+        "an", "An", "AN", "en", "En", "EN", "on", "On", "ON", "oun", "Oun", "OUN"
+    ]
+    st.markdown(f"**{label}**")
+    cols = st.columns(len(chars))
+    for i, ch in enumerate(chars):
+        with cols[i]:
+            if st.button(ch, key=f"char_{key_prefix}_{ch}"):
+                if key_prefix == "chat_input":
+                    current = st.session_state.get("chat_input", "")
+                    st.session_state.chat_input = current + ch
+                elif key_prefix == "train_text":
+                    current = st.session_state.get("train_text", "")
+                    st.session_state.train_text = current + ch
+                elif key_prefix.startswith("edit_"):
+                    idx = key_prefix.split("_")[1]
+                    key = f"edit_text_{idx}"
+                    current = st.session_state.get(key, "")
+                    st.session_state[key] = current + ch
+                st.rerun()
 
+# ---------- RETRIEVAL ----------
 def retrieve_facts_hybrid(query, k=3):
-    semantic_results = retrieve_relevant_facts(query, k=k, threshold=1.2)
-    if not semantic_results:
-        semantic_results = []
-    keyword_results = []
-    if st.session_state.tfidf_vectorizer is not None and st.session_state.tfidf_matrix is not None:
-        q_vec = st.session_state.tfidf_vectorizer.transform([query])
-        scores = cosine_similarity(q_vec, st.session_state.tfidf_matrix).flatten()
-        top_indices = scores.argsort()[-k:][::-1]
-        for idx in top_indices:
-            if scores[idx] > 0.1:
-                keyword_results.append(st.session_state.texts[idx])
-    combined = list(dict.fromkeys(semantic_results + keyword_results))
-    return combined[:k]
-
-def retrieve_relevant_facts(query, k=3, threshold=1.2):
     if st.session_state.index is None or st.session_state.index.ntotal == 0:
         return []
     query_embedding = st.session_state.embedding_model.encode([query])[0].astype(np.float32).reshape(1, -1)
     distances, indices = st.session_state.index.search(query_embedding, k)
     results = []
     for i, idx in enumerate(indices[0]):
-        if idx != -1 and idx < len(st.session_state.texts) and distances[0][i] < threshold:
+        if idx != -1 and idx < len(st.session_state.texts) and distances[0][i] < 1.2:
             results.append(st.session_state.texts[idx])
-    return results
+    # Keyword fallback
+    if st.session_state.tfidf_vectorizer is not None and st.session_state.tfidf_matrix is not None:
+        q_vec = st.session_state.tfidf_vectorizer.transform([query])
+        scores = cosine_similarity(q_vec, st.session_state.tfidf_matrix).flatten()
+        top_indices = scores.argsort()[-k:][::-1]
+        for idx in top_indices:
+            if scores[idx] > 0.1 and st.session_state.texts[idx] not in results:
+                results.append(st.session_state.texts[idx])
+    return results[:k]
 
-def add_to_facts(text):
-    if not text.strip():
-        return False
-    embedding = st.session_state.embedding_model.encode([text])[0]
-    if st.session_state.index is None:
-        dim = len(embedding)
-        st.session_state.index = faiss.IndexFlatL2(dim)
-        st.session_state.texts = []
-    st.session_state.index.add(np.array([embedding], dtype=np.float32))
-    st.session_state.texts.append(text)
-    build_tfidf()
-    return True
-
-# ---------- DIRECT KEYWORD ANSWERS ----------
 def direct_keyword_answer(query, lang):
     q_lower = query.lower().strip()
-    
-    # Identity
-    identity_queries = [
-        "kijan ou rele", "kiyès ou ye", "kisa ou ye",
-        "ki moun ou ye", "what is your name", "who are you"
-    ]
-    if any(q in q_lower for q in identity_queries):
+    if any(q in q_lower for q in ["kijan ou rele", "kiyès ou ye", "kisa ou ye", "ki moun ou ye", "what is your name", "who are you"]):
         return "Non pa mw se Gesner L’IA, kreyatè mw an se Gesner Deslandes nan GlobalInternet.py."
-    
-    # Creator
-    creator_queries = [
-        "kiyès ki kreye ou", "ki moun ki fè ou", "who created you",
-        "ki moun ki devlope ou", "kiyès ki te kreye ou"
-    ]
-    if any(q in q_lower for q in creator_queries):
+    if any(q in q_lower for q in ["kiyès ki kreye ou", "ki moun ki fè ou", "who created you", "ki moun ki devlope ou", "kiyès ki te kreye ou"]):
         return "Mwen te kreye pa Gesner Deslandes, fondatè GlobalInternet.py. Li se yon enjenyè ki renmen edike Ayiti."
-    
-    # Greetings
     if q_lower in ["bonjou", "bonswa", "hello", "hi", "salut"]:
         return "Bonjou! Kijan ou ye? Mwen la pou reponn kesyon ou."
-    
     return None
 
-# ---------- LOGICAL REASONING ----------
 def reason_about_question(query, lang):
     q = query.lower().strip()
-    
-    # Simple arithmetic
     math_match = re.search(r"(\d+)\s*([\+\-\*\/])\s*(\d+)", q)
     if math_match:
         try:
             a, op, b = int(math_match.group(1)), math_match.group(2), int(math_match.group(3))
-            if op == '+':
-                res = a + b
-            elif op == '-':
-                res = a - b
-            elif op == '*':
-                res = a * b
-            elif op == '/':
-                res = a / b
-            else:
-                res = None
+            if op == '+': res = a + b
+            elif op == '-': res = a - b
+            elif op == '*': res = a * b
+            elif op == '/': res = a / b
+            else: res = None
             if res is not None:
-                if lang == "ht":
-                    return f"Repons lan se {res}."
-                elif lang == "fr":
-                    return f"La réponse est {res}."
-                elif lang == "es":
-                    return f"La respuesta es {res}."
-                else:
-                    return f"The answer is {res}."
-        except:
-            pass
-    
-    # Capital cities
+                if lang == "ht": return f"Repons lan se {res}."
+                elif lang == "fr": return f"La réponse est {res}."
+                elif lang == "es": return f"La respuesta es {res}."
+                else: return f"The answer is {res}."
+        except: pass
     if "kapital" in q or "capital" in q:
-        capitals = {
-            "france": "Paris",
-            "ayiti": "Pòtoprens",
-            "haiti": "Port‑au‑Prince",
-            "etazini": "Washington, D.C.",
-            "usa": "Washington, D.C.",
-            "kanada": "Ottawa",
-            "brezil": "Brasília",
-            "alman": "Bèlen",
-            "itali": "Wòm",
-            "espay": "Madrid",
-            "angle": "Londr",
-            "japon": "Tokiyo",
-        }
+        capitals = {"france":"Paris","ayiti":"Pòtoprens","haiti":"Port‑au‑Prince","etazini":"Washington, D.C.","usa":"Washington, D.C.","kanada":"Ottawa","brezil":"Brasília","alman":"Bèlen","itali":"Wòm","espay":"Madrid","angle":"Londr","japon":"Tokiyo"}
         for country, cap in capitals.items():
             if country in q:
-                if lang == "ht":
-                    return f"Kapital {country.title()} se {cap}."
-                elif lang == "fr":
-                    return f"La capitale de {country.title()} est {cap}."
-                elif lang == "es":
-                    return f"La capital de {country.title()} es {cap}."
-                else:
-                    return f"The capital of {country.title()} is {cap}."
-    
-    # Current time
+                if lang == "ht": return f"Kapital {country.title()} se {cap}."
+                elif lang == "fr": return f"La capitale de {country.title()} est {cap}."
+                elif lang == "es": return f"La capital de {country.title()} es {cap}."
+                else: return f"The capital of {country.title()} is {cap}."
     if "ki lè li ye" in q or "what time" in q:
         now = datetime.now().strftime("%H:%M")
-        if lang == "ht":
-            return f"Kounye a li {now}."
-        elif lang == "fr":
-            return f"Il est {now}."
-        elif lang == "es":
-            return f"Son las {now}."
-        else:
-            return f"It is {now}."
-    
+        if lang == "ht": return f"Kounye a li {now}."
+        elif lang == "fr": return f"Il est {now}."
+        elif lang == "es": return f"Son las {now}."
+        else: return f"It is {now}."
     return None
 
-# ---------- RESPONSE ----------
 def generate_response(user_input, target_lang):
-    # Phase 1: direct keywords
     direct = direct_keyword_answer(user_input, target_lang)
     if direct:
         return direct, False, None
-    
-    # Phase 2: trained facts (from dictionaries and voice training)
     facts = retrieve_facts_hybrid(user_input, k=3)
     if facts:
         return facts[0], False, None
-    
-    # Phase 3: logical reasoning
     logic = reason_about_question(user_input, target_lang)
     if logic:
         return logic, False, None
-    
-    # Phase 4: fallback
     fallbacks = {
-        "en": "I don't know that yet. Please teach me using the Training Center (dictionaries or voice training).",
-        "fr": "Je ne connais pas encore cela. Enseignez‑moi via le Centre d'entraînement (dictionnaires ou voix).",
-        "ht": "Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon (diksyonè oswa vwa).",
-        "es": "Todavía no lo sé. Por favor enséñame en el Centro de Entrenamiento (diccionarios o voz)."
+        "en": "I don't know that yet. Please teach me using the Training Center (dictionaries, bulk import, or voice).",
+        "fr": "Je ne connais pas encore cela. Enseignez‑moi via le Centre d'entraînement.",
+        "ht": "Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon.",
+        "es": "Todavía no lo sé. Por favor enséñame en el Centro de Entrenamiento."
     }
     return fallbacks.get(target_lang, fallbacks["en"]), True, target_lang
 
 def play_voice_button(text, is_fallback, fallback_audio_lang, button_label="🔊", key_suffix=""):
     if is_fallback:
-        lang_map = {"en": "en-US", "fr": "fr-FR", "ht": "fr-FR", "es": "es-ES"}
+        lang_map = {"en":"en-US","fr":"fr-FR","ht":"fr-FR","es":"es-ES"}
         tts_lang = lang_map.get(fallback_audio_lang, "en-US")
         safe_text = json.dumps(text)
         html = f"""
@@ -529,11 +566,10 @@ def play_voice_button(text, is_fallback, fallback_audio_lang, button_label="🔊
         else:
             return ""
 
-# ---------- DICTIONARY MANAGER ----------
+# ---------- UI COMPONENTS ----------
 def dictionary_manager(t):
     st.markdown(f"## {t['dict_title']}")
     col1, col2, col3 = st.columns(3)
-    
     def display_dict(lang_code, lang_label, dict_data):
         st.markdown(f"### {lang_label}")
         w = st.text_input(f"{t['dict_word']} ({lang_code.upper()})", key=f"{lang_code}_word")
@@ -541,9 +577,8 @@ def dictionary_manager(t):
         if st.button(t['dict_add'], key=f"add_{lang_code}"):
             if w and m:
                 dict_data[w] = m
-                # Also train the AI with this fact
                 fact = f"{w} means {m}"
-                add_to_facts(fact)
+                add_to_training(fact)
                 st.success(t['trained_entry_success'].format(word=w, meaning=m))
                 st.rerun()
         for word, meaning in list(dict_data.items()):
@@ -551,10 +586,9 @@ def dictionary_manager(t):
             with col_a:
                 st.text(f"{word}: {meaning}")
             with col_b:
-                if st.button(f"{t['dict_delete']}", key=f"del_{lang_code}_{word}"):
+                if st.button(t['dict_delete'], key=f"del_{lang_code}_{word}"):
                     del dict_data[word]
                     st.rerun()
-    
     with col1:
         display_dict("ht", t['dict_ht'], st.session_state.dictionaries["ht"])
     with col2:
@@ -562,10 +596,9 @@ def dictionary_manager(t):
     with col3:
         display_dict("en", t['dict_en'], st.session_state.dictionaries["en"])
 
-# ---------- VOICE TRAINING ----------
 def voice_training(t):
     st.markdown(f"## {t['voice_training_title']}")
-    st.info("🎙️ Upload your voice for Kreyòl phrases. Gesner AI will use your exact voice when answering those sentences.")
+    st.info("🎙️ Record your voice, download it, then upload below.")
     recorder_html = f"""
     <div id="recorder-container">
         <button id="recordBtn" style="background-color:#e94560; border:none; border-radius:30px; padding:8px 16px; color:white;">{t['record_btn']}</button>
@@ -622,10 +655,141 @@ def voice_training(t):
         if st.button(t['voice_train'], use_container_width=True):
             audio_bytes = uploaded_file.read()
             save_voice_for_text(transcript.strip(), audio_bytes)
-            add_to_facts(transcript.strip())
+            add_to_training(transcript.strip())
             st.success(t['voice_success'])
 
-# ---------- SIDEBAR ----------
+def bulk_training(t):
+    st.markdown(f"## {t['bulk_training_title']}")
+    st.info("Import many facts at once.")
+    def import_facts(facts):
+        count = 0
+        for fact in facts:
+            if fact.strip():
+                if add_to_training(fact.strip()):
+                    count += 1
+        st.success(f"Imported {count} facts.")
+    csv_file = st.file_uploader(t['bulk_csv_label'], type=["csv"], key="bulk_csv")
+    if csv_file:
+        try:
+            content = csv_file.read().decode('utf-8')
+            reader = csv.DictReader(io.StringIO(content))
+            facts = []
+            for row in reader:
+                if 'question' in row and 'answer' in row:
+                    facts.append(f"{row['question']} → {row['answer']}")
+                elif 'fact' in row:
+                    facts.append(row['fact'])
+                else:
+                    first_key = list(row.keys())[0]
+                    facts.append(row[first_key])
+            if facts:
+                st.info(f"Found {len(facts)} facts in CSV.")
+                if st.button(t['bulk_import_button'], key="import_csv"):
+                    import_facts(facts)
+            else:
+                st.warning("No valid facts found in CSV.")
+        except Exception as e:
+            st.error(f"Error reading CSV: {e}")
+    json_file = st.file_uploader(t['bulk_json_label'], type=["json"], key="bulk_json")
+    if json_file:
+        try:
+            data = json.load(json_file)
+            if isinstance(data, list):
+                facts = [str(item) for item in data]
+                st.info(f"Found {len(facts)} facts in JSON.")
+                if st.button(t['bulk_import_button'], key="import_json"):
+                    import_facts(facts)
+            else:
+                st.warning("JSON must be an array of strings.")
+        except Exception as e:
+            st.error(f"Error reading JSON: {e}")
+    text_facts = st.text_area(t['bulk_text_label'], height=150, key="bulk_text")
+    if text_facts.strip():
+        lines = [line.strip() for line in text_facts.split('\n') if line.strip()]
+        st.info(f"Found {len(lines)} facts in text.")
+        if st.button(t['bulk_import_button'], key="import_text"):
+            import_facts(lines)
+
+def manage_trained_facts(t):
+    st.markdown(f"## {t['manage_facts']}")
+    if not st.session_state.training_data:
+        st.info("No facts trained yet. Use dictionaries, bulk import, or voice training to add facts.")
+    else:
+        for idx, item in enumerate(st.session_state.training_data):
+            original = item["text"]
+            with st.expander(f"Fact #{idx+1}: {original[:60]}..."):
+                character_picker(f"edit_{idx}", "Insert Kreyòl characters for this fact:")
+                new_text = st.text_area("Edit text", value=original, key=f"edit_text_{idx}", height=100)
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button(t['edit_save'], key=f"save_{idx}"):
+                        if new_text.strip() and new_text != original:
+                            update_training_item(idx, new_text)
+                            st.success("Updated")
+                            st.rerun()
+                        elif not new_text.strip():
+                            st.warning("Text cannot be empty.")
+                        else:
+                            st.info("No changes made.")
+                with col2:
+                    if st.button(t['delete'], key=f"delete_{idx}"):
+                        delete_training_item(idx)
+                        st.success("Deleted")
+                        st.rerun()
+                voice_exists = get_voice_for_text(original) is not None
+                st.caption("🔊 Voice file exists" if voice_exists else "🔇 No voice file")
+
+def training_center(t):
+    st.markdown(f"<h1 style='text-align:center;'>🔧 {t['training_section']}</h1>", unsafe_allow_html=True)
+    dictionary_manager(t)
+    st.markdown("---")
+    voice_training(t)
+    st.markdown("---")
+    bulk_training(t)
+    st.markdown("---")
+    manage_trained_facts(t)
+
+def chat_interface(t):
+    st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center;'>Ask me anything. I learn from dictionaries, bulk import, and voice training.</p>", unsafe_allow_html=True)
+    
+    for idx, msg in enumerate(st.session_state.conversation_history):
+        if msg["role"] == "user":
+            st.markdown(f'<div class="chat-message user-message">🧑‍💻 {msg["content"]}</div>', unsafe_allow_html=True)
+        else:
+            col1, col2 = st.columns([10, 1])
+            with col1:
+                st.markdown(f'<div class="chat-message assistant-message" style="width:100%;">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
+            with col2:
+                btn_html = play_voice_button(
+                    msg["content"],
+                    msg.get("is_fallback", False),
+                    msg.get("fallback_lang"),
+                    "🔊",
+                    f"chat_{idx}"
+                )
+                if btn_html:
+                    st.components.v1.html(btn_html, height=50)
+    
+    character_picker("chat_input", "Insert Kreyòl characters:")
+    user_input = st.text_input(t['chat_input'], key="chat_input")
+    if st.button(t['send'], use_container_width=True, key="send_btn"):
+        if user_input.strip():
+            target_lang = st.session_state.chat_language
+            answer, is_fallback, fallback_lang = generate_response(user_input, target_lang)
+            st.session_state.conversation_history.append({"role": "user", "content": user_input})
+            st.session_state.conversation_history.append({
+                "role": "assistant",
+                "content": answer,
+                "is_fallback": is_fallback,
+                "fallback_lang": fallback_lang
+            })
+            st.rerun()
+    
+    if st.button(t['clear'], use_container_width=True, key="clear_btn"):
+        st.session_state.conversation_history = []
+        st.rerun()
+
 def show_sidebar():
     lang_names = list(LANGUAGES.keys())
     selected_lang_name = st.sidebar.selectbox("🌐 Language", lang_names, key="main_lang_selector")
@@ -659,7 +823,6 @@ def show_sidebar():
     if not st.session_state.training_access:
         api_key_input = st.sidebar.text_input(t['api_key_label'], type="password", key="api_key_input")
         if st.sidebar.button("Unlock Training Center"):
-            # API key is fixed – use the same as before
             if api_key_input == "PNL_fJC4L5QNjA0GJbc4N8TzIXBjdfIXfgcLv1yZ8Yc":
                 st.session_state.training_access = True
                 st.sidebar.success("Access granted!")
@@ -677,64 +840,12 @@ def show_sidebar():
         st.session_state.conversation_history = []
         st.rerun()
 
-# ---------- MAIN CHAT INTERFACE ----------
-def chat_interface(t):
-    st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center;'>Ask me anything. I learn from dictionaries and voice training.</p>", unsafe_allow_html=True)
-    
-    # Chat history
-    for idx, msg in enumerate(st.session_state.conversation_history):
-        if msg["role"] == "user":
-            st.markdown(f'<div class="chat-message user-message">🧑‍💻 {msg["content"]}</div>', unsafe_allow_html=True)
-        else:
-            col1, col2 = st.columns([10, 1])
-            with col1:
-                st.markdown(f'<div class="chat-message assistant-message" style="width:100%;">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
-            with col2:
-                btn_html = play_voice_button(
-                    msg["content"],
-                    msg.get("is_fallback", False),
-                    msg.get("fallback_lang"),
-                    "🔊",
-                    f"chat_{idx}"
-                )
-                if btn_html:
-                    st.components.v1.html(btn_html, height=50)
-    
-    # Input
-    user_input = st.text_input(t['chat_input'], key="chat_input")
-    if st.button(t['send'], use_container_width=True, key="send_btn"):
-        if user_input.strip():
-            target_lang = st.session_state.chat_language
-            answer, is_fallback, fallback_lang = generate_response(user_input, target_lang)
-            st.session_state.conversation_history.append({"role": "user", "content": user_input})
-            st.session_state.conversation_history.append({
-                "role": "assistant",
-                "content": answer,
-                "is_fallback": is_fallback,
-                "fallback_lang": fallback_lang
-            })
-            st.rerun()
-    
-    if st.button(t['clear'], use_container_width=True, key="clear_btn"):
-        st.session_state.conversation_history = []
-        st.rerun()
-
-# ---------- TRAINING CENTER (dictionaries + voice) ----------
-def training_center(t):
-    st.markdown(f"<h1 style='text-align:center;'>🔧 {t['training_section']}</h1>", unsafe_allow_html=True)
-    dictionary_manager(t)
-    st.markdown("---")
-    voice_training(t)
-
-# ---------- MAIN ----------
 def main():
-    # Set default UI language
     if "ui_language" not in st.session_state:
         st.session_state.ui_language = "en"
     if "chat_language" not in st.session_state:
         st.session_state.chat_language = "en"
-    
+    ensure_intro_text()
     show_sidebar()
     t = TEXTS.get(st.session_state.ui_language, TEXTS["en"])
     
