@@ -10,7 +10,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 st.set_page_config(page_title="Gesner AI – Fast Chat", page_icon="🧠", layout="wide")
 
-# ---------- CSS: sidebar same gradient as main ----------
+# ---------- CSS: sidebar and main background, plus dropdown styling ----------
 st.markdown(
     """
     <style>
@@ -21,7 +21,17 @@ st.markdown(
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         border-right: 2px solid #e94560;
     }
-    .stMarkdown, .stTextInput label, .stButton button, h1, h2, p, div, span {
+    /* Make all selectboxes (including language selector) have dark background and white text */
+    div[data-baseweb="select"] > div {
+        background-color: #0f3460 !important;
+        color: white !important;
+        border: 1px solid #e94560;
+        border-radius: 12px;
+    }
+    div[data-baseweb="select"] svg {
+        fill: white !important;
+    }
+    .stMarkdown, .stTextInput label, .stButton button, h1, h2, p, div, span, label {
         color: #ffffff !important;
     }
     .stButton button {
@@ -74,6 +84,14 @@ st.markdown(
     .char-btn:hover {
         background-color: #e94560;
     }
+    /* Style for the question list box */
+    .question-list-box {
+        background: rgba(15,52,96,0.4);
+        border-left: 4px solid #e94560;
+        border-radius: 12px;
+        padding: 10px;
+        margin-bottom: 15px;
+    }
     </style>
     """, unsafe_allow_html=True
 )
@@ -97,8 +115,8 @@ TEXTS = {
         "fact_label": "Enter a fact, sentence, or Q&A pair:",
         "voice_upload_label": "Optional: upload your voice for this text",
         "learn_button": "Learn this",
-        "question_list_title": "📋 Choose a trained question:",
-        "ask_button": "Ask this",
+        "question_list_title": "📋 Pick a trained question to ask (or type your own below):",
+        "ask_button": "Ask this question",
         "clear_chat": "🗑️ Clear chat history",
         "reset_all": "🔥 Reset all knowledge",
         "footer": "© GlobalInternet.py – Gesner AI | Fast, lightweight, always learning",
@@ -109,7 +127,8 @@ TEXTS = {
         "lock_button": "Lock Training",
         "training_active": "Training mode active",
         "invalid_key": "Invalid API Key",
-        "char_picker_label": "Insert Kreyòl characters (click to add):"
+        "char_picker_label": "Insert Kreyòl characters (click to add):",
+        "no_trained_questions": "No trained questions yet. Use the training section to teach me some facts."
     },
     "fr": {
         "chat_title": "💬 Gesner IA Chat",
@@ -121,8 +140,8 @@ TEXTS = {
         "fact_label": "Entrez un fait, une phrase ou une paire Q/R :",
         "voice_upload_label": "Optionnel : téléchargez votre voix pour ce texte",
         "learn_button": "Apprendre",
-        "question_list_title": "📋 Choisissez une question entraînée :",
-        "ask_button": "Poser",
+        "question_list_title": "📋 Choisissez une question entraînée (ou tapez la vôtre ci-dessous) :",
+        "ask_button": "Poser cette question",
         "clear_chat": "🗑️ Effacer l'historique",
         "reset_all": "🔥 Tout réinitialiser",
         "footer": "© GlobalInternet.py – Gesner IA | Rapide, léger, toujours en apprentissage",
@@ -133,7 +152,8 @@ TEXTS = {
         "lock_button": "Verrouiller",
         "training_active": "Mode entraînement actif",
         "invalid_key": "Clé API invalide",
-        "char_picker_label": "Insérer des caractères kreyòl (cliquez pour ajouter) :"
+        "char_picker_label": "Insérer des caractères kreyòl (cliquez pour ajouter) :",
+        "no_trained_questions": "Aucune question entraînée pour l'instant. Utilisez la section d'entraînement pour m'enseigner des faits."
     },
     "ht": {
         "chat_title": "💬 Gesner AI Chat",
@@ -145,8 +165,8 @@ TEXTS = {
         "fact_label": "Antre yon reyalite, yon fraz, oswa yon kesyon/repons :",
         "voice_upload_label": "Opsyonèl: chaje vwa ou pou tèks sa a",
         "learn_button": "Aprann sa",
-        "question_list_title": "📋 Chwazi yon kesyon antrene :",
-        "ask_button": "Mande sa",
+        "question_list_title": "📋 Chwazi yon kesyon antrene (oswa tape pwòp kesyon ou anba a) :",
+        "ask_button": "Mande kesyon sa a",
         "clear_chat": "🗑️ Efase listorik chat la",
         "reset_all": "🔥 Efase tout konesans",
         "footer": "© GlobalInternet.py – Gesner AI | Rapid, lejè, toujou ap aprann",
@@ -157,7 +177,8 @@ TEXTS = {
         "lock_button": "Bloke Fòmasyon",
         "training_active": "Mòd fòmasyon aktif",
         "invalid_key": "Kle API pa bon",
-        "char_picker_label": "Antre karaktè kreyòl (klike pou ajoute) :"
+        "char_picker_label": "Antre karaktè kreyòl (klike pou ajoute) :",
+        "no_trained_questions": "Pa gen kesyon antrene ankò. Sèvi ak seksyon fòmasyon pou anseye m kèk reyalite."
     },
     "es": {
         "chat_title": "💬 Gesner AI Chat",
@@ -169,8 +190,8 @@ TEXTS = {
         "fact_label": "Ingrese un hecho, frase o par pregunta/respuesta:",
         "voice_upload_label": "Opcional: sube tu voz para este texto",
         "learn_button": "Aprender",
-        "question_list_title": "📋 Elige una pregunta entrenada:",
-        "ask_button": "Preguntar",
+        "question_list_title": "📋 Elige una pregunta entrenada (o escribe la tuya abajo):",
+        "ask_button": "Preguntar esto",
         "clear_chat": "🗑️ Borrar historial",
         "reset_all": "🔥 Reiniciar todo",
         "footer": "© GlobalInternet.py – Gesner AI | Rápido, ligero, siempre aprendiendo",
@@ -181,7 +202,8 @@ TEXTS = {
         "lock_button": "Bloquear",
         "training_active": "Modo entrenamiento activo",
         "invalid_key": "Clave API inválida",
-        "char_picker_label": "Insertar caracteres kreyòl (haga clic para agregar):"
+        "char_picker_label": "Insertar caracteres kreyòl (haga clic para agregar):",
+        "no_trained_questions": "No hay preguntas entrenadas aún. Use la sección de entrenamiento para enseñarme datos."
     }
 }
 
@@ -357,15 +379,11 @@ def play_voice_button(text, is_fallback, lang, key_suffix=""):
 
 # ---------- Character picker component ----------
 def character_picker(target_key):
-    """Display buttons for Kreyòl letters. When clicked, append to the text area stored in session_state[target_key]."""
     chars_lower = ["a", "an", "b", "ch", "d", "e", "è", "en", "f", "g", "h", "i", "j", "k", "l", "m", "n", "ng", "o", "ò", "on", "ou", "oun", "p", "r", "s", "t", "ui", "v", "w", "y", "z"]
     chars_upper = [c.upper() for c in chars_lower]
-    # Combine both cases in a readable order
     all_chars = []
     for lc, uc in zip(chars_lower, chars_upper):
         all_chars.extend([lc, uc])
-    # Remove duplicates that might appear (e.g., 'a' and 'A' are fine)
-    # Create a row of buttons
     cols = st.columns(len(all_chars))
     for i, ch in enumerate(all_chars):
         with cols[i]:
@@ -377,7 +395,7 @@ def character_picker(target_key):
 # ---------- main UI ----------
 load_previous_training()
 
-# Language selection in sidebar
+# Language selection in sidebar (now styled correctly via CSS)
 with st.sidebar:
     lang_name = st.selectbox("🌐 Language", list(LANGUAGES.keys()), key="lang_selector")
     st.session_state.ui_language = LANGUAGES[lang_name]
@@ -399,22 +417,26 @@ for idx, msg in enumerate(st.session_state.conversation_history):
             if btn:
                 st.components.v1.html(btn, height=50)
 
-# ---- Question list from training (selectbox) ----
+# ---- Question list from training (prominent box) ----
 if st.session_state.texts:
+    st.markdown(f'<div class="question-list-box">', unsafe_allow_html=True)
     st.markdown(f"### {t['question_list_title']}")
     options = [f"{i+1}: {fact[:80]}{'...' if len(fact)>80 else ''}" for i, fact in enumerate(st.session_state.texts)]
-    selected_option = st.selectbox("", options, key="trained_question_select")
-    if st.button(t['ask_button'], use_container_width=True):
+    selected_option = st.selectbox("", options, key="trained_question_select", label_visibility="collapsed")
+    if st.button(t['ask_button'], use_container_width=True, key="ask_trained_btn"):
         idx = int(selected_option.split(":")[0]) - 1
         question = st.session_state.texts[idx]
         answer, is_fallback = generate_answer(question, st.session_state.ui_language)
         st.session_state.conversation_history.append({"role": "user", "content": question})
         st.session_state.conversation_history.append({"role": "assistant", "content": answer, "is_fallback": is_fallback})
         st.rerun()
+    st.markdown(f'</div>', unsafe_allow_html=True)
+else:
+    st.info(t["no_trained_questions"])
 
-# Chat input
+# Chat input (user can also type freely)
 user_input = st.text_input(t["chat_input_placeholder"], key="chat_input")
-if st.button(t["send_button"], use_container_width=True):
+if st.button(t["send_button"], use_container_width=True, key="send_user_btn"):
     if user_input.strip():
         answer, is_fallback = generate_answer(user_input, st.session_state.ui_language)
         st.session_state.conversation_history.append({"role": "user", "content": user_input})
@@ -440,10 +462,8 @@ else:
 
 if st.session_state.training_access:
     with st.expander(t["training_title"], expanded=True):
-        # Character picker
         st.markdown(f"**{t['char_picker_label']}**")
         character_picker("train_text_area")
-        # Text area for new fact
         new_fact = st.text_area(t["fact_label"], key="train_text_area", height=150)
         voice_file = st.file_uploader(t["voice_upload_label"], type=["wav","mp3"], key="train_voice")
         if st.button(t["learn_button"], use_container_width=True):
@@ -451,7 +471,7 @@ if st.session_state.training_access:
                 if voice_file:
                     save_voice_for_text(new_fact.strip(), voice_file.read())
                 add_to_training(new_fact.strip())
-                st.session_state.train_text_area = ""  # clear after training
+                st.session_state.train_text_area = ""
                 st.rerun()
             else:
                 st.warning("Please enter some text.")
