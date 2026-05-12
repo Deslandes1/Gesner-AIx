@@ -389,7 +389,7 @@ def get_voice_for_text(text):
     key = get_voice_filename(text)
     return VOICE_CACHE.get(key)
 
-# ---------- CHARACTER PICKER (Kreyòl letters) ----------
+# ---------- CHARACTER PICKER (Kreyòl letters) – only used in training center ----------
 def character_picker(key_prefix, label="Insert Kreyòl characters:"):
     chars = [
         "e", "è", "E", "È", "o", "ò", "O", "Ò",
@@ -400,13 +400,7 @@ def character_picker(key_prefix, label="Insert Kreyòl characters:"):
     for i, ch in enumerate(chars):
         with cols[i]:
             if st.button(ch, key=f"char_{key_prefix}_{ch}"):
-                if key_prefix == "chat_input":
-                    current = st.session_state.get("chat_input", "")
-                    st.session_state.chat_input = current + ch
-                elif key_prefix == "train_text":
-                    current = st.session_state.get("train_text", "")
-                    st.session_state.train_text = current + ch
-                elif key_prefix.startswith("edit_"):
+                if key_prefix.startswith("edit_"):
                     idx = key_prefix.split("_")[1]
                     key = f"edit_text_{idx}"
                     current = st.session_state.get(key, "")
@@ -771,7 +765,7 @@ def chat_interface(t):
                 if btn_html:
                     st.components.v1.html(btn_html, height=50)
     
-    character_picker("chat_input", "Insert Kreyòl characters:")
+    # Character picker removed from chat interface as requested
     user_input = st.text_input(t['chat_input'], key="chat_input")
     if st.button(t['send'], use_container_width=True, key="send_btn"):
         if user_input.strip():
