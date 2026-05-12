@@ -54,14 +54,35 @@ st.markdown(
         border-top: 1px solid #e94560;
         color: white;
     }
+    .char-picker {
+        background: rgba(15,52,96,0.6);
+        border-radius: 12px;
+        padding: 10px;
+        margin: 10px 0;
+    }
+    .char-btn {
+        background-color: #2a5298;
+        border: none;
+        border-radius: 20px;
+        padding: 5px 12px;
+        color: white;
+        cursor: pointer;
+        font-size: 1rem;
+        margin: 3px;
+        transition: 0.2s;
+    }
+    .char-btn:hover {
+        background-color: #e94560;
+    }
     </style>
     """, unsafe_allow_html=True
 )
 
-# ---------- Language texts ----------
+# ---------- Language texts (including Haitian Creole) ----------
 LANGUAGES = {
     "English": "en",
     "Français": "fr",
+    "Kreyòl Ayisyen": "ht",
     "Español": "es"
 }
 
@@ -87,7 +108,8 @@ TEXTS = {
         "unlock_button": "Unlock Training",
         "lock_button": "Lock Training",
         "training_active": "Training mode active",
-        "invalid_key": "Invalid API Key"
+        "invalid_key": "Invalid API Key",
+        "char_picker_label": "Insert Kreyòl characters (click to add):"
     },
     "fr": {
         "chat_title": "💬 Gesner IA Chat",
@@ -110,7 +132,32 @@ TEXTS = {
         "unlock_button": "Déverrouiller",
         "lock_button": "Verrouiller",
         "training_active": "Mode entraînement actif",
-        "invalid_key": "Clé API invalide"
+        "invalid_key": "Clé API invalide",
+        "char_picker_label": "Insérer des caractères kreyòl (cliquez pour ajouter) :"
+    },
+    "ht": {
+        "chat_title": "💬 Gesner AI Chat",
+        "user_prefix": "🧑‍💻 Ou : ",
+        "assistant_prefix": "🤖 Gesner AI : ",
+        "send_button": "Voye",
+        "chat_input_placeholder": "Pose yon kesyon...",
+        "training_title": "📚 Anseye m yon bagay nouvo",
+        "fact_label": "Antre yon reyalite, yon fraz, oswa yon kesyon/repons :",
+        "voice_upload_label": "Opsyonèl: chaje vwa ou pou tèks sa a",
+        "learn_button": "Aprann sa",
+        "question_list_title": "📋 Chwazi yon kesyon antrene :",
+        "ask_button": "Mande sa",
+        "clear_chat": "🗑️ Efase listorik chat la",
+        "reset_all": "🔥 Efase tout konesans",
+        "footer": "© GlobalInternet.py – Gesner AI | Rapid, lejè, toujou ap aprann",
+        "no_facts_answer": "Mwen poko konnen sa. Tanpri anseye m nan seksyon fòmasyon (kle API obligatwa).",
+        "training_locked": "🔒 Fòmasyon an bloke. Antre kle API a nan ba lateral la pou anseye m nouvo reyalite.",
+        "api_key_label": "Antre kle API pou anseye m",
+        "unlock_button": "Dekloke Fòmasyon",
+        "lock_button": "Bloke Fòmasyon",
+        "training_active": "Mòd fòmasyon aktif",
+        "invalid_key": "Kle API pa bon",
+        "char_picker_label": "Antre karaktè kreyòl (klike pou ajoute) :"
     },
     "es": {
         "chat_title": "💬 Gesner AI Chat",
@@ -133,7 +180,8 @@ TEXTS = {
         "unlock_button": "Desbloquear",
         "lock_button": "Bloquear",
         "training_active": "Modo entrenamiento activo",
-        "invalid_key": "Clave API inválida"
+        "invalid_key": "Clave API inválida",
+        "char_picker_label": "Insertar caracteres kreyòl (haga clic para agregar):"
     }
 }
 
@@ -152,6 +200,8 @@ if "training_access" not in st.session_state:
     st.session_state.training_access = False
 if "ui_language" not in st.session_state:
     st.session_state.ui_language = "en"
+if "train_text_area" not in st.session_state:
+    st.session_state.train_text_area = ""
 
 # ---------- API key (same as before) ----------
 REQUIRED_API_KEY = "PNL_fJC4L5QNjA0GJbc4N8TzIXBjdfIXfgcLv1yZ8Yc"
@@ -257,10 +307,10 @@ def generate_answer(query, lang):
     logic = reason_about_question(query, lang)
     if logic:
         return logic, False
-    # fallback in selected language
     fallbacks = {
         "en": "I don't know that yet. Please teach me in the training section (API key required).",
         "fr": "Je ne connais pas encore cela. Veuillez m'enseigner dans la section d'entraînement (clé API requise).",
+        "ht": "Mwen poko konnen sa. Tanpri anseye m nan seksyon fòmasyon (kle API obligatwa).",
         "es": "Todavía no sé eso. Por favor enséñame en la sección de entrenamiento (se requiere clave API)."
     }
     return fallbacks.get(lang, fallbacks["en"]), True
@@ -268,7 +318,6 @@ def generate_answer(query, lang):
 # ---------- Voice button with language fallback ----------
 def play_voice_button(text, is_fallback, lang, key_suffix=""):
     import base64
-    # If not fallback and we have custom voice for this text, use it
     if not is_fallback:
         voice_bytes = get_voice_for_text(text)
         if voice_bytes:
@@ -291,8 +340,8 @@ def play_voice_button(text, is_fallback, lang, key_suffix=""):
             </script>
             """
             return html
-    # Fallback: use browser TTS in the selected language (French is preferred backup, but we respect lang)
-    tts_lang_map = {"en": "en-US", "fr": "fr-FR", "es": "es-ES"}
+    # Fallback TTS
+    tts_lang_map = {"en": "en-US", "fr": "fr-FR", "ht": "fr-FR", "es": "es-ES"}
     tts_lang = tts_lang_map.get(lang, "fr-FR")
     safe_text = json.dumps(text)
     return f"""
@@ -305,6 +354,25 @@ def play_voice_button(text, is_fallback, lang, key_suffix=""):
         }};
     </script>
     """
+
+# ---------- Character picker component ----------
+def character_picker(target_key):
+    """Display buttons for Kreyòl letters. When clicked, append to the text area stored in session_state[target_key]."""
+    chars_lower = ["a", "an", "b", "ch", "d", "e", "è", "en", "f", "g", "h", "i", "j", "k", "l", "m", "n", "ng", "o", "ò", "on", "ou", "oun", "p", "r", "s", "t", "ui", "v", "w", "y", "z"]
+    chars_upper = [c.upper() for c in chars_lower]
+    # Combine both cases in a readable order
+    all_chars = []
+    for lc, uc in zip(chars_lower, chars_upper):
+        all_chars.extend([lc, uc])
+    # Remove duplicates that might appear (e.g., 'a' and 'A' are fine)
+    # Create a row of buttons
+    cols = st.columns(len(all_chars))
+    for i, ch in enumerate(all_chars):
+        with cols[i]:
+            if st.button(ch, key=f"char_{target_key}_{ch}"):
+                current = st.session_state.get(target_key, "")
+                st.session_state[target_key] = current + ch
+                st.rerun()
 
 # ---------- main UI ----------
 load_previous_training()
@@ -339,7 +407,6 @@ if st.session_state.texts:
     if st.button(t['ask_button'], use_container_width=True):
         idx = int(selected_option.split(":")[0]) - 1
         question = st.session_state.texts[idx]
-        # Send this question as user input
         answer, is_fallback = generate_answer(question, st.session_state.ui_language)
         st.session_state.conversation_history.append({"role": "user", "content": question})
         st.session_state.conversation_history.append({"role": "assistant", "content": answer, "is_fallback": is_fallback})
@@ -373,13 +440,18 @@ else:
 
 if st.session_state.training_access:
     with st.expander(t["training_title"], expanded=True):
-        new_fact = st.text_area(t["fact_label"])
-        voice_file = st.file_uploader(t["voice_upload_label"], type=["wav","mp3"])
+        # Character picker
+        st.markdown(f"**{t['char_picker_label']}**")
+        character_picker("train_text_area")
+        # Text area for new fact
+        new_fact = st.text_area(t["fact_label"], key="train_text_area", height=150)
+        voice_file = st.file_uploader(t["voice_upload_label"], type=["wav","mp3"], key="train_voice")
         if st.button(t["learn_button"], use_container_width=True):
             if new_fact.strip():
                 if voice_file:
                     save_voice_for_text(new_fact.strip(), voice_file.read())
                 add_to_training(new_fact.strip())
+                st.session_state.train_text_area = ""  # clear after training
                 st.rerun()
             else:
                 st.warning("Please enter some text.")
