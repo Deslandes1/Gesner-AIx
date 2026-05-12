@@ -10,20 +10,132 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 st.set_page_config(page_title="Gesner AI – Fast Chat", page_icon="🧠", layout="wide")
 
+# ---------- CSS: sidebar same gradient as main ----------
 st.markdown(
     """
     <style>
-    .stApp { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
-    .stMarkdown, .stTextInput label, .stButton button, h1, h2, p { color: #ffffff !important; }
-    .stButton button { background-color: #e94560 !important; border-radius: 30px !important; }
-    .stTextInput input, .stTextArea textarea { background-color: #0f3460 !important; border-radius: 12px; border: 1px solid #e94560; color: white; }
-    .chat-message { padding: 1rem; border-radius: 20px; margin-bottom: 1rem; }
-    .user-message { background: linear-gradient(135deg, #e94560, #ff6b6b); color: white; }
-    .assistant-message { background: linear-gradient(135deg, #0f3460, #1a4a7a); color: white; }
-    .footer { text-align: center; margin-top: 2rem; padding: 1rem; border-top: 1px solid #e94560; color: white; }
+    .stApp {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+    [data-testid="stSidebar"] {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-right: 2px solid #e94560;
+    }
+    .stMarkdown, .stTextInput label, .stButton button, h1, h2, p, div, span {
+        color: #ffffff !important;
+    }
+    .stButton button {
+        background-color: #e94560 !important;
+        border-radius: 30px !important;
+    }
+    .stTextInput input, .stTextArea textarea {
+        background-color: #0f3460 !important;
+        border-radius: 12px;
+        border: 1px solid #e94560;
+        color: white;
+    }
+    .chat-message {
+        padding: 1rem;
+        border-radius: 20px;
+        margin-bottom: 1rem;
+    }
+    .user-message {
+        background: linear-gradient(135deg, #e94560, #ff6b6b);
+        color: white;
+    }
+    .assistant-message {
+        background: linear-gradient(135deg, #0f3460, #1a4a7a);
+        color: white;
+    }
+    .footer {
+        text-align: center;
+        margin-top: 2rem;
+        padding: 1rem;
+        border-top: 1px solid #e94560;
+        color: white;
+    }
     </style>
     """, unsafe_allow_html=True
 )
+
+# ---------- Language texts ----------
+LANGUAGES = {
+    "English": "en",
+    "Français": "fr",
+    "Español": "es"
+}
+
+TEXTS = {
+    "en": {
+        "chat_title": "💬 Gesner AI Chat",
+        "user_prefix": "🧑‍💻 You: ",
+        "assistant_prefix": "🤖 Gesner AI: ",
+        "send_button": "Send",
+        "chat_input_placeholder": "Ask me anything...",
+        "training_title": "📚 Teach me something new",
+        "fact_label": "Enter a fact, sentence, or Q&A pair:",
+        "voice_upload_label": "Optional: upload your voice for this text",
+        "learn_button": "Learn this",
+        "question_list_title": "📋 Choose a trained question:",
+        "ask_button": "Ask this",
+        "clear_chat": "🗑️ Clear chat history",
+        "reset_all": "🔥 Reset all knowledge",
+        "footer": "© GlobalInternet.py – Gesner AI | Fast, lightweight, always learning",
+        "no_facts_answer": "I don't know that yet. Please teach me in the training section (API key required).",
+        "training_locked": "🔒 Training is locked. Enter the API key in the sidebar to teach me new facts.",
+        "api_key_label": "Enter API Key to teach me",
+        "unlock_button": "Unlock Training",
+        "lock_button": "Lock Training",
+        "training_active": "Training mode active",
+        "invalid_key": "Invalid API Key"
+    },
+    "fr": {
+        "chat_title": "💬 Gesner IA Chat",
+        "user_prefix": "🧑‍💻 Vous : ",
+        "assistant_prefix": "🤖 Gesner IA : ",
+        "send_button": "Envoyer",
+        "chat_input_placeholder": "Demandez-moi n'importe quoi...",
+        "training_title": "📚 Enseignez-moi quelque chose",
+        "fact_label": "Entrez un fait, une phrase ou une paire Q/R :",
+        "voice_upload_label": "Optionnel : téléchargez votre voix pour ce texte",
+        "learn_button": "Apprendre",
+        "question_list_title": "📋 Choisissez une question entraînée :",
+        "ask_button": "Poser",
+        "clear_chat": "🗑️ Effacer l'historique",
+        "reset_all": "🔥 Tout réinitialiser",
+        "footer": "© GlobalInternet.py – Gesner IA | Rapide, léger, toujours en apprentissage",
+        "no_facts_answer": "Je ne connais pas encore cela. Veuillez m'enseigner dans la section d'entraînement (clé API requise).",
+        "training_locked": "🔒 L'entraînement est verrouillé. Entrez la clé API dans la barre latérale pour m'enseigner.",
+        "api_key_label": "Entrez la clé API pour m'enseigner",
+        "unlock_button": "Déverrouiller",
+        "lock_button": "Verrouiller",
+        "training_active": "Mode entraînement actif",
+        "invalid_key": "Clé API invalide"
+    },
+    "es": {
+        "chat_title": "💬 Gesner AI Chat",
+        "user_prefix": "🧑‍💻 Tú: ",
+        "assistant_prefix": "🤖 Gesner AI: ",
+        "send_button": "Enviar",
+        "chat_input_placeholder": "Pregúntame cualquier cosa...",
+        "training_title": "📚 Enséñame algo nuevo",
+        "fact_label": "Ingrese un hecho, frase o par pregunta/respuesta:",
+        "voice_upload_label": "Opcional: sube tu voz para este texto",
+        "learn_button": "Aprender",
+        "question_list_title": "📋 Elige una pregunta entrenada:",
+        "ask_button": "Preguntar",
+        "clear_chat": "🗑️ Borrar historial",
+        "reset_all": "🔥 Reiniciar todo",
+        "footer": "© GlobalInternet.py – Gesner AI | Rápido, ligero, siempre aprendiendo",
+        "no_facts_answer": "Todavía no sé eso. Por favor enséñame en la sección de entrenamiento (se requiere clave API).",
+        "training_locked": "🔒 El entrenamiento está bloqueado. Ingrese la clave API en la barra lateral para enseñarme.",
+        "api_key_label": "Ingrese la clave API para enseñarme",
+        "unlock_button": "Desbloquear",
+        "lock_button": "Bloquear",
+        "training_active": "Modo entrenamiento activo",
+        "invalid_key": "Clave API inválida"
+    }
+}
 
 # ---------- session state ----------
 if "training_data" not in st.session_state:
@@ -38,8 +150,10 @@ if "tfidf_matrix" not in st.session_state:
     st.session_state.tfidf_matrix = None
 if "training_access" not in st.session_state:
     st.session_state.training_access = False
+if "ui_language" not in st.session_state:
+    st.session_state.ui_language = "en"
 
-# ---------- API key for training (same as you defined) ----------
+# ---------- API key (same as before) ----------
 REQUIRED_API_KEY = "PNL_fJC4L5QNjA0GJbc4N8TzIXBjdfIXfgcLv1yZ8Yc"
 
 # ---------- voice cache ----------
@@ -100,8 +214,8 @@ def load_previous_training():
         except Exception:
             pass
 
-# ---------- built‑in answers ----------
-def direct_keyword_answer(query):
+# ---------- built‑in answers (Kreyòl / multilingual) ----------
+def direct_keyword_answer(query, lang):
     q = query.lower().strip()
     if any(w in q for w in ["konbyen vwayèl", "vwayel"]):
         return "Alfabè kreyòl la gen 8 vwayèl: A, E, È, I, O, Ò, OU, UI."
@@ -115,7 +229,7 @@ def direct_keyword_answer(query):
         return "Bonjou! Kijan ou ye? Mwen la pou reponn kesyon ou."
     return None
 
-def reason_about_question(query):
+def reason_about_question(query, lang):
     q = query.lower().strip()
     m = re.search(r"(\d+)\s*([\+\-\*\/])\s*(\d+)", q)
     if m:
@@ -133,104 +247,135 @@ def reason_about_question(query):
         return f"Kounye a li {time.strftime('%H:%M')}."
     return None
 
-def generate_answer(query):
-    direct = direct_keyword_answer(query)
+def generate_answer(query, lang):
+    direct = direct_keyword_answer(query, lang)
     if direct:
-        return direct
+        return direct, False
     facts = retrieve_relevant_facts(query, k=3)
     if facts:
-        return facts[0]
-    logic = reason_about_question(query)
+        return facts[0], False
+    logic = reason_about_question(query, lang)
     if logic:
-        return logic
-    return "Mwen poko gen repons sa. Tanpri anseye m nan seksyon 'Anseye m' anba a."
+        return logic, False
+    # fallback in selected language
+    fallbacks = {
+        "en": "I don't know that yet. Please teach me in the training section (API key required).",
+        "fr": "Je ne connais pas encore cela. Veuillez m'enseigner dans la section d'entraînement (clé API requise).",
+        "es": "Todavía no sé eso. Por favor enséñame en la sección de entrenamiento (se requiere clave API)."
+    }
+    return fallbacks.get(lang, fallbacks["en"]), True
 
-def play_voice_button(text, key_suffix=""):
+# ---------- Voice button with language fallback ----------
+def play_voice_button(text, is_fallback, lang, key_suffix=""):
     import base64
-    voice = get_voice_for_text(text)
-    if voice:
-        b64 = base64.b64encode(voice).decode()
-        html = f"""
-        <button id="vb{key_suffix}" style="background:#ffaa33; border:none; border-radius:30px; padding:5px 12px;">🔊</button>
-        <audio id="ad{key_suffix}" style="display:none;"></audio>
-        <script>
-            (function(){{
-                const btn = document.getElementById('vb{key_suffix}');
-                const aud = document.getElementById('ad{key_suffix}');
-                const b64 = "{b64}";
-                const binary = atob(b64);
-                const bytes = new Uint8Array(binary.length);
-                for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
-                const blob = new Blob([bytes], {{type:'audio/wav'}});
-                aud.src = URL.createObjectURL(blob);
-                btn.onclick = () => aud.play();
-            }})();
-        </script>
-        """
-        return html
-    else:
-        safe_text = json.dumps(text)
-        return f"""
-        <button id="tts{key_suffix}" style="background:#ffaa33; border:none; border-radius:30px; padding:5px 12px;">🔊</button>
-        <script>
-            document.getElementById('tts{key_suffix}').onclick = () => {{
-                var u = new SpeechSynthesisUtterance({safe_text});
-                u.lang = 'fr-FR';
-                speechSynthesis.speak(u);
-            }};
-        </script>
-        """
+    # If not fallback and we have custom voice for this text, use it
+    if not is_fallback:
+        voice_bytes = get_voice_for_text(text)
+        if voice_bytes:
+            b64 = base64.b64encode(voice_bytes).decode()
+            html = f"""
+            <button id="vb{key_suffix}" style="background:#ffaa33; border:none; border-radius:30px; padding:5px 12px;">🔊</button>
+            <audio id="ad{key_suffix}" style="display:none;"></audio>
+            <script>
+                (function(){{
+                    const btn = document.getElementById('vb{key_suffix}');
+                    const aud = document.getElementById('ad{key_suffix}');
+                    const b64 = "{b64}";
+                    const binary = atob(b64);
+                    const bytes = new Uint8Array(binary.length);
+                    for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+                    const blob = new Blob([bytes], {{type:'audio/wav'}});
+                    aud.src = URL.createObjectURL(blob);
+                    btn.onclick = () => aud.play();
+                }})();
+            </script>
+            """
+            return html
+    # Fallback: use browser TTS in the selected language (French is preferred backup, but we respect lang)
+    tts_lang_map = {"en": "en-US", "fr": "fr-FR", "es": "es-ES"}
+    tts_lang = tts_lang_map.get(lang, "fr-FR")
+    safe_text = json.dumps(text)
+    return f"""
+    <button id="tts{key_suffix}" style="background:#ffaa33; border:none; border-radius:30px; padding:5px 12px;">🔊</button>
+    <script>
+        document.getElementById('tts{key_suffix}').onclick = () => {{
+            var utterance = new SpeechSynthesisUtterance({safe_text});
+            utterance.lang = '{tts_lang}';
+            window.speechSynthesis.speak(utterance);
+        }};
+    </script>
+    """
 
 # ---------- main UI ----------
 load_previous_training()
 
-st.markdown("<h1 style='text-align:center;'>💬 Gesner AI – Fast Chat</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center;'>I learn from what you teach me. Ask me anything!</p>", unsafe_allow_html=True)
+# Language selection in sidebar
+with st.sidebar:
+    lang_name = st.selectbox("🌐 Language", list(LANGUAGES.keys()), key="lang_selector")
+    st.session_state.ui_language = LANGUAGES[lang_name]
 
-# Chat history display
+t = TEXTS[st.session_state.ui_language]
+
+st.markdown(f"<h1 style='text-align:center;'>{t['chat_title']}</h1>", unsafe_allow_html=True)
+
+# Display chat history
 for idx, msg in enumerate(st.session_state.conversation_history):
     if msg["role"] == "user":
-        st.markdown(f'<div class="chat-message user-message">🧑‍💻 {msg["content"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="chat-message user-message">{t["user_prefix"]}{msg["content"]}</div>', unsafe_allow_html=True)
     else:
         col1, col2 = st.columns([10,1])
         with col1:
-            st.markdown(f'<div class="chat-message assistant-message">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="chat-message assistant-message">{t["assistant_prefix"]}{msg["content"]}</div>', unsafe_allow_html=True)
         with col2:
-            btn = play_voice_button(msg["content"], f"chat{idx}")
+            btn = play_voice_button(msg["content"], msg.get("is_fallback", False), st.session_state.ui_language, f"chat{idx}")
             if btn:
                 st.components.v1.html(btn, height=50)
 
-user_input = st.text_input("Your question:", key="chat_input")
-if st.button("Send", use_container_width=True):
+# ---- Question list from training (selectbox) ----
+if st.session_state.texts:
+    st.markdown(f"### {t['question_list_title']}")
+    options = [f"{i+1}: {fact[:80]}{'...' if len(fact)>80 else ''}" for i, fact in enumerate(st.session_state.texts)]
+    selected_option = st.selectbox("", options, key="trained_question_select")
+    if st.button(t['ask_button'], use_container_width=True):
+        idx = int(selected_option.split(":")[0]) - 1
+        question = st.session_state.texts[idx]
+        # Send this question as user input
+        answer, is_fallback = generate_answer(question, st.session_state.ui_language)
+        st.session_state.conversation_history.append({"role": "user", "content": question})
+        st.session_state.conversation_history.append({"role": "assistant", "content": answer, "is_fallback": is_fallback})
+        st.rerun()
+
+# Chat input
+user_input = st.text_input(t["chat_input_placeholder"], key="chat_input")
+if st.button(t["send_button"], use_container_width=True):
     if user_input.strip():
-        ans = generate_answer(user_input)
+        answer, is_fallback = generate_answer(user_input, st.session_state.ui_language)
         st.session_state.conversation_history.append({"role": "user", "content": user_input})
-        st.session_state.conversation_history.append({"role": "assistant", "content": ans})
+        st.session_state.conversation_history.append({"role": "assistant", "content": answer, "is_fallback": is_fallback})
         st.rerun()
 
 # ---------- Training section with API key protection ----------
+st.sidebar.markdown("---")
 st.sidebar.markdown("## 🔐 Training Access")
-with st.sidebar:
-    if not st.session_state.training_access:
-        api_key_input = st.text_input("Enter API Key to teach me", type="password")
-        if st.button("Unlock Training"):
-            if api_key_input == REQUIRED_API_KEY:
-                st.session_state.training_access = True
-                st.success("Access granted!")
-                st.rerun()
-            else:
-                st.error("Invalid API Key")
-    else:
-        st.success("Training mode active")
-        if st.button("Lock Training"):
-            st.session_state.training_access = False
+if not st.session_state.training_access:
+    api_key_input = st.sidebar.text_input(t["api_key_label"], type="password")
+    if st.sidebar.button(t["unlock_button"]):
+        if api_key_input == REQUIRED_API_KEY:
+            st.session_state.training_access = True
             st.rerun()
+        else:
+            st.sidebar.error(t["invalid_key"])
+else:
+    st.sidebar.success(t["training_active"])
+    if st.sidebar.button(t["lock_button"]):
+        st.session_state.training_access = False
+        st.rerun()
 
 if st.session_state.training_access:
-    with st.expander("📚 Teach me something new", expanded=True):
-        new_fact = st.text_area("Enter a fact, sentence, or Q&A pair:")
-        voice_file = st.file_uploader("Optional: upload your voice for this text", type=["wav","mp3"])
-        if st.button("Learn this", use_container_width=True):
+    with st.expander(t["training_title"], expanded=True):
+        new_fact = st.text_area(t["fact_label"])
+        voice_file = st.file_uploader(t["voice_upload_label"], type=["wav","mp3"])
+        if st.button(t["learn_button"], use_container_width=True):
             if new_fact.strip():
                 if voice_file:
                     save_voice_for_text(new_fact.strip(), voice_file.read())
@@ -239,19 +384,19 @@ if st.session_state.training_access:
             else:
                 st.warning("Please enter some text.")
 else:
-    st.info("🔒 Training is locked. Enter the API key in the sidebar to teach me new facts.")
+    st.info(t["training_locked"])
 
-# ---------- Sidebar utilities ----------
+# Sidebar utilities
 with st.sidebar:
     st.markdown("---")
     st.markdown("## 🌍 GlobalInternet.py")
     st.markdown("**Gesner Deslandes – Coder in Chief**")
     st.markdown("📞 (509)-47385663  |  ✉️ deslandes78@gmail.com")
     st.markdown("---")
-    if st.button("🗑️ Clear chat history", use_container_width=True):
+    if st.button(t["clear_chat"], use_container_width=True):
         st.session_state.conversation_history = []
         st.rerun()
-    if st.button("🔥 Reset all knowledge", use_container_width=True):
+    if st.button(t["reset_all"], use_container_width=True):
         st.session_state.training_data = []
         st.session_state.texts = []
         st.session_state.conversation_history = []
@@ -266,4 +411,4 @@ with st.sidebar:
         time.sleep(1)
         st.rerun()
 
-st.markdown('<div class="footer">© GlobalInternet.py – Gesner AI | Fast, lightweight, always learning</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="footer">{t["footer"]}</div>', unsafe_allow_html=True)
