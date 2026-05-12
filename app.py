@@ -389,7 +389,7 @@ def get_voice_for_text(text):
     key = get_voice_filename(text)
     return VOICE_CACHE.get(key)
 
-# ---------- CHARACTER PICKER (Kreyòl letters) – only used in training center ----------
+# ---------- CHARACTER PICKER (ONLY USED IN TRAINING CENTER) ----------
 def character_picker(key_prefix, label="Insert Kreyòl characters:"):
     chars = [
         "e", "è", "E", "È", "o", "ò", "O", "Ò",
@@ -560,7 +560,7 @@ def play_voice_button(text, is_fallback, fallback_audio_lang, button_label="🔊
         else:
             return ""
 
-# ---------- UI COMPONENTS ----------
+# ---------- UI COMPONENTS (No character picker in chat) ----------
 def dictionary_manager(t):
     st.markdown(f"## {t['dict_title']}")
     col1, col2, col3 = st.columns(3)
@@ -765,7 +765,7 @@ def chat_interface(t):
                 if btn_html:
                     st.components.v1.html(btn_html, height=50)
     
-    # Character picker removed from chat interface as requested
+    # NO CHARACTER PICKER HERE – removed as requested
     user_input = st.text_input(t['chat_input'], key="chat_input")
     if st.button(t['send'], use_container_width=True, key="send_btn"):
         if user_input.strip():
