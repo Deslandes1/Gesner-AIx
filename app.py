@@ -36,7 +36,11 @@ st.markdown(
     [data-testid="stSidebar"] * {
         color: #ffffff !important;
     }
-    /* Fix sidebar selectbox background and text */
+    /* Force selectbox to have dark background and no white */
+    [data-testid="stSidebar"] .stSelectbox {
+        background-color: #0f3460 !important;
+        border-radius: 12px !important;
+    }
     [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
         background-color: #0f3460 !important;
         border: 1px solid #e94560 !important;
@@ -47,10 +51,10 @@ st.markdown(
         color: white !important;
     }
     [data-testid="stSidebar"] .stSelectbox svg {
-        fill: white !important;
-        stroke: white !important;
+        fill: #e94560 !important;
+        stroke: #e94560 !important;
     }
-    /* Dropdown menu options */
+    /* Dropdown menu completely dark */
     div[data-baseweb="popover"] ul {
         background-color: #1a1a2e !important;
         border: 1px solid #e94560 !important;
