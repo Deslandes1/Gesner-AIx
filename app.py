@@ -36,6 +36,33 @@ st.markdown(
     [data-testid="stSidebar"] * {
         color: #ffffff !important;
     }
+    /* Fix sidebar selectbox background and text */
+    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
+        background-color: #0f3460 !important;
+        border: 1px solid #e94560 !important;
+        border-radius: 12px !important;
+    }
+    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
+        background-color: #0f3460 !important;
+        color: white !important;
+    }
+    [data-testid="stSidebar"] .stSelectbox svg {
+        fill: white !important;
+        stroke: white !important;
+    }
+    /* Dropdown menu options */
+    div[data-baseweb="popover"] ul {
+        background-color: #1a1a2e !important;
+        border: 1px solid #e94560 !important;
+    }
+    div[data-baseweb="popover"] li {
+        color: white !important;
+        background-color: #1a1a2e !important;
+    }
+    div[data-baseweb="popover"] li:hover {
+        background-color: #e94560 !important;
+        color: white !important;
+    }
     .stButton button {
         background-color: #e94560 !important;
         color: white !important;
