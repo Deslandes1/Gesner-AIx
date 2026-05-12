@@ -36,32 +36,32 @@ st.markdown(
     [data-testid="stSidebar"] * {
         color: #ffffff !important;
     }
-    /* Force selectbox to have dark background and no white */
+    /* Make language selectbox dark black */
     [data-testid="stSidebar"] .stSelectbox {
-        background-color: #0f3460 !important;
+        background-color: #000000 !important;
         border-radius: 12px !important;
     }
     [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
-        background-color: #0f3460 !important;
+        background-color: #000000 !important;
         border: 1px solid #e94560 !important;
         border-radius: 12px !important;
     }
     [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
-        background-color: #0f3460 !important;
+        background-color: #000000 !important;
         color: white !important;
     }
     [data-testid="stSidebar"] .stSelectbox svg {
         fill: #e94560 !important;
         stroke: #e94560 !important;
     }
-    /* Dropdown menu completely dark */
+    /* Dropdown menu completely dark black */
     div[data-baseweb="popover"] ul {
-        background-color: #1a1a2e !important;
+        background-color: #000000 !important;
         border: 1px solid #e94560 !important;
     }
     div[data-baseweb="popover"] li {
         color: white !important;
-        background-color: #1a1a2e !important;
+        background-color: #000000 !important;
     }
     div[data-baseweb="popover"] li:hover {
         background-color: #e94560 !important;
