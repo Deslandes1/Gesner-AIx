@@ -591,7 +591,7 @@ def play_voice_button(text, is_fallback, fallback_audio_lang, button_label="🔊
         else:
             return ""
 
-# ---------- UI COMPONENTS (No character picker in chat) ----------
+# ---------- UI COMPONENTS (character picker only in training center) ----------
 def dictionary_manager(t):
     st.markdown(f"## {t['dict_title']}")
     col1, col2, col3 = st.columns(3)
@@ -743,6 +743,7 @@ def manage_trained_facts(t):
         for idx, item in enumerate(st.session_state.training_data):
             original = item["text"]
             with st.expander(f"Fact #{idx+1}: {original[:60]}..."):
+                # Character picker appears HERE (only in training center)
                 character_picker(f"edit_{idx}", "Insert Kreyòl characters for this fact:")
                 new_text = st.text_area("Edit text", value=original, key=f"edit_text_{idx}", height=100)
                 col1, col2 = st.columns(2)
@@ -775,7 +776,7 @@ def training_center(t):
     manage_trained_facts(t)
 
 def chat_interface(t):
-    # Insert characters (Kreyòl picker) have been removed from chat interface as requested.
+    # Character picker is NOT present in chat mode.
     st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Ask me anything. I learn from dictionaries, bulk import, and voice training.</p>", unsafe_allow_html=True)
     
