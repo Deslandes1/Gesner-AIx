@@ -775,6 +775,7 @@ def training_center(t):
     manage_trained_facts(t)
 
 def chat_interface(t):
+    # Insert characters (Kreyòl picker) have been removed from chat interface as requested.
     st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Ask me anything. I learn from dictionaries, bulk import, and voice training.</p>", unsafe_allow_html=True)
     
@@ -796,7 +797,6 @@ def chat_interface(t):
                 if btn_html:
                     st.components.v1.html(btn_html, height=50)
     
-    # NO CHARACTER PICKER HERE – removed as requested
     user_input = st.text_input(t['chat_input'], key="chat_input")
     if st.button(t['send'], use_container_width=True, key="send_btn"):
         if user_input.strip():
