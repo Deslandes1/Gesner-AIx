@@ -63,7 +63,7 @@ def load_voice_cache():
         return cache
     return {}
 
-# ---------- DEFAULT TRAINING (FULL) ----------
+# ---------- DEFAULT TRAINING (FULL, INCLUDING NEW INTERACTIVE FACTS) ----------
 def get_default_training_facts():
     facts = []
 
@@ -78,7 +78,7 @@ def get_default_training_facts():
     facts.append("OU pwononse tankou 'ou' nan franse, UI pwononse tankou 'wi'.")
     facts.append("NG pwononse tankou 'ng' nan 'sitting' an angle.")
 
-    # ----- BEGINNER PHRASES -----
+    # ----- BEGINNER PHRASES (essential) -----
     facts.append("Bonjou se fason pou di 'good morning' an Kreyòl.")
     facts.append("Bonswa se fason pou di 'good evening' an Kreyòl.")
     facts.append("Mèsi se 'thank you'.")
@@ -218,6 +218,16 @@ def get_default_training_facts():
     facts.append("Poumon yo pote oksijèn nan san an epi lage gaz kabonik.")
     facts.append("Zo yo bay sipò estriktirèl, pwoteje ògàn, epi pèmèt mouvman.")
 
+    # ========== NEW: INTERACTIVE / HELP / CAPABILITIES ==========
+    facts.append("Kisa ou ka ede m fè? Mwen ka ede w aprann Kreyòl, reponn kesyon sou alfabè, gramè, istwa Ayiti, matematik, ak tout bagay moun te anseye m. Ou ka poze m nenpòt kesyon, epi m ap eseye reponn.")
+    facts.append("Kisa ou kapab fè pou mwen? Mwen ka ede w tradui mo, eksplike règ gramè, rakonte istwa, fè kalkil, ak anseye w vokabilè. Si m pa konnen, ou ka anseye m nan Sant Fòmasyon.")
+    facts.append("Kijan ou ka ede m? Mwen ka reponn kesyon ou yo an Kreyòl. Mwen konnen alfabè, konjigezon, istwa Ayiti, ak anpil lòt bagay. Poze m yon kesyon epi gade sa m kapab fè.")
+    facts.append("Ki kalite kesyon mwen ka poze w? Ou ka poze m kesyon sou alfabè kreyòl, jan pou w di mo an Kreyòl, fason pou w fè fraz, diferans ant tan vèb, istwa Ayiti, ak tout bagay ou te anseye m nan Sant Fòmasyon.")
+    facts.append("Èske ou ka ede m aprann Kreyòl? Wi, mwen kapab! Poze m kesyon sou vokabilè, gramè, pwononsyasyon, oswa nenpòt bagay ki gen rapò ak Kreyòl. Mwen la pou ede w.")
+    facts.append("Kisa w konn fè? Mwen konn reponn kesyon sou alfabè, istwa, matematik, ak tout bagay moun te anseye m. Mwen konn pale Kreyòl, Franse, Angle, ak Panyòl. Mwen ka jwe vwa si ou te anrejistre yon fichye pou mwen.")
+    facts.append("Kisa diferans ant 'ou' ak 'w'? 'Ou' se pwonon (you). 'W' se yon kontraksyon 'ou' apre yon vwayèl, tankou 'Mwen wè w' olye 'Mwen wè ou'.")
+    facts.append("Kisa mwen dwe fè pou m byen pale Kreyòl? Pran tan pou w aprann alfabè a, koute moun pale, pratike chak jou, epi poze m kesyon lè w pa konprann. Mwen ka ede w korije erè ou yo.")
+
     # ----- GESNER AI IDENTITY -----
     facts.append("Gesner AI te kreye pa Gesner Deslandes, fondatè GlobalInternet.py.")
     facts.append("Mwen reponn sèlman an Kreyòl. Poze m kesyon sou alfabè, gramè, istwa Ayiti, oswa nenpòt bagay ou te anseye m.")
@@ -237,7 +247,11 @@ def initialize_default_training():
         save_training_data()
 
 # ---------- STREAMLIT PAGE CONFIG ----------
-st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
+st.set_page_config(
+    page_title="Gesner AI",
+    page_icon="🧠",
+    layout="wide"
+)
 
 # ---------- CSS (dark theme) ----------
 st.markdown(
@@ -763,55 +777,35 @@ def reason_about_question(query):
         return f"Kounye a li {now}."
     return None
 
-# ========== NEW: REASONING FUNCTION ==========
+# ========== REASONING FUNCTION ==========
 def reason_answer(query, retrieved_facts):
-    """
-    Attempt to construct a reasoned answer from multiple retrieved facts.
-    For history questions, combine facts into a timeline.
-    """
     if not retrieved_facts:
         return None
-
     if len(retrieved_facts) == 1:
         return retrieved_facts[0]
-
     q_lower = query.lower()
-    # If question asks for story/history, combine multiple history facts
     if any(word in q_lower for word in ["raconte", "rakonte", "istwa", "history", "histoire"]):
         history_facts = [f for f in retrieved_facts if any(kw in f.lower() for kw in ["endepandan", "revolisyon", "duvalier", "tranblemanntè", "1804", "1915", "1957", "bwa kayiman"])]
         if history_facts:
-            # Combine first 3 into a coherent answer
             combined = ". ".join(history_facts[:3])
             return combined + "."
         else:
             return retrieved_facts[0]
-
-    # For comparisons, you could add more logic; fallback to first fact
     return retrieved_facts[0]
 
 def generate_response(user_input):
-    # Step 1: Show thinking spinner (simulate reasoning)
     with st.spinner("🧠 Gesner AI ap reflechi... (thinking...)"):
-        time.sleep(0.8)  # Simulate thinking time
-
-        # Step 2: Check direct keyword answers
+        time.sleep(0.8)
         direct = direct_keyword_answer(user_input)
         if direct:
             return direct, False
-
-        # Step 3: Retrieve multiple facts (k=5 for reasoning)
         facts = retrieve_facts_hybrid(user_input, k=5)
-
-        # Step 4: Use reasoning to combine or select best answer
         if facts:
             reasoned = reason_answer(user_input, facts)
             return reasoned, False
-
-        # Step 5: Fallback to logic or default
         logic = reason_about_question(user_input)
         if logic:
             return logic, False
-
     return "Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon.", True
 
 def play_voice_button(text, button_label="🔊", key_suffix=""):
