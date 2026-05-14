@@ -63,10 +63,9 @@ def load_voice_cache():
         return cache
     return {}
 
-# ---------- DEFAULT TRAINING (same as before, including all fixes) ----------
+# ---------- DEFAULT TRAINING (same as previous, included for completeness) ----------
 def get_default_training_facts():
     facts = []
-
     # ----- ALPHABET -----
     facts.append("Alfabè kreyòl la gen 32 let: A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.")
     facts.append("Lis let alfabè kreyòl la se: A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.")
@@ -77,7 +76,6 @@ def get_default_training_facts():
     facts.append("Let È pwononse tankou 'e' nan franse, let Ò pwononse tankou 'o' louvri.")
     facts.append("OU pwononse tankou 'ou' nan franse, UI pwononse tankou 'wi'.")
     facts.append("NG pwononse tankou 'ng' nan 'sitting' an angle.")
-
     # ----- BEGINNER PHRASES -----
     facts.append("Bonjou se fason pou di 'good morning' an Kreyòl.")
     facts.append("Bonswa se fason pou di 'good evening' an Kreyòl.")
@@ -145,7 +143,6 @@ def get_default_training_facts():
     facts.append("Se pa anyen oswa Sa bon se 'It's okay'.")
     facts.append("Félicitasyon, Bòn chans, Bon apeti, Pran swen ou.")
     facts.append("Na wè pita, Na wè demen, Orevwa.")
-
     # ----- INTERMEDIATE / ADVANCED GRAMMAR -----
     facts.append("Pou fè tan pase, mete 'te' anvan vèb la. Egzanp: Mwen te manje (I ate).")
     facts.append("Pou fè tan fiti, mete 'ap' oswa 'pral' anvan vèb la. Egzanp: Mwen ap manje (I will eat).")
@@ -167,7 +164,6 @@ def get_default_training_facts():
     facts.append("Conditional perfect: 'ta' + 'te' + vèb. Egzanp: Mwen ta te vini si mwen te konnen.")
     facts.append("Mo 'kòmsi' (as if): Li pale kòmsi li te konnen tout bagay.")
     facts.append("Mo 'menm si' (even if): Menm si li te rich, li pa ta achte sa.")
-
     # ----- HAITI HISTORY -----
     facts.append("Premye moun ki te rete sou zile Ispanyola (kote Ayiti ye jodi a) se te Endyen Taino yo.")
     facts.append("Kristòf Kolon te rive sou zile a an 1492, li te nonmen l 'La Isla Española'.")
@@ -209,7 +205,6 @@ def get_default_training_facts():
     facts.append("Kiyès ki te Papa Dok? François Duvalier, yon diktatè ki te dirije Ayiti 1957-1971, li te kreye tonton makout yo.")
     facts.append("Kisa tranblemanntè 2010 te fè? Li te touye plis pase 200,000 moun, li te detwi Pòtoprens, epi li te deplase 1.5 milyon moun.")
     facts.append("Ki dat Jovenel Moïse te asasine? 7 jiyè 2021.")
-
     # ----- GENERAL KNOWLEDGE -----
     facts.append("Diri ak pwa se yon manje popilè an Ayiti.")
     facts.append("Po moun se pi gwo ògàn kò imen an.")
@@ -217,7 +212,6 @@ def get_default_training_facts():
     facts.append("Sèvo moun kontwole tout fonksyon kò a.")
     facts.append("Poumon yo pote oksijèn nan san an epi lage gaz kabonik.")
     facts.append("Zo yo bay sipò estriktirèl, pwoteje ògàn, epi pèmèt mouvman.")
-
     # ----- INTERACTIVE / HELP / CAPABILITIES -----
     facts.append("Kisa ou ka ede m fè? Mwen ka ede w aprann Kreyòl, reponn kesyon sou alfabè, gramè, istwa Ayiti, matematik, ak tout bagay moun te anseye m. Ou ka poze m nenpòt kesyon, epi m ap eseye reponn.")
     facts.append("Kisa ou kapab fè pou mwen? Mwen ka ede w tradui mo, eksplike règ gramè, rakonte istwa, fè kalkil, ak anseye w vokabilè. Si m pa konnen, ou ka anseye m nan Sant Fòmasyon.")
@@ -227,13 +221,11 @@ def get_default_training_facts():
     facts.append("Kisa w konn fè? Mwen konn reponn kesyon sou alfabè, istwa, matematik, ak tout bagay moun te anseye m. Mwen konn pale Kreyòl, Franse, Angle, ak Panyòl. Mwen ka jwe vwa si ou te anrejistre yon fichye pou mwen.")
     facts.append("Kisa diferans ant 'ou' ak 'w'? 'Ou' se pwonon (you). 'W' se yon kontraksyon 'ou' apre yon vwayèl, tankou 'Mwen wè w' olye 'Mwen wè ou'.")
     facts.append("Kisa mwen dwe fè pou m byen pale Kreyòl? Pran tan pou w aprann alfabè a, koute moun pale, pratike chak jou, epi poze m kesyon lè w pa konprann. Mwen ka ede w korije erè ou yo.")
-
     # ----- GESNER AI IDENTITY -----
     facts.append("Gesner AI te kreye pa Gesner Deslandes, fondatè GlobalInternet.py.")
     facts.append("Mwen reponn sèlman an Kreyòl. Poze m kesyon sou alfabè, gramè, istwa Ayiti, oswa nenpòt bagay ou te anseye m.")
     facts.append("Si mwen pa konnen, mwen di 'Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon.'")
     facts.append("Ou ka antrene m lè w ajoute facts nan Training Center, sèvi ak diksyonè, oswa fòmasyon vwa.")
-
     return facts
 
 def initialize_default_training():
@@ -253,7 +245,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------- CSS (dark theme) ----------
+# ---------- CSS (dark theme + spinning globe) ----------
 st.markdown(
     """
     <style>
@@ -371,6 +363,16 @@ st.markdown(
     }
     .char-btn:hover {
         background-color: #e94560;
+    }
+    /* Spinning globe animation */
+    @keyframes spin-globe {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .spinning-globe {
+        animation: spin-globe 4s linear infinite;
+        display: inline-block;
+        font-size: 3rem;
     }
     </style>
     """,
@@ -647,6 +649,24 @@ if "tfidf_matrix" not in st.session_state:
 
 VOICE_CACHE = load_voice_cache()
 
+# ========== PRE‑DEFINED VOICE MAPPING ==========
+PREDEFINED_VOICES = {
+    "kijan ou rele": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording.wav",
+    "site konbyen let ki genhen nan alfabe kreyol al": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(1).wav",
+    "konbyen let ki gehen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(3).wav"
+}
+
+def normalize_text(text):
+    """Remove extra spaces, lower case, remove accents? For matching we keep simple."""
+    return re.sub(r'\s+', ' ', text.strip().lower())
+
+def get_predefined_voice_url(user_question):
+    norm_q = normalize_text(user_question)
+    for key, url in PREDEFINED_VOICES.items():
+        if key in norm_q or norm_q.startswith(key):
+            return url
+    return None
+
 def save_all():
     save_training_data()
     save_dictionaries()
@@ -755,8 +775,6 @@ def direct_keyword_answer(query):
 
 def reason_about_question(query):
     q = query.lower().strip()
-    # First: math detection (must come before any keyword lookup)
-    # Pattern: digits with operators + - * / and optional equals or question mark
     math_match = re.search(r"(\d+)\s*([\+\-\*\/])\s*(\d+)", q)
     if math_match:
         try:
@@ -767,12 +785,10 @@ def reason_about_question(query):
             elif op == '/': res = a / b
             else: res = None
             if res is not None:
-                # If answer is integer, show as integer; if float, show with 2 decimals
                 if isinstance(res, float) and res.is_integer():
                     res = int(res)
                 return f"Repons lan se {res}."
         except: pass
-    # Then geography
     if "kapital" in q or "capital" in q:
         capitals = {"france":"Paris","ayiti":"Pòtoprens","haiti":"Port‑au‑Prince","etazini":"Washington, D.C.","usa":"Washington, D.C.","kanada":"Ottawa","brezil":"Brasília","alman":"Bèlen","itali":"Wòm","espay":"Madrid","angle":"Londr","japon":"Tokiyo"}
         for country, cap in capitals.items():
@@ -789,7 +805,6 @@ def reason_answer(query, retrieved_facts):
     if len(retrieved_facts) == 1:
         return retrieved_facts[0]
     q_lower = query.lower()
-    # For history questions
     if any(word in q_lower for word in ["raconte", "rakonte", "istwa", "history", "histoire"]):
         history_facts = [f for f in retrieved_facts if any(kw in f.lower() for kw in ["endepandan", "revolisyon", "duvalier", "tranblemanntè", "1804", "1915", "1957", "bwa kayiman"])]
         if history_facts:
@@ -802,26 +817,41 @@ def reason_answer(query, retrieved_facts):
 def generate_response(user_input):
     with st.spinner("🧠 Gesner AI ap reflechi... (thinking...)"):
         time.sleep(0.8)
-        # 1. Math FIRST (before any other lookup)
         math_result = reason_about_question(user_input)
         if math_result and ("+" in user_input or "-" in user_input or "*" in user_input or "/" in user_input):
             return math_result, False
-        # 2. Direct keyword answers (name, creator, greetings)
         direct = direct_keyword_answer(user_input)
         if direct:
             return direct, False
-        # 3. Retrieve from training (k=5 for reasoning)
         facts = retrieve_facts_hybrid(user_input, k=5)
         if facts:
             reasoned = reason_answer(user_input, facts)
             return reasoned, False
-        # 4. Non-math logic (time, capitals, etc.)
         logic = reason_about_question(user_input)
         if logic:
             return logic, False
     return "Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon.", True
 
-def play_voice_button(text, button_label="🔊", key_suffix=""):
+# Modified play_voice_button to check predefined voices first
+def play_voice_button(text, user_question, button_label="🔊", key_suffix=""):
+    # First, check if this specific question has a predefined voice URL
+    predefined_url = get_predefined_voice_url(user_question) if user_question else None
+    if predefined_url:
+        # Use the raw audio URL directly
+        html = f"""
+        <button class="speak-btn" id="voiceBtn_{key_suffix}" style="background-color:#ffaa33; border:none; border-radius:30px; padding:5px 12px; margin-left:12px; cursor:pointer;">{button_label}</button>
+        <audio id="customAudio_{key_suffix}" style="display:none;"></audio>
+        <script>
+            (function() {{
+                const btn = document.getElementById('voiceBtn_{key_suffix}');
+                const audioEl = document.getElementById('customAudio_{key_suffix}');
+                audioEl.src = "{predefined_url}";
+                btn.onclick = () => audioEl.play();
+            }})();
+        </script>
+        """
+        return html
+    # Otherwise, check if custom voice is attached to the answer text
     voice_bytes = get_voice_for_text(text)
     if voice_bytes:
         audio_b64 = base64.b64encode(voice_bytes).decode()
@@ -865,7 +895,7 @@ def play_fallback_audio_french():
     """
     return html
 
-# ---------- UI COMPONENTS (unchanged) ----------
+# ---------- UI COMPONENTS (unchanged except chat_interface to pass user question to voice button) ----------
 def dictionary_manager(t):
     st.markdown(f"## {t['dict_title']}")
     col1, col2, col3 = st.columns(3)
@@ -962,7 +992,7 @@ def voice_training(t):
             st.markdown("---")
             st.markdown(f"### {t['test_this_fact']}")
             st.write(f"**Fact:** {fact_text}")
-            btn_html = play_voice_button(fact_text, t['play_voice'], "after_train")
+            btn_html = play_voice_button(fact_text, "", t['play_voice'], "after_train")
             if btn_html:
                 st.components.v1.html(btn_html, height=50)
 
@@ -1045,7 +1075,7 @@ def manage_trained_facts(t):
                     st.success("Deleted")
                     st.rerun()
             with col3:
-                btn_html = play_voice_button(original, t['test_voice_btn'], f"test_{idx}")
+                btn_html = play_voice_button(original, "", t['test_voice_btn'], f"test_{idx}")
                 if btn_html:
                     st.components.v1.html(btn_html, height=50)
             st.markdown("---")
@@ -1061,7 +1091,7 @@ def manage_trained_facts(t):
                     st.error("Please select a voice file first.")
             if get_voice_for_text(original) is not None:
                 st.markdown("✅ **Voice is now attached!**")
-                test_btn = play_voice_button(original, "🔊 Test attached voice", f"after_attach_{idx}")
+                test_btn = play_voice_button(original, "", "🔊 Test attached voice", f"after_attach_{idx}")
                 if test_btn:
                     st.components.v1.html(test_btn, height=50)
 
@@ -1078,7 +1108,7 @@ def test_training_section(t):
                 voice_bytes = get_voice_for_text(best_fact)
                 if voice_bytes:
                     st.markdown(f"✅ {t['voice_exists']}")
-                    btn_html = play_voice_button(best_fact, t['play_voice'], "test_retrieval")
+                    btn_html = play_voice_button(best_fact, test_query, t['play_voice'], "test_retrieval")
                     if btn_html:
                         st.components.v1.html(btn_html, height=50)
                 else:
@@ -1118,7 +1148,9 @@ def chat_interface(t):
             with col1:
                 st.markdown(f'<div class="chat-message assistant-message" style="width:100%;">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
             with col2:
-                btn_html = play_voice_button(msg["content"], "🔊", f"chat_{idx}")
+                # Pass the user's question (the previous message) to the voice button
+                user_q = st.session_state.conversation_history[idx-1]["content"] if idx > 0 else ""
+                btn_html = play_voice_button(msg["content"], user_q, "🔊", f"chat_{idx}")
                 if btn_html:
                     st.components.v1.html(btn_html, height=50)
                 else:
@@ -1142,14 +1174,8 @@ def show_sidebar():
     selected_lang_code = LANGUAGES[selected_lang_name]
     st.session_state.ui_language = selected_lang_code
     t = TEXTS.get(st.session_state.ui_language, TEXTS["en"])
-    st.sidebar.markdown(
-        f"""
-        <div style="text-align: center;">
-            <div style="font-size:80px; animation:spin 4s linear infinite; display:inline-block;">🌍</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    # Spinning globe in sidebar
+    st.sidebar.markdown('<div style="text-align:center;"><div class="spinning-globe">🌍</div></div>', unsafe_allow_html=True)
     st.sidebar.markdown(f"## **{t['sidebar_company']}**")
     st.sidebar.markdown(f"### {t['sidebar_product']}")
     st.sidebar.markdown("---")
