@@ -63,11 +63,11 @@ def load_voice_cache():
         return cache
     return {}
 
-# ---------- DEFAULT TRAINING (FULL, INCLUDING NEW INTERACTIVE FACTS) ----------
+# ---------- DEFAULT TRAINING (same as before, including all fixes) ----------
 def get_default_training_facts():
     facts = []
 
-    # ----- ALPHABET (count and list) -----
+    # ----- ALPHABET -----
     facts.append("Alfabè kreyòl la gen 32 let: A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.")
     facts.append("Lis let alfabè kreyòl la se: A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.")
     facts.append("Konbyen let nan alfabè kreyòl? 32 let.")
@@ -78,7 +78,7 @@ def get_default_training_facts():
     facts.append("OU pwononse tankou 'ou' nan franse, UI pwononse tankou 'wi'.")
     facts.append("NG pwononse tankou 'ng' nan 'sitting' an angle.")
 
-    # ----- BEGINNER PHRASES (essential) -----
+    # ----- BEGINNER PHRASES -----
     facts.append("Bonjou se fason pou di 'good morning' an Kreyòl.")
     facts.append("Bonswa se fason pou di 'good evening' an Kreyòl.")
     facts.append("Mèsi se 'thank you'.")
@@ -168,7 +168,7 @@ def get_default_training_facts():
     facts.append("Mo 'kòmsi' (as if): Li pale kòmsi li te konnen tout bagay.")
     facts.append("Mo 'menm si' (even if): Menm si li te rich, li pa ta achte sa.")
 
-    # ----- HAITI HISTORY (extensive) -----
+    # ----- HAITI HISTORY -----
     facts.append("Premye moun ki te rete sou zile Ispanyola (kote Ayiti ye jodi a) se te Endyen Taino yo.")
     facts.append("Kristòf Kolon te rive sou zile a an 1492, li te nonmen l 'La Isla Española'.")
     facts.append("Panyòl yo te kolonize zile a epi yo te redui popilasyon Taino a.")
@@ -218,7 +218,7 @@ def get_default_training_facts():
     facts.append("Poumon yo pote oksijèn nan san an epi lage gaz kabonik.")
     facts.append("Zo yo bay sipò estriktirèl, pwoteje ògàn, epi pèmèt mouvman.")
 
-    # ========== NEW: INTERACTIVE / HELP / CAPABILITIES ==========
+    # ----- INTERACTIVE / HELP / CAPABILITIES -----
     facts.append("Kisa ou ka ede m fè? Mwen ka ede w aprann Kreyòl, reponn kesyon sou alfabè, gramè, istwa Ayiti, matematik, ak tout bagay moun te anseye m. Ou ka poze m nenpòt kesyon, epi m ap eseye reponn.")
     facts.append("Kisa ou kapab fè pou mwen? Mwen ka ede w tradui mo, eksplike règ gramè, rakonte istwa, fè kalkil, ak anseye w vokabilè. Si m pa konnen, ou ka anseye m nan Sant Fòmasyon.")
     facts.append("Kijan ou ka ede m? Mwen ka reponn kesyon ou yo an Kreyòl. Mwen konnen alfabè, konjigezon, istwa Ayiti, ak anpil lòt bagay. Poze m yon kesyon epi gade sa m kapab fè.")
@@ -755,6 +755,8 @@ def direct_keyword_answer(query):
 
 def reason_about_question(query):
     q = query.lower().strip()
+    # First: math detection (must come before any keyword lookup)
+    # Pattern: digits with operators + - * / and optional equals or question mark
     math_match = re.search(r"(\d+)\s*([\+\-\*\/])\s*(\d+)", q)
     if math_match:
         try:
@@ -765,8 +767,12 @@ def reason_about_question(query):
             elif op == '/': res = a / b
             else: res = None
             if res is not None:
+                # If answer is integer, show as integer; if float, show with 2 decimals
+                if isinstance(res, float) and res.is_integer():
+                    res = int(res)
                 return f"Repons lan se {res}."
         except: pass
+    # Then geography
     if "kapital" in q or "capital" in q:
         capitals = {"france":"Paris","ayiti":"Pòtoprens","haiti":"Port‑au‑Prince","etazini":"Washington, D.C.","usa":"Washington, D.C.","kanada":"Ottawa","brezil":"Brasília","alman":"Bèlen","itali":"Wòm","espay":"Madrid","angle":"Londr","japon":"Tokiyo"}
         for country, cap in capitals.items():
@@ -777,13 +783,13 @@ def reason_about_question(query):
         return f"Kounye a li {now}."
     return None
 
-# ========== REASONING FUNCTION ==========
 def reason_answer(query, retrieved_facts):
     if not retrieved_facts:
         return None
     if len(retrieved_facts) == 1:
         return retrieved_facts[0]
     q_lower = query.lower()
+    # For history questions
     if any(word in q_lower for word in ["raconte", "rakonte", "istwa", "history", "histoire"]):
         history_facts = [f for f in retrieved_facts if any(kw in f.lower() for kw in ["endepandan", "revolisyon", "duvalier", "tranblemanntè", "1804", "1915", "1957", "bwa kayiman"])]
         if history_facts:
@@ -796,13 +802,20 @@ def reason_answer(query, retrieved_facts):
 def generate_response(user_input):
     with st.spinner("🧠 Gesner AI ap reflechi... (thinking...)"):
         time.sleep(0.8)
+        # 1. Math FIRST (before any other lookup)
+        math_result = reason_about_question(user_input)
+        if math_result and ("+" in user_input or "-" in user_input or "*" in user_input or "/" in user_input):
+            return math_result, False
+        # 2. Direct keyword answers (name, creator, greetings)
         direct = direct_keyword_answer(user_input)
         if direct:
             return direct, False
+        # 3. Retrieve from training (k=5 for reasoning)
         facts = retrieve_facts_hybrid(user_input, k=5)
         if facts:
             reasoned = reason_answer(user_input, facts)
             return reasoned, False
+        # 4. Non-math logic (time, capitals, etc.)
         logic = reason_about_question(user_input)
         if logic:
             return logic, False
@@ -852,7 +865,7 @@ def play_fallback_audio_french():
     """
     return html
 
-# ---------- UI COMPONENTS ----------
+# ---------- UI COMPONENTS (unchanged) ----------
 def dictionary_manager(t):
     st.markdown(f"## {t['dict_title']}")
     col1, col2, col3 = st.columns(3)
