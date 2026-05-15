@@ -77,6 +77,10 @@ def get_default_training_facts():
     facts.append("Let È pwononse tankou 'e' nan franse, let Ò pwononse tankou 'o' louvri.")
     facts.append("OU pwononse tankou 'ou' nan franse, UI pwononse tankou 'wi'.")
     facts.append("NG pwononse tankou 'ng' nan 'sitting' an angle.")
+    
+    # ----- NEW: Exact answer for the misspelled question -----
+    facts.append("Site konbyen let ki genhen nan alfabe kreyol la? A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.")
+    facts.append("Site konbyen let ki genhen nan alfabe kreyol la? Lis la se A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.")
 
     # ----- BEGINNER PHRASES -----
     facts.append("Bonjou se fason pou di 'good morning' an Kreyòl.")
@@ -658,7 +662,6 @@ VOICE_CACHE = load_voice_cache()
 # ========== PRE‑DEFINED VOICE MAPPING ==========
 PREDEFINED_VOICES = {
     "kijan ou rele": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording.wav",
-    "site konbyen let ki genhen nan alfabe kreyol al": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(1).wav",
     "site konbyen let ki genhen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(1).wav",
     "konbyen let ki gehen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(3).wav"
 }
