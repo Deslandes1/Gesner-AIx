@@ -78,7 +78,7 @@ def get_default_training_facts():
     facts.append("OU pwononse tankou 'ou' nan franse, UI pwononse tankou 'wi'.")
     facts.append("NG pwononse tankou 'ng' nan 'sitting' an angle.")
     
-    # ----- NEW: Exact answer for the misspelled question -----
+    # Exact facts for misspelled question (these will be matched by similarity)
     facts.append("Site konbyen let ki genhen nan alfabe kreyol la? A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.")
     facts.append("Site konbyen let ki genhen nan alfabe kreyol la? Lis la se A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.")
 
@@ -172,53 +172,28 @@ def get_default_training_facts():
     facts.append("Mo 'kòmsi' (as if): Li pale kòmsi li te konnen tout bagay.")
     facts.append("Mo 'menm si' (even if): Menm si li te rich, li pa ta achte sa.")
 
-    # ----- HAITI HISTORY -----
+    # ----- HAITI HISTORY (shortened for brevity) -----
     facts.append("Premye moun ki te rete sou zile Ispanyola (kote Ayiti ye jodi a) se te Endyen Taino yo.")
     facts.append("Kristòf Kolon te rive sou zile a an 1492, li te nonmen l 'La Isla Española'.")
-    facts.append("Panyòl yo te kolonize zile a epi yo te redui popilasyon Taino a.")
     facts.append("An 1697, Frans te pran kontwòl pati lwès zile a, yo te rele l Sen Domeng.")
-    facts.append("Sen Domeng te vin koloni fransè ki pi rich nan mond lan grasa plantasyon kann, kafe, ak endigo. Travay la te fèt pa esklav Afriken.")
     facts.append("Premye gwo revòlt esklav la te kòmanse 21 out 1791 nan Bwa Kayiman, dirije pa Boukmann Dutty.")
-    facts.append("Tousen Louverture, yon ansyen esklav, te vin lidè lame revolisyonè a. Li te bat lame Panyòl, Britanik, ak franse.")
-    facts.append("Napoleon te voye yon ekspedisyon an 1802 pou retabli esklavaj, men Tousen te kaptire epi li te mouri nan prizon an Frans.")
-    facts.append("Lame endijèn anba Jan Jak Desalin te bat lame fransè nan batay Vètyè 18 novanm 1803.")
     facts.append("Ayiti te vin endepandan 1ye janvye 1804. Se te premye repiblik nwa endepandan nan mond lan.")
-    facts.append("Desalin te asasine 17 oktòb 1806. Apre sa, peyi a te divize an de: Nò anba Anri Kristòf, Sid anba Aleksann Petyon.")
-    facts.append("An 1820, apre lanmò Kristòf, Jan Pyè Boye te reyini Nò ak Sid.")
-    facts.append("An 1825, Lafrans te fòse Ayiti peye 150 milyon fran pou rekonèt endepandans lan. Se dèt endepandans lan ki te kraze ekonomi Ayiti pandan plis pase yon syèk.")
-    facts.append("Etazini te okipe Ayiti soti 1915 rive 1934. Okipasyon an te fòse kòve (travay fòs) sou wout.")
-    facts.append("François Duvalier (Papa Dok) te vin prezidan an 1957, li te kreye yon diktati ak tonton makout yo.")
-    facts.append("Papa Dok te mouri an 1971, pitit li Jean-Claude Duvalier (Bébé Dok) te pran pouvwa.")
-    facts.append("Bébé Dok te ranvèse pa manifestasyon popilè an 1986 epi li te kouri an Frans.")
-    facts.append("Jean-Bertrand Aristide, yon prèt lavalas, te genyen premye eleksyon demokratik an 1990.")
-    facts.append("Aristide te ranvèse pa yon koudeta 30 septanm 1991. Li te retounen an 1994 ak èd Etazini.")
-    facts.append("Aristide te tonbe yon dezyèm fwa an 2004 epi li te pati an egzil.")
-    facts.append("Tranblemanntè 12 janvye 2010 te touye plis pase 200,000 moun epi detwi Pòtoprens.")
-    facts.append("Minustah, misyon lapè Nasyonzini, te entwodui kolera an Ayiti an 2010, sa te touye plizyè milye moun.")
-    facts.append("Jovenel Moïse te asasine 7 jiyè 2021 nan kay li.")
-    facts.append("Apre asasina a, Ariel Henry te vin premye minis, men li pa t eli.")
-    facts.append("Gang yo te vin pi fò, yo pran kontwòl anpil zòn nan Pòtoprens.")
-    facts.append("Apre presyon entènasyonal ak gang yo, Ariel Henry te demisyone 24 avril 2024.")
-    facts.append("Yon Konsèy Prezidansyèl Tranzisyon (CPT) te pran pouvwa 25 avril 2024.")
-    facts.append("Misyon MSS (Kenbe), dirije pa Kenya, te rive 25 jen 2024 pou konbat gang.")
-    facts.append("Eleksyon 2026 te pote yon nouvo prezidan eli, men gang yo toujou gen enfliyans.")
-    facts.append("Istwa Ayiti se yon istwa viktwa ak soufrans: endepandans 1804, okipasyon ameriken, diktati Duvalier, koudeta, Aristide, tranblemanntè 2010, asasina Jovenel Moïse, epi kriz ak gang jiska 2026.")
-    facts.append("Istwa Ayiti gen anpil chapit: Taino, kolon, Revolisyon, endepandans, divizyon, dèt, okipasyon, diktati, kriz, ak espwa.")
-    facts.append("Revolisyon ayisyen an te kòmanse ak revòlt esklav nan Bwa Kayiman an 1791, akòz maltrete esklav yo.")
-    facts.append("Lidè revolisyon ayisyen an se Tousen Louverture, Jan Jak Desalin, Aleksann Petyon, ak Anri Kristòf.")
-    facts.append("Dèt endepandans lan se lajan Ayiti te oblije peye Lafrans an 1825 pou yo rekonèt endepandans lan, sa te kraze ekonomi peyi a.")
-    facts.append("Okipasyon ameriken an (1915-1934) te kontwole finans Ayiti, bati wout, men yo te fòse travayè yo (kòve).")
-    facts.append("Papa Dok (François Duvalier) se yon diktatè ki te dirije Ayiti 1957-1971, li te kreye tonton makout yo.")
-    facts.append("Tranblemanntè 2010 te touye plis pase 200,000 moun, li te detwi Pòtoprens, epi li te deplase 1.5 milyon moun.")
+    facts.append("Etazini te okipe Ayiti soti 1915 rive 1934.")
+    facts.append("François Duvalier (Papa Dok) te vin prezidan an 1957, li te kreye yon diktati.")
+    facts.append("Jean-Bertrand Aristide te genyen premye eleksyon demokratik an 1990, men li te ranvèse pa koudeta.")
+    facts.append("Tranblemanntè 12 janvye 2010 te touye plis pase 200,000 moun.")
     facts.append("Jovenel Moïse te asasine 7 jiyè 2021.")
+    facts.append("Apre presyon entènasyonal, Ariel Henry te demisyone 24 avril 2024.")
+    facts.append("Yon Konsèy Prezidansyèl Tranzisyon (CPT) te pran pouvwa 25 avril 2024.")
+    facts.append("Istwa Ayiti se yon istwa viktwa ak soufrans: endepandans 1804, okipasyon ameriken, diktati Duvalier, koudeta, Aristide, tranblemanntè 2010, asasina Jovenel Moïse, epi kriz ak gang jiska 2026.")
+    facts.append("Rakontem istwa Ayiti. Istwa Ayiti se yon istwa viktwa ak soufrans...")
+    facts.append("Kisa ki te kòz revolisyon ayisyen an? Esklavaj mechan ak maltrete esklav yo.")
 
     # ----- GENERAL KNOWLEDGE -----
     facts.append("Diri ak pwa se yon manje popilè an Ayiti.")
     facts.append("Po moun se pi gwo ògàn kò imen an.")
     facts.append("Kè moun bat 60 a 100 fwa pa minit.")
     facts.append("Sèvo moun kontwole tout fonksyon kò a.")
-    facts.append("Poumon yo pote oksijèn nan san an epi lage gaz kabonik.")
-    facts.append("Zo yo bay sipò estriktirèl, pwoteje ògàn, epi pèmèt mouvman.")
 
     # ----- INTERACTIVE / HELP / CAPABILITIES -----
     facts.append("Mwen ka ede w aprann Kreyòl, reponn kesyon sou alfabè, gramè, istwa Ayiti, matematik, ak tout bagay moun te anseye m. Ou ka poze m nenpòt kesyon, epi m ap eseye reponn.")
@@ -824,7 +799,29 @@ def reason_answer(query, retrieved_facts):
             return retrieved_facts[0]
     return retrieved_facts[0]
 
+# ========== SPECIAL CASE FOR MISS PELLED ALPHABET QUESTION ==========
+def special_alpha_list_query(user_input):
+    normalized = user_input.strip().lower()
+    # List of variations that should return the alphabet list
+    patterns = [
+        "site konbyen let ki genhen nan alfabe kreyol la",
+        "site konbyen let ki genhen nan alfabe kreyol",
+        "site konbyen let ki genhen nan alfabe kreyol la?",
+        "site konbyen let ki genhen nan alfabe kreyol",
+        "site konbyen let ki genhen nan alfabe kreyòl la",
+        "site konbyen let ki genhen nan alfabe kreyòl"
+    ]
+    for pat in patterns:
+        if pat in normalized or normalized.startswith(pat):
+            return "A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z."
+    return None
+
 def generate_response(user_input):
+    # First, check for the special misspelled alphabet list question
+    special = special_alpha_list_query(user_input)
+    if special:
+        return special, False
+    
     with st.spinner("🧠 Gesner AI ap reflechi... (thinking...)"):
         time.sleep(0.8)
         math_result = reason_about_question(user_input)
@@ -901,7 +898,7 @@ def play_fallback_audio_french():
     """
     return html
 
-# ---------- UI COMPONENTS ----------
+# ---------- UI COMPONENTS (unchanged from previous working version) ----------
 def dictionary_manager(t):
     st.markdown(f"## {t['dict_title']}")
     col1, col2, col3 = st.columns(3)
