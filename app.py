@@ -63,19 +63,21 @@ def load_voice_cache():
         return cache
     return {}
 
-# ---------- DEFAULT TRAINING (same as previous, included for completeness) ----------
+# ---------- DEFAULT TRAINING (DIRECT ANSWERS ONLY, NO QUESTION REPETITION) ----------
 def get_default_training_facts():
     facts = []
+
     # ----- ALPHABET -----
-    facts.append("Alfabè kreyòl la gen 32 let: A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.")
-    facts.append("Lis let alfabè kreyòl la se: A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.")
-    facts.append("Konbyen let nan alfabè kreyòl? 32 let.")
-    facts.append("Site let nan alfabe kreyol la? A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.")
+    facts.append("Alfabè kreyòl la gen 32 let.")
+    facts.append("32 let.")
+    facts.append("Alfabè kreyòl la gen trantde (32) let.")
+    facts.append("Lis tout let alfabè kreyòl la: A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.")
     facts.append("Premye let nan alfabè kreyòl la se A, dènye let la se Z.")
     facts.append("Let CH pwononse tankou 'sh' nan angle.")
     facts.append("Let È pwononse tankou 'e' nan franse, let Ò pwononse tankou 'o' louvri.")
     facts.append("OU pwononse tankou 'ou' nan franse, UI pwononse tankou 'wi'.")
     facts.append("NG pwononse tankou 'ng' nan 'sitting' an angle.")
+
     # ----- BEGINNER PHRASES -----
     facts.append("Bonjou se fason pou di 'good morning' an Kreyòl.")
     facts.append("Bonswa se fason pou di 'good evening' an Kreyòl.")
@@ -137,38 +139,49 @@ def get_default_training_facts():
     facts.append("Ki manje ou pi renmen? Diri ak pwa se yon manje popilè.")
     facts.append("Ayiti se yon bèl peyi.")
     facts.append("Mwen vle vizite Kap Ayisyen.")
-    facts.append("Tan an bèl jodi a. Lap fè lapli. Solèy la ap klere.")
+    facts.append("Tan an bèl jodi a.")
+    facts.append("Lap fè lapli.")
+    facts.append("Solèy la ap klere.")
     facts.append("Kisa w ap fè? M ap travay, M ap etidye, M ap li yon liv.")
-    facts.append("Koute mwen. Gade mwen. Fè atansyon.")
+    facts.append("Koute mwen.")
+    facts.append("Gade mwen.")
+    facts.append("Fè atansyon.")
     facts.append("Se pa anyen oswa Sa bon se 'It's okay'.")
-    facts.append("Félicitasyon, Bòn chans, Bon apeti, Pran swen ou.")
-    facts.append("Na wè pita, Na wè demen, Orevwa.")
-    # ----- INTERMEDIATE / ADVANCED GRAMMAR -----
+    facts.append("Félicitasyon se 'Congratulations'.")
+    facts.append("Bòn chans se 'Good luck'.")
+    facts.append("Bon apeti se 'Enjoy your meal'.")
+    facts.append("Pran swen ou se 'Take care'.")
+    facts.append("Na wè pita se 'See you later'.")
+    facts.append("Na wè demen se 'See you tomorrow'.")
+    facts.append("Orevwa se 'Goodbye'.")
+
+    # ----- GRAMMAR (direct explanations) -----
     facts.append("Pou fè tan pase, mete 'te' anvan vèb la. Egzanp: Mwen te manje (I ate).")
     facts.append("Pou fè tan fiti, mete 'ap' oswa 'pral' anvan vèb la. Egzanp: Mwen ap manje (I will eat).")
     facts.append("Pou fè tan kontinyèl, mete 'ap' ant pwonon ak vèb: M ap manje (I am eating).")
-    facts.append("Pou fè kondisyonèl, itilize 'ta': Mwen ta vini (I would come).")
-    facts.append("Konparezon: pi ... pase (more than), mwens ... pase (less than). Egzanp: Li pi gran pase mwen.")
-    facts.append("Sipèlatif: pi ... nan tout. Egzanp: Li se pi bèl nan tout.")
-    facts.append("Mo 'ke' lye fraz: Mwen konnen ke li renmen mwen.")
-    facts.append("Mo 'pou' endike bi: Mwen vini pou ede ou.")
-    facts.append("Mo 'avan' (before), 'apre' (after). Egzanp: Apre manje, mwen ale dòmi.")
-    facts.append("Mo 'jan' endike fason: Mwen renmen jan li pale.")
-    facts.append("Mo 'dwe' (must): Ou dwe etidye.")
-    facts.append("Mo 'kapab' oswa 'gen dwa' (may): Èske mwen kapab antre?")
-    facts.append("Mo 'tou' (too/also): Mwen renmen ou tou.")
-    facts.append("Mo 'men' (but): Mwen grangou, men mwen pa gen lajan.")
-    facts.append("Mo 'donk' (so): Li te malad, donk li pa vini.")
-    facts.append("Pluperfect: 'te' + 'deja' oswa 'te fin'. Egzanp: Mwen te deja manje lè ou rive.")
-    facts.append("Future perfect: 'pral' + 'te' + vèb. Egzanp: Mwen pral te fin manje lè ou vini.")
-    facts.append("Conditional perfect: 'ta' + 'te' + vèb. Egzanp: Mwen ta te vini si mwen te konnen.")
-    facts.append("Mo 'kòmsi' (as if): Li pale kòmsi li te konnen tout bagay.")
-    facts.append("Mo 'menm si' (even if): Menm si li te rich, li pa ta achte sa.")
-    # ----- HAITI HISTORY -----
+    facts.append("Pou fè kondisyonèl, itilize 'ta'. Egzanp: Mwen ta vini (I would come).")
+    facts.append("Konparezon yo fèt ak 'pi ... pase' (more than) oswa 'mwens ... pase' (less than). Egzanp: Li pi gran pase mwen.")
+    facts.append("Sipèlatif yo fèt ak 'pi ... nan tout'. Egzanp: Li se pi bèl nan tout.")
+    facts.append("Mo 'ke' itilize pou lye fraz. Egzanp: Mwen konnen ke li renmen mwen.")
+    facts.append("Mo 'pou' endike bi. Egzanp: Mwen vini pou ede ou.")
+    facts.append("Mo 'avan' vle di 'before', 'apre' vle di 'after'. Egzanp: Apre manje, mwen ale dòmi.")
+    facts.append("Mo 'jan' endike fason. Egzanp: Mwen renmen jan li pale.")
+    facts.append("Mo 'dwe' vle di 'must'. Egzanp: Ou dwe etidye.")
+    facts.append("Mo 'kapab' oswa 'gen dwa' vle di 'may'. Egzanp: Èske mwen kapab antre?")
+    facts.append("Mo 'tou' vle di 'too/also'. Egzanp: Mwen renmen ou tou.")
+    facts.append("Mo 'men' vle di 'but'. Egzanp: Mwen grangou, men mwen pa gen lajan.")
+    facts.append("Mo 'donk' vle di 'so'. Egzanp: Li te malad, donk li pa vini.")
+    facts.append("Pou tan pase ki sot pase (pluperfect), itilize 'te' + 'deja' oswa 'te fin'. Egzanp: Mwen te deja manje lè ou rive.")
+    facts.append("Pou tan fiti ki sot pase (future perfect), itilize 'pral' + 'te' + vèb. Egzanp: Mwen pral te fin manje lè ou vini.")
+    facts.append("Pou tan fiti nan pase (conditional perfect), itilize 'ta' + 'te' + vèb. Egzanp: Mwen ta te vini si mwen te konnen.")
+    facts.append("Mo 'kòmsi' vle di 'as if'. Egzanp: Li pale kòmsi li te konnen tout bagay.")
+    facts.append("Mo 'menm si' vle di 'even if'. Egzanp: Menm si li te rich, li pa ta achte sa.")
+
+    # ----- HAITI HISTORY (direct statements) -----
     facts.append("Premye moun ki te rete sou zile Ispanyola (kote Ayiti ye jodi a) se te Endyen Taino yo.")
-    facts.append("Kristòf Kolon te rive sou zile a an 1492, li te nonmen l 'La Isla Española'.")
-    facts.append("Panyòl yo te kolonize zile a epi yo te redui popilasyon Taino a.")
-    facts.append("An 1697, Frans te pran kontwòl pati lwès zile a, yo te rele l Sen Domeng.")
+    facts.append("Kristòf Kolon te rive sou zile a an 1492 e li te nonmen l 'La Isla Española'.")
+    facts.append("Panyòl yo te kolonize zile a epi yo te redui popilasyon Taino a akòz maladi ak travay fòse.")
+    facts.append("An 1697, Frans te pran kontwòl pati lwès zile a epi yo te rele l Sen Domeng.")
     facts.append("Sen Domeng te vin koloni fransè ki pi rich nan mond lan grasa plantasyon kann, kafe, ak endigo. Travay la te fèt pa esklav Afriken.")
     facts.append("Premye gwo revòlt esklav la te kòmanse 21 out 1791 nan Bwa Kayiman, dirije pa Boukmann Dutty.")
     facts.append("Tousen Louverture, yon ansyen esklav, te vin lidè lame revolisyonè a. Li te bat lame Panyòl, Britanik, ak franse.")
@@ -179,7 +192,7 @@ def get_default_training_facts():
     facts.append("An 1820, apre lanmò Kristòf, Jan Pyè Boye te reyini Nò ak Sid.")
     facts.append("An 1825, Lafrans te fòse Ayiti peye 150 milyon fran pou rekonèt endepandans lan. Se dèt endepandans lan ki te kraze ekonomi Ayiti pandan plis pase yon syèk.")
     facts.append("Etazini te okipe Ayiti soti 1915 rive 1934. Okipasyon an te fòse kòve (travay fòs) sou wout.")
-    facts.append("François Duvalier (Papa Dok) te vin prezidan an 1957, li te kreye yon diktati ak tonton makout yo.")
+    facts.append("François Duvalier (Papa Dok) te vin prezidan an 1957 epi li te kreye yon diktati ak tonton makout yo.")
     facts.append("Papa Dok te mouri an 1971, pitit li Jean-Claude Duvalier (Bébé Dok) te pran pouvwa.")
     facts.append("Bébé Dok te ranvèse pa manifestasyon popilè an 1986 epi li te kouri an Frans.")
     facts.append("Jean-Bertrand Aristide, yon prèt lavalas, te genyen premye eleksyon demokratik an 1990.")
@@ -194,17 +207,16 @@ def get_default_training_facts():
     facts.append("Yon Konsèy Prezidansyèl Tranzisyon (CPT) te pran pouvwa 25 avril 2024.")
     facts.append("Misyon MSS (Kenbe), dirije pa Kenya, te rive 25 jen 2024 pou konbat gang.")
     facts.append("Eleksyon 2026 te pote yon nouvo prezidan eli, men gang yo toujou gen enfliyans.")
-    facts.append("Rakontem istwa Ayiti. Istwa Ayiti se yon istwa viktwa ak soufrans. Li te kòmanse ak Endyen Taino, answit koloni fransè Sen Domeng, revolisyon esklav la, endepandans an 1804, premye repiblik nwa nan mond lan, okipasyon ameriken, diktati Duvalier, koudeta, Aristide, tranblemanntè 2010, asasina Jovenel Moïse, epi kriz ak gang jiska 2026.")
-    facts.append("Rakonte m sou istwa Ayiti. Ayiti te gen revolisyon esklav la ki te kòmanse nan Bwa Kayiman an 1791, apre sa endepandans an 1804, okipasyon ameriken, diktati Duvalier, koudeta kont Aristide, tranblemanntè 2010, asasina Jovenel Moïse, ak kriz ak gang.")
-    facts.append("Esplike m istwa Ayiti an brèf. Istwa Ayiti se revolisyon, endepandans, dèt, okipasyon, diktati, kriz, ak espwa. Li se premye repiblik nwa endepandan.")
-    facts.append("Kijan Ayiti te vin endepandan? Apre revolisyon esklav la ak batay Vètyè an 1803, Jan Jak Desalin te pwoklame endepandans 1ye janvye 1804.")
-    facts.append("Kisa ki te kòz revolisyon ayisyen an? Esklavaj mechan ak maltrete esklav yo te lakòz revòlt la nan Bwa Kayiman an 1791.")
-    facts.append("Kiyès ki te lidè revolisyon ayisyen an? Tousen Louverture, Jan Jak Desalin, Aleksann Petyon, ak Anri Kristòf se kèk nan lidè yo.")
-    facts.append("Kisa dèt endepandans lan ye? Se lajan Ayiti te oblije peye Lafrans an 1825 pou yo rekonèt endepandans lan, sa te kraze ekonomi peyi a.")
-    facts.append("Kisa okipasyon ameriken an te fè? Ameriken yo te okipe Ayiti 1915-1934, yo te kontwole finans yo, bati wout, men yo te fòse travayè yo (kòve).")
-    facts.append("Kiyès ki te Papa Dok? François Duvalier, yon diktatè ki te dirije Ayiti 1957-1971, li te kreye tonton makout yo.")
-    facts.append("Kisa tranblemanntè 2010 te fè? Li te touye plis pase 200,000 moun, li te detwi Pòtoprens, epi li te deplase 1.5 milyon moun.")
-    facts.append("Ki dat Jovenel Moïse te asasine? 7 jiyè 2021.")
+    facts.append("Istwa Ayiti se yon istwa viktwa ak soufrans: endepandans 1804, okipasyon ameriken, diktati Duvalier, koudeta, Aristide, tranblemanntè 2010, asasina Jovenel Moïse, epi kriz ak gang jiska 2026.")
+    facts.append("Istwa Ayiti gen anpil chapit: Taino, kolon, Revolisyon, endepandans, divizyon, dèt, okipasyon, diktati, kriz, ak espwa.")
+    facts.append("Revolisyon ayisyen an te kòmanse ak revòlt esklav nan Bwa Kayiman an 1791, akòz maltrete esklav yo.")
+    facts.append("Lidè revolisyon ayisyen an se Tousen Louverture, Jan Jak Desalin, Aleksann Petyon, ak Anri Kristòf.")
+    facts.append("Dèt endepandans lan se lajan Ayiti te oblije peye Lafrans an 1825 pou yo rekonèt endepandans lan, sa te kraze ekonomi peyi a.")
+    facts.append("Okipasyon ameriken an (1915-1934) te kontwole finans Ayiti, bati wout, men yo te fòse travayè yo (kòve).")
+    facts.append("Papa Dok (François Duvalier) se yon diktatè ki te dirije Ayiti 1957-1971, li te kreye tonton makout yo.")
+    facts.append("Tranblemanntè 2010 te touye plis pase 200,000 moun, li te detwi Pòtoprens, epi li te deplase 1.5 milyon moun.")
+    facts.append("Jovenel Moïse te asasine 7 jiyè 2021.")
+
     # ----- GENERAL KNOWLEDGE -----
     facts.append("Diri ak pwa se yon manje popilè an Ayiti.")
     facts.append("Po moun se pi gwo ògàn kò imen an.")
@@ -212,20 +224,23 @@ def get_default_training_facts():
     facts.append("Sèvo moun kontwole tout fonksyon kò a.")
     facts.append("Poumon yo pote oksijèn nan san an epi lage gaz kabonik.")
     facts.append("Zo yo bay sipò estriktirèl, pwoteje ògàn, epi pèmèt mouvman.")
-    # ----- INTERACTIVE / HELP / CAPABILITIES -----
-    facts.append("Kisa ou ka ede m fè? Mwen ka ede w aprann Kreyòl, reponn kesyon sou alfabè, gramè, istwa Ayiti, matematik, ak tout bagay moun te anseye m. Ou ka poze m nenpòt kesyon, epi m ap eseye reponn.")
-    facts.append("Kisa ou kapab fè pou mwen? Mwen ka ede w tradui mo, eksplike règ gramè, rakonte istwa, fè kalkil, ak anseye w vokabilè. Si m pa konnen, ou ka anseye m nan Sant Fòmasyon.")
-    facts.append("Kijan ou ka ede m? Mwen ka reponn kesyon ou yo an Kreyòl. Mwen konnen alfabè, konjigezon, istwa Ayiti, ak anpil lòt bagay. Poze m yon kesyon epi gade sa m kapab fè.")
-    facts.append("Ki kalite kesyon mwen ka poze w? Ou ka poze m kesyon sou alfabè kreyòl, jan pou w di mo an Kreyòl, fason pou w fè fraz, diferans ant tan vèb, istwa Ayiti, ak tout bagay ou te anseye m nan Sant Fòmasyon.")
-    facts.append("Èske ou ka ede m aprann Kreyòl? Wi, mwen kapab! Poze m kesyon sou vokabilè, gramè, pwononsyasyon, oswa nenpòt bagay ki gen rapò ak Kreyòl. Mwen la pou ede w.")
-    facts.append("Kisa w konn fè? Mwen konn reponn kesyon sou alfabè, istwa, matematik, ak tout bagay moun te anseye m. Mwen konn pale Kreyòl, Franse, Angle, ak Panyòl. Mwen ka jwe vwa si ou te anrejistre yon fichye pou mwen.")
-    facts.append("Kisa diferans ant 'ou' ak 'w'? 'Ou' se pwonon (you). 'W' se yon kontraksyon 'ou' apre yon vwayèl, tankou 'Mwen wè w' olye 'Mwen wè ou'.")
-    facts.append("Kisa mwen dwe fè pou m byen pale Kreyòl? Pran tan pou w aprann alfabè a, koute moun pale, pratike chak jou, epi poze m kesyon lè w pa konprann. Mwen ka ede w korije erè ou yo.")
+
+    # ----- INTERACTIVE / HELP / CAPABILITIES (direct answers) -----
+    facts.append("Mwen ka ede w aprann Kreyòl, reponn kesyon sou alfabè, gramè, istwa Ayiti, matematik, ak tout bagay moun te anseye m. Ou ka poze m nenpòt kesyon, epi m ap eseye reponn.")
+    facts.append("Mwen ka ede w tradui mo, eksplike règ gramè, rakonte istwa, fè kalkil, ak anseye w vokabilè. Si m pa konnen, ou ka anseye m nan Sant Fòmasyon.")
+    facts.append("Mwen ka reponn kesyon ou yo an Kreyòl. Mwen konnen alfabè, konjigezon, istwa Ayiti, ak anpil lòt bagay. Poze m yon kesyon epi gade sa m kapab fè.")
+    facts.append("Ou ka poze m kesyon sou alfabè kreyòl, jan pou w di mo an Kreyòl, fason pou w fè fraz, diferans ant tan vèb, istwa Ayiti, ak tout bagay ou te anseye m nan Sant Fòmasyon.")
+    facts.append("Wi, mwen kapab ede w aprann Kreyòl! Poze m kesyon sou vokabilè, gramè, pwononsyasyon, oswa nenpòt bagay ki gen rapò ak Kreyòl. Mwen la pou ede w.")
+    facts.append("Mwen konn reponn kesyon sou alfabè, istwa, matematik, ak tout bagay moun te anseye m. Mwen konn pale Kreyòl, Franse, Angle, ak Panyòl. Mwen ka jwe vwa si ou te anrejistre yon fichye pou mwen.")
+    facts.append("Diferans ant 'ou' ak 'w': 'Ou' se pwonon (you). 'W' se yon kontraksyon 'ou' apre yon vwayèl, tankou 'Mwen wè w' olye 'Mwen wè ou'.")
+    facts.append("Pou byen pale Kreyòl, pran tan pou w aprann alfabè a, koute moun pale, pratike chak jou, epi poze m kesyon lè w pa konprann. Mwen ka ede w korije erè ou yo.")
+
     # ----- GESNER AI IDENTITY -----
     facts.append("Gesner AI te kreye pa Gesner Deslandes, fondatè GlobalInternet.py.")
     facts.append("Mwen reponn sèlman an Kreyòl. Poze m kesyon sou alfabè, gramè, istwa Ayiti, oswa nenpòt bagay ou te anseye m.")
     facts.append("Si mwen pa konnen, mwen di 'Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon.'")
     facts.append("Ou ka antrene m lè w ajoute facts nan Training Center, sèvi ak diksyonè, oswa fòmasyon vwa.")
+
     return facts
 
 def initialize_default_training():
@@ -657,7 +672,6 @@ PREDEFINED_VOICES = {
 }
 
 def normalize_text(text):
-    """Remove extra spaces, lower case, remove accents? For matching we keep simple."""
     return re.sub(r'\s+', ' ', text.strip().lower())
 
 def get_predefined_voice_url(user_question):
@@ -832,12 +846,9 @@ def generate_response(user_input):
             return logic, False
     return "Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon.", True
 
-# Modified play_voice_button to check predefined voices first
 def play_voice_button(text, user_question, button_label="🔊", key_suffix=""):
-    # First, check if this specific question has a predefined voice URL
     predefined_url = get_predefined_voice_url(user_question) if user_question else None
     if predefined_url:
-        # Use the raw audio URL directly
         html = f"""
         <button class="speak-btn" id="voiceBtn_{key_suffix}" style="background-color:#ffaa33; border:none; border-radius:30px; padding:5px 12px; margin-left:12px; cursor:pointer;">{button_label}</button>
         <audio id="customAudio_{key_suffix}" style="display:none;"></audio>
@@ -851,7 +862,6 @@ def play_voice_button(text, user_question, button_label="🔊", key_suffix=""):
         </script>
         """
         return html
-    # Otherwise, check if custom voice is attached to the answer text
     voice_bytes = get_voice_for_text(text)
     if voice_bytes:
         audio_b64 = base64.b64encode(voice_bytes).decode()
@@ -895,7 +905,7 @@ def play_fallback_audio_french():
     """
     return html
 
-# ---------- UI COMPONENTS (unchanged except chat_interface to pass user question to voice button) ----------
+# ---------- UI COMPONENTS ----------
 def dictionary_manager(t):
     st.markdown(f"## {t['dict_title']}")
     col1, col2, col3 = st.columns(3)
@@ -1148,7 +1158,6 @@ def chat_interface(t):
             with col1:
                 st.markdown(f'<div class="chat-message assistant-message" style="width:100%;">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
             with col2:
-                # Pass the user's question (the previous message) to the voice button
                 user_q = st.session_state.conversation_history[idx-1]["content"] if idx > 0 else ""
                 btn_html = play_voice_button(msg["content"], user_q, "🔊", f"chat_{idx}")
                 if btn_html:
@@ -1174,7 +1183,7 @@ def show_sidebar():
     selected_lang_code = LANGUAGES[selected_lang_name]
     st.session_state.ui_language = selected_lang_code
     t = TEXTS.get(st.session_state.ui_language, TEXTS["en"])
-    # Spinning globe in sidebar
+    # Spinning globe
     st.sidebar.markdown('<div style="text-align:center;"><div class="spinning-globe">🌍</div></div>', unsafe_allow_html=True)
     st.sidebar.markdown(f"## **{t['sidebar_company']}**")
     st.sidebar.markdown(f"### {t['sidebar_product']}")
