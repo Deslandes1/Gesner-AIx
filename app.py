@@ -799,28 +799,21 @@ def reason_answer(query, retrieved_facts):
             return retrieved_facts[0]
     return retrieved_facts[0]
 
-# ========== SPECIAL CASE FOR MISS PELLED ALPHABET QUESTION ==========
-def special_alpha_list_query(user_input):
+# ========== FIXED: SPECIAL CASE FOR MISSPELLED ALPHABET QUESTION ==========
+def generate_response(user_input):
+    # First, check for the misspelled alphabet list question
     normalized = user_input.strip().lower()
-    # List of variations that should return the alphabet list
     patterns = [
         "site konbyen let ki genhen nan alfabe kreyol la",
         "site konbyen let ki genhen nan alfabe kreyol",
-        "site konbyen let ki genhen nan alfabe kreyol la?",
-        "site konbyen let ki genhen nan alfabe kreyol",
         "site konbyen let ki genhen nan alfabe kreyòl la",
-        "site konbyen let ki genhen nan alfabe kreyòl"
+        "site konbyen let ki genhen nan alfabe kreyòl",
+        "konbyen let ki gehen nan alfabe kreyol la",
+        "site konbyen let ki genhen"
     ]
     for pat in patterns:
-        if pat in normalized or normalized.startswith(pat):
-            return "A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z."
-    return None
-
-def generate_response(user_input):
-    # First, check for the special misspelled alphabet list question
-    special = special_alpha_list_query(user_input)
-    if special:
-        return special, False
+        if pat in normalized:
+            return "A, B, C, CH, D, E, È, F, G, H, I, J, K, L, M, N, NG, O, Ò, OU, P, R, S, T, UI, V, W, Y, Z.", False
     
     with st.spinner("🧠 Gesner AI ap reflechi... (thinking...)"):
         time.sleep(0.8)
@@ -898,7 +891,7 @@ def play_fallback_audio_french():
     """
     return html
 
-# ---------- UI COMPONENTS (unchanged from previous working version) ----------
+# ---------- UI COMPONENTS (unchanged) ----------
 def dictionary_manager(t):
     st.markdown(f"## {t['dict_title']}")
     col1, col2, col3 = st.columns(3)
