@@ -15,10 +15,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime
 
-# ========== RESET OLD DATA ==========
+# ========== DATA DIRECTORY (NO FORCED RESET) ==========
 DATA_DIR = ".gesner_data"
-if os.path.exists(DATA_DIR):
-    shutil.rmtree(DATA_DIR)
 os.makedirs(DATA_DIR, exist_ok=True)
 
 TRAINING_FILE = os.path.join(DATA_DIR, "training_data.json")
@@ -80,7 +78,7 @@ def get_default_training_facts():
     facts.append("OU pwononse tankou 'ou' nan franse, UI pwononse tankou 'wi'.")
     facts.append("NG pwononse tankou 'ng' nan 'sitting' an angle.")
 
-    # ----- BEGINNER PHRASES (unchanged) -----
+    # ----- BEGINNER PHRASES -----
     facts.append("Bonjou se fason pou di 'good morning' an Kreyòl.")
     facts.append("Bonswa se fason pou di 'good evening' an Kreyòl.")
     facts.append("Mèsi se 'thank you'.")
@@ -148,7 +146,7 @@ def get_default_training_facts():
     facts.append("Félicitasyon, Bòn chans, Bon apeti, Pran swen ou.")
     facts.append("Na wè pita, Na wè demen, Orevwa.")
 
-    # ----- GRAMMAR (same as before) -----
+    # ----- GRAMMAR -----
     facts.append("Pou fè tan pase, mete 'te' anvan vèb la. Egzanp: Mwen te manje (I ate).")
     facts.append("Pou fè tan fiti, mete 'ap' oswa 'pral' anvan vèb la. Egzanp: Mwen ap manje (I will eat).")
     facts.append("Pou fè tan kontinyèl, mete 'ap' ant pwonon ak vèb: M ap manje (I am eating).")
@@ -170,7 +168,7 @@ def get_default_training_facts():
     facts.append("Mo 'kòmsi' (as if): Li pale kòmsi li te konnen tout bagay.")
     facts.append("Mo 'menm si' (even if): Menm si li te rich, li pa ta achte sa.")
 
-    # ----- HAITI HISTORY (unchanged) -----
+    # ----- HAITI HISTORY -----
     facts.append("Premye moun ki te rete sou zile Ispanyola (kote Ayiti ye jodi a) se te Endyen Taino yo.")
     facts.append("Kristòf Kolon te rive sou zile a an 1492, li te nonmen l 'La Isla Española'.")
     facts.append("Panyòl yo te kolonize zile a epi yo te redui popilasyon Taino a.")
