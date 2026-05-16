@@ -589,7 +589,7 @@ def reason_answer(query, retrieved_facts):
             return retrieved_facts[0]
     return retrieved_facts[0]
 
-# ========== FIXED: ALPHABET ANSWER RETURNS ONLY THE SENTENCE ==========
+# ========== FIXED: ALPHABET ANSWER RETURNS THE LIST (MATCHES AUDIO) ==========
 def generate_response(user_input):
     normalized = user_input.strip().lower()
     # Patterns for the alphabet question
@@ -603,9 +603,9 @@ def generate_response(user_input):
     ]
     for pat in patterns:
         if pat in normalized:
-            # Return ONLY the short sentence (no list), and allow audio button to appear
-            answer = "Alfabè kreyol la gen 32 let."
-            return answer, False, False   # skip_audio=False so the 🔊 button shows
+            # Return the full alphabet list (matches the audio)
+            answer = "A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z"
+            return answer, False, False  # skip_audio=False so the 🔊 button shows
 
     with st.spinner("🧠 Gesner AI ap reflechi... (thinking...)"):
         time.sleep(0.8)
