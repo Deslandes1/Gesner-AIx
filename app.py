@@ -63,12 +63,12 @@ def load_voice_cache():
 
 # ---------- DEFAULT TRAINING FACTS ----------
 def get_default_training_facts():
-    # (keep all your existing default facts)
     return [
         "Alfabè kreyòl la gen 32 lèt.",
         "Kreyòl Ayisyen se lang ofisyèl Ayiti.",
         "Ayiti te endepandan an 1804.",
-        # ... add your full list ...
+        "Pòtoprens se kapital Ayiti.",
+        "Jan bèl espwa se deviz Ayiti."
     ]
 
 def initialize_default_training():
@@ -202,9 +202,92 @@ LANGUAGES = {
     "Español": "es"
 }
 
+# ============================================================
+#  IMPORTANT: Replace this minimal TEXTS dictionary with your
+#  own complete multilingual strings (English, French, Kreyòl).
+#  The keys used in the code are:
+#    'app_title', 'chat_input', 'send', 'clear',
+#    'dictionary', 'voice_training', 'training_center',
+#    'bulk_training', 'manage_facts', 'test_training',
+#    'train_new', 'fact_text', 'add_fact', 'upload_csv',
+#    'upload_audio', 'save_voice', 'play', 'delete', 'edit',
+#    'update', 'chat_interface_label'
+# ============================================================
 TEXTS = {
-    # (keep your existing TEXTS dictionary)
+    "en": {
+        "app_title": "Gesner AI - Kreyòl Assistant",
+        "chat_input": "Ask me anything in Kreyòl...",
+        "send": "Send",
+        "clear": "Clear Chat",
+        "dictionary": "Dictionary",
+        "voice_training": "Voice Training",
+        "bulk_training": "Bulk Training",
+        "manage_facts": "Manage Facts",
+        "test_training": "Test Training",
+        "training_center": "Training Center",
+        "train_new": "Train New Fact",
+        "fact_text": "Fact text",
+        "add_fact": "Add Fact",
+        "upload_csv": "Upload CSV",
+        "upload_audio": "Upload Audio",
+        "record_voice": "Record Voice",
+        "save_voice": "Save Voice",
+        "play": "Play",
+        "delete": "Delete",
+        "edit": "Edit",
+        "update": "Update",
+        "chat_interface_label": "Chat"
+    },
+    "fr": {
+        "app_title": "Gesner IA - Assistant Kreyòl",
+        "chat_input": "Posez-moi une question en Kreyòl...",
+        "send": "Envoyer",
+        "clear": "Effacer",
+        "dictionary": "Dictionnaire",
+        "voice_training": "Entraînement vocal",
+        "bulk_training": "Formation en masse",
+        "manage_facts": "Gérer les faits",
+        "test_training": "Tester l'entraînement",
+        "training_center": "Centre de formation",
+        "train_new": "Ajouter un fait",
+        "fact_text": "Texte du fait",
+        "add_fact": "Ajouter",
+        "upload_csv": "Importer CSV",
+        "upload_audio": "Importer audio",
+        "record_voice": "Enregistrer",
+        "save_voice": "Sauvegarder",
+        "play": "Écouter",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "update": "Mettre à jour",
+        "chat_interface_label": "Discussion"
+    },
+    "ht": {
+        "app_title": "Gesner AI - Asistan Kreyòl",
+        "chat_input": "Pose m yon kesyon an Kreyòl...",
+        "send": "Voye",
+        "clear": "Efase",
+        "dictionary": "Diksyonè",
+        "voice_training": "Fòmasyon Vwa",
+        "bulk_training": "Fòmasyon an mas",
+        "manage_facts": "Jere reyalite yo",
+        "test_training": "Tès fòmasyon",
+        "training_center": "Sant Fòmasyon",
+        "train_new": "Anseye yon nouvo reyalite",
+        "fact_text": "Tèks reyalite a",
+        "add_fact": "Ajoute",
+        "upload_csv": "Chaje CSV",
+        "upload_audio": "Chaje odyo",
+        "record_voice": "Anrejistre",
+        "save_voice": "Sove",
+        "play": "Jwe",
+        "delete": "Efase",
+        "edit": "Modifye",
+        "update": "Mete ajou",
+        "chat_interface_label": "Chat"
+    }
 }
+# ============================================================
 
 # ---------- SESSION STATE ----------
 if "conversation_history" not in st.session_state:
@@ -227,7 +310,7 @@ if "tfidf_vectorizer" not in st.session_state:
 if "tfidf_matrix" not in st.session_state:
     st.session_state.tfidf_matrix = None
 if "play_audio" not in st.session_state:
-    st.session_state.play_audio = None           # stores (audio_bytes, mime_type) to play
+    st.session_state.play_audio = None
 
 VOICE_CACHE = load_voice_cache()
 
@@ -428,29 +511,22 @@ def generate_response(user_input):
             return logic, False, False
     return "Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon.", True, False
 
-# ---------- NEW AUDIO PLAYBACK (no custom JS) ----------
+# ---------- AUDIO PLAYBACK (no custom JS) ----------
 def show_audio_button(text, user_question, key_suffix):
-    """Display a button that sets st.session_state.play_audio to the audio data."""
-    # First check predefined URL
     url = get_predefined_voice_url(user_question) if user_question else None
     if url:
         if st.button("🔊", key=f"audio_btn_{key_suffix}", help="Play audio"):
-            # For URLs we can use st.audio directly, but to keep consistent we also set session state
             st.session_state.play_audio = ("url", url)
             st.rerun()
         return
-    # Then check cached audio bytes
     audio_bytes = get_voice_for_text(text)
     if audio_bytes:
         if st.button("🔊", key=f"audio_btn_{key_suffix}", help="Play audio"):
             st.session_state.play_audio = ("bytes", audio_bytes, "audio/wav")
             st.rerun()
         return
-    # No audio available – show nothing
-    pass
 
 def render_audio_player():
-    """If play_audio is set, render an st.audio component and then clear the flag."""
     if st.session_state.play_audio:
         audio_type = st.session_state.play_audio[0]
         if audio_type == "url":
@@ -459,32 +535,140 @@ def render_audio_player():
         elif audio_type == "bytes":
             _, data, mime = st.session_state.play_audio
             st.audio(data, format=mime)
-        # Clear after rendering so it doesn't replay on next rerun
         st.session_state.play_audio = None
         st.rerun()
 
 # ---------- UI COMPONENTS ----------
+def dictionary_manager(t):
+    st.subheader(t['dictionary'])
+    lang = st.selectbox("Select language", list(LANGUAGES.keys()), key="dict_lang")
+    lang_code = LANGUAGES[lang]
+    word = st.text_input("Word / Phrase", key="dict_word")
+    meaning = st.text_area("Meaning / Translation", key="dict_meaning")
+    if st.button("Add / Update", key="dict_add"):
+        if word and meaning:
+            st.session_state.dictionaries[lang_code][word] = meaning
+            save_dictionaries()
+            st.success("Saved!")
+            st.rerun()
+    st.markdown("---")
+    st.write("**Existing entries**")
+    for w, m in st.session_state.dictionaries[lang_code].items():
+        col1, col2 = st.columns([3,1])
+        with col1:
+            st.write(f"**{w}**: {m}")
+        with col2:
+            if st.button("Delete", key=f"del_{lang_code}_{w}"):
+                del st.session_state.dictionaries[lang_code][w]
+                save_dictionaries()
+                st.rerun()
+
+def voice_training(t):
+    st.subheader(t['voice_training'])
+    fact_text = st.text_area(t['fact_text'], key="voice_fact")
+    uploaded_audio = st.file_uploader(t['upload_audio'], type=["wav", "mp3"], key="voice_upload")
+    if uploaded_audio:
+        audio_bytes = uploaded_audio.read()
+        st.audio(audio_bytes, format="audio/wav")
+        if st.button(t['save_voice'], key="save_voice_btn"):
+            save_voice_for_text(fact_text, audio_bytes)
+            st.success("Voice saved!")
+    st.markdown("---")
+    st.write("**Existing voice mappings**")
+    for idx, item in enumerate(st.session_state.training_data):
+        text = item["text"]
+        if get_voice_for_text(text):
+            col1, col2 = st.columns([3,1])
+            with col1:
+                st.write(text[:60] + "..." if len(text) > 60 else text)
+            with col2:
+                if st.button(t['play'], key=f"play_voice_{idx}"):
+                    audio_bytes = get_voice_for_text(text)
+                    if audio_bytes:
+                        st.audio(audio_bytes, format="audio/wav")
+
+def bulk_training(t):
+    st.subheader(t['bulk_training'])
+    uploaded_file = st.file_uploader(t['upload_csv'], type=["csv"], key="bulk_csv")
+    if uploaded_file:
+        df = csv.DictReader(io.StringIO(uploaded_file.getvalue().decode("utf-8")))
+        facts = [row.get("fact") or row.get("text") for row in df]
+        if facts:
+            if st.button("Import facts", key="bulk_import"):
+                count = 0
+                for fact in facts:
+                    if fact and fact.strip():
+                        if add_to_training(fact.strip()):
+                            count += 1
+                st.success(f"Imported {count} facts.")
+                st.rerun()
+
+def manage_trained_facts(t):
+    st.subheader(t['manage_facts'])
+    for idx, item in enumerate(st.session_state.training_data):
+        col1, col2, col3 = st.columns([4,1,1])
+        with col1:
+            if f"edit_{idx}" in st.session_state and st.session_state[f"edit_{idx}"]:
+                new_text = st.text_area("Edit", value=item["text"], key=f"edit_text_{idx}")
+                if st.button("Save", key=f"save_edit_{idx}"):
+                    update_training_item(idx, new_text)
+                    st.session_state[f"edit_{idx}"] = False
+                    st.rerun()
+            else:
+                st.write(item["text"])
+        with col2:
+            if st.button(t['edit'], key=f"edit_btn_{idx}"):
+                st.session_state[f"edit_{idx}"] = True
+                st.rerun()
+        with col3:
+            if st.button(t['delete'], key=f"del_btn_{idx}"):
+                delete_training_item(idx)
+                st.rerun()
+
+def test_training_section(t):
+    st.subheader(t['test_training'])
+    query = st.text_input("Test query", key="test_query")
+    if st.button("Test", key="test_btn"):
+        if query:
+            facts = retrieve_facts_hybrid(query, k=3)
+            if facts:
+                st.write("**Retrieved facts:**")
+                for f in facts:
+                    st.write(f"- {f}")
+            else:
+                st.write("No relevant facts found.")
+
+def training_center(t):
+    st.markdown(f"## {t['training_center']}")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown(f"### {t['train_new']}")
+        new_fact = st.text_area(t['fact_text'], key="new_fact")
+        if st.button(t['add_fact'], key="add_fact_btn"):
+            if new_fact.strip():
+                add_to_training(new_fact.strip())
+                st.success("Fact added!")
+                st.rerun()
+    with col2:
+        bulk_training(t)
+    manage_trained_facts(t)
+    test_training_section(t)
+
 def chat_interface(t):
     st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Mwen reponn sèlman an Kreyòl. Poze m kesyon sou alfabè, gramè, istwa Ayiti, oswa nenpòt bagay ou te anseye m.</p>", unsafe_allow_html=True)
-
     for idx, msg in enumerate(st.session_state.conversation_history):
         if msg["role"] == "user":
             st.markdown(f'<div class="chat-message user-message">🧑‍💻 {msg["content"]}</div>', unsafe_allow_html=True)
         else:
-            col1, col2 = st.columns([10, 1])
+            col1, col2 = st.columns([10,1])
             with col1:
                 st.markdown(f'<div class="chat-message assistant-message" style="width:100%;">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
             with col2:
                 if not msg.get("skip_audio", False):
                     user_q = st.session_state.conversation_history[idx-1]["content"] if idx > 0 else ""
                     show_audio_button(msg["content"], user_q, f"chat_{idx}")
-                else:
-                    st.empty()
-
-    # Audio player (rendered after the chat)
     render_audio_player()
-
     user_input = st.text_input(t['chat_input'], key="chat_input")
     if st.button(t['send'], use_container_width=True, key="send_btn"):
         if user_input.strip():
@@ -501,37 +685,27 @@ def chat_interface(t):
         st.session_state.conversation_history = []
         st.rerun()
 
-def dictionary_manager(t):
-    # ... (keep your existing implementation)
-    pass
-
-def voice_training(t):
-    # ... (keep your existing implementation)
-    pass
-
-def bulk_training(t):
-    # ... (keep your existing implementation)
-    pass
-
-def manage_trained_facts(t):
-    # ... (keep your existing implementation)
-    pass
-
-def test_training_section(t):
-    # ... (keep your existing implementation)
-    pass
-
-def training_center(t):
-    # ... (keep your existing implementation)
-    pass
-
 def show_sidebar():
-    # ... (keep your existing sidebar)
-    pass
+    with st.sidebar:
+        st.markdown("<div style='text-align:center;'><span style='font-size:3rem;'>🧠</span><br>Gesner AI</div>", unsafe_allow_html=True)
+        lang_choice = st.selectbox("🌐 Interface Language", list(LANGUAGES.keys()), key="lang_select")
+        st.session_state.ui_language = LANGUAGES[lang_choice]
+        t = TEXTS.get(st.session_state.ui_language, TEXTS["en"])
+        menu = st.radio("Menu", [t['chat_interface_label'], t['dictionary'], t['voice_training'], t['training_center']])
+        return menu, t
 
 def main():
-    # ... (keep your main logic)
-    pass
+    if not st.session_state.training_data:
+        initialize_default_training()
+    menu, t = show_sidebar()
+    if menu == t.get('chat_interface_label', "Chat"):
+        chat_interface(t)
+    elif menu == t['dictionary']:
+        dictionary_manager(t)
+    elif menu == t['voice_training']:
+        voice_training(t)
+    elif menu == t['training_center']:
+        training_center(t)
 
 if __name__ == "__main__":
     main()
