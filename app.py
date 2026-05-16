@@ -512,8 +512,10 @@ def reason_answer(query, retrieved_facts):
             return retrieved_facts[0]
     return retrieved_facts[0]
 
+# ========== FIXED: ALPHABET ANSWER WITHOUT REPEATING THE QUESTION ==========
 def generate_response(user_input):
     normalized = user_input.strip().lower()
+    # Patterns for the alphabet question
     patterns = [
         "site konbyen let ki genhen nan alfabe kreyol la",
         "site konbyen let ki genhen nan alfabe kreyol",
@@ -524,8 +526,9 @@ def generate_response(user_input):
     ]
     for pat in patterns:
         if pat in normalized:
-            answer = "Site konbyen let ki genhen nan alfabe kreyol la ?: A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z"
-            return answer, False, True
+            # Return ONLY the alphabet list (no question repeat)
+            answer = "A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z"
+            return answer, False, True  # skip_audio = True (predefined voice will still play)
 
     with st.spinner("🧠 Gesner AI ap reflechi... (thinking...)"):
         time.sleep(0.8)
