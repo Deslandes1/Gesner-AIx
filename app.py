@@ -15,7 +15,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime
 
-# ========== DATA DIRECTORY (NO FORCED RESET) ==========
+# ========== DATA DIRECTORY ==========
 DATA_DIR = ".gesner_data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
@@ -24,8 +24,6 @@ DICT_FILE = os.path.join(DATA_DIR, "dictionaries.json")
 VOICE_FILE = os.path.join(DATA_DIR, "voice_cache.json")
 
 # ---------- PERSISTENCE FUNCTIONS ----------
-# ... (same as before, omitted for brevity)
-
 def save_training_data():
     with open(TRAINING_FILE, "w", encoding="utf-8") as f:
         json.dump(st.session_state.training_data, f, ensure_ascii=False, indent=2)
@@ -63,10 +61,15 @@ def load_voice_cache():
         return cache
     return {}
 
-# ---------- DEFAULT TRAINING (same as previous) ----------
+# ---------- DEFAULT TRAINING FACTS ----------
 def get_default_training_facts():
-    # ... (keep all previous facts)
-    pass
+    # (keep all your existing default facts)
+    return [
+        "Alfabè kreyòl la gen 32 lèt.",
+        "Kreyòl Ayisyen se lang ofisyèl Ayiti.",
+        "Ayiti te endepandan an 1804.",
+        # ... add your full list ...
+    ]
 
 def initialize_default_training():
     if not st.session_state.training_data:
@@ -79,13 +82,9 @@ def initialize_default_training():
         save_training_data()
 
 # ---------- STREAMLIT PAGE CONFIG ----------
-st.set_page_config(
-    page_title="Gesner AI",
-    page_icon="🧠",
-    layout="wide"
-)
+st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 
-# ---------- CSS (dark theme + spinning globe) ----------
+# ---------- CSS (dark theme) ----------
 st.markdown(
     """
     <style>
@@ -164,20 +163,6 @@ st.markdown(
         background: linear-gradient(135deg, #0f3460, #1a4a7a);
         color: white;
     }
-    .speak-btn {
-        background-color: #ffaa33;
-        border: none;
-        border-radius: 30px;
-        padding: 5px 12px;
-        margin-left: 12px;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: 0.2s;
-    }
-    .speak-btn:hover {
-        background-color: #ffcc66;
-        transform: scale(1.05);
-    }
     .footer {
         text-align: center;
         margin-top: 2rem;
@@ -204,22 +189,12 @@ st.markdown(
     .char-btn:hover {
         background-color: #e94560;
     }
-    /* Spinning globe animation */
-    @keyframes spin-globe {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    .spinning-globe {
-        animation: spin-globe 4s linear infinite;
-        display: inline-block;
-        font-size: 3rem;
-    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# ---------- LANGUAGES AND TEXTS (same as before) ----------
+# ---------- LANGUAGES AND TEXTS ----------
 LANGUAGES = {
     "English": "en",
     "Français": "fr",
@@ -228,7 +203,7 @@ LANGUAGES = {
 }
 
 TEXTS = {
-    # ... (same full TEXTS as previous version, omitted for brevity)
+    # (keep your existing TEXTS dictionary)
 }
 
 # ---------- SESSION STATE ----------
@@ -251,10 +226,12 @@ if "tfidf_vectorizer" not in st.session_state:
     st.session_state.tfidf_vectorizer = None
 if "tfidf_matrix" not in st.session_state:
     st.session_state.tfidf_matrix = None
+if "play_audio" not in st.session_state:
+    st.session_state.play_audio = None           # stores (audio_bytes, mime_type) to play
 
 VOICE_CACHE = load_voice_cache()
 
-# ========== PRE‑DEFINED VOICE MAPPING ==========
+# ---------- PRE‑DEFINED VOICE MAPPING ----------
 PREDEFINED_VOICES = {
     "kijan ou rele": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording.wav",
     "site konbyen let ki genhen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(1).wav",
@@ -419,7 +396,6 @@ def reason_answer(query, retrieved_facts):
             return retrieved_facts[0]
     return retrieved_facts[0]
 
-# ========== FIXED: SPECIAL CASE FOR MISSPELLED ALPHABET QUESTION (INCLUDES QUESTION TEXT, NO AUDIO) ==========
 def generate_response(user_input):
     normalized = user_input.strip().lower()
     patterns = [
@@ -432,9 +408,8 @@ def generate_response(user_input):
     ]
     for pat in patterns:
         if pat in normalized:
-            # Return the question followed by the alphabet list, and flag to skip audio
             answer = "Site konbyen let ki genhen nan alfabe kreyol la ?: A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z"
-            return answer, False, True  # third value: skip_audio
+            return answer, False, True
 
     with st.spinner("🧠 Gesner AI ap reflechi... (thinking...)"):
         time.sleep(0.8)
@@ -453,111 +428,63 @@ def generate_response(user_input):
             return logic, False, False
     return "Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon.", True, False
 
-def play_voice_button(text, user_question, button_label="🔊", key_suffix=""):
-    predefined_url = get_predefined_voice_url(user_question) if user_question else None
-    if predefined_url:
-        html = f"""
-        <button class="speak-btn" id="voiceBtn_{key_suffix}" style="background-color:#ffaa33; border:none; border-radius:30px; padding:5px 12px; margin-left:12px; cursor:pointer;">{button_label}</button>
-        <audio id="customAudio_{key_suffix}" style="display:none;"></audio>
-        <script>
-            (function() {{
-                const btn = document.getElementById('voiceBtn_{key_suffix}');
-                const audioEl = document.getElementById('customAudio_{key_suffix}');
-                audioEl.src = "{predefined_url}";
-                btn.onclick = () => audioEl.play();
-            }})();
-        </script>
-        """
-        return html
-    voice_bytes = get_voice_for_text(text)
-    if voice_bytes:
-        audio_b64 = base64.b64encode(voice_bytes).decode()
-        mime = "audio/wav"
-        html = f"""
-        <button class="speak-btn" id="voiceBtn_{key_suffix}" style="background-color:#ffaa33; border:none; border-radius:30px; padding:5px 12px; margin-left:12px; cursor:pointer;">{button_label}</button>
-        <audio id="customAudio_{key_suffix}" style="display:none;"></audio>
-        <script>
-            (function() {{
-                const audioData = "{audio_b64}";
-                const binaryStr = atob(audioData);
-                const bytes = new Uint8Array(binaryStr.length);
-                for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
-                const audioBlob = new Blob([bytes], {{ type: '{mime}' }});
-                const audioUrl = URL.createObjectURL(audioBlob);
-                const audioEl = document.getElementById('customAudio_{key_suffix}');
-                audioEl.src = audioUrl;
-                document.getElementById('voiceBtn_{key_suffix}').onclick = () => audioEl.play();
-            }})();
-        </script>
-        """
-        return html
-    else:
-        return ""
-
-def play_fallback_audio_french():
-    html = """
-    <button id="fallbackFrenchBtn" style="background-color:#ffaa33; border:none; border-radius:30px; padding:5px 12px; margin-left:12px; cursor:pointer;">🔊</button>
-    <script>
-        (function() {
-            const btn = document.getElementById('fallbackFrenchBtn');
-            if (!btn) return;
-            btn.onclick = function() {
-                let utterance = new SpeechSynthesisUtterance("Gesner AI réfléchit à votre question. Veuillez patienter.");
-                utterance.lang = "fr-FR";
-                window.speechSynthesis.cancel();
-                window.speechSynthesis.speak(utterance);
-            };
-        })();
-    </script>
-    """
-    return html
-
-# ---------- UI COMPONENTS (unchanged except chat_interface to handle skip_audio) ----------
-def dictionary_manager(t):
-    # ... (same as before)
+# ---------- NEW AUDIO PLAYBACK (no custom JS) ----------
+def show_audio_button(text, user_question, key_suffix):
+    """Display a button that sets st.session_state.play_audio to the audio data."""
+    # First check predefined URL
+    url = get_predefined_voice_url(user_question) if user_question else None
+    if url:
+        if st.button("🔊", key=f"audio_btn_{key_suffix}", help="Play audio"):
+            # For URLs we can use st.audio directly, but to keep consistent we also set session state
+            st.session_state.play_audio = ("url", url)
+            st.rerun()
+        return
+    # Then check cached audio bytes
+    audio_bytes = get_voice_for_text(text)
+    if audio_bytes:
+        if st.button("🔊", key=f"audio_btn_{key_suffix}", help="Play audio"):
+            st.session_state.play_audio = ("bytes", audio_bytes, "audio/wav")
+            st.rerun()
+        return
+    # No audio available – show nothing
     pass
 
-def voice_training(t):
-    # ... (same)
-    pass
+def render_audio_player():
+    """If play_audio is set, render an st.audio component and then clear the flag."""
+    if st.session_state.play_audio:
+        audio_type = st.session_state.play_audio[0]
+        if audio_type == "url":
+            url = st.session_state.play_audio[1]
+            st.audio(url, format="audio/wav")
+        elif audio_type == "bytes":
+            _, data, mime = st.session_state.play_audio
+            st.audio(data, format=mime)
+        # Clear after rendering so it doesn't replay on next rerun
+        st.session_state.play_audio = None
+        st.rerun()
 
-def bulk_training(t):
-    # ... (same)
-    pass
-
-def manage_trained_facts(t):
-    # ... (same)
-    pass
-
-def test_training_section(t):
-    # ... (same)
-    pass
-
-def training_center(t):
-    # ... (same)
-    pass
-
+# ---------- UI COMPONENTS ----------
 def chat_interface(t):
     st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Mwen reponn sèlman an Kreyòl. Poze m kesyon sou alfabè, gramè, istwa Ayiti, oswa nenpòt bagay ou te anseye m.</p>", unsafe_allow_html=True)
+
     for idx, msg in enumerate(st.session_state.conversation_history):
         if msg["role"] == "user":
             st.markdown(f'<div class="chat-message user-message">🧑‍💻 {msg["content"]}</div>', unsafe_allow_html=True)
         else:
-            col1, col2 = st.columns([10,1])
+            col1, col2 = st.columns([10, 1])
             with col1:
                 st.markdown(f'<div class="chat-message assistant-message" style="width:100%;">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
             with col2:
-                # Check if this message has skip_audio flag
                 if not msg.get("skip_audio", False):
                     user_q = st.session_state.conversation_history[idx-1]["content"] if idx > 0 else ""
-                    btn_html = play_voice_button(msg["content"], user_q, "🔊", f"chat_{idx}")
-                    if btn_html:
-                        st.components.v1.html(btn_html, height=50)
-                    else:
-                        if msg.get("is_fallback", False) and st.session_state.ui_language == "fr":
-                            fallback_html = play_fallback_audio_french()
-                            st.components.v1.html(fallback_html, height=50)
+                    show_audio_button(msg["content"], user_q, f"chat_{idx}")
+                else:
+                    st.empty()
+
+    # Audio player (rendered after the chat)
+    render_audio_player()
+
     user_input = st.text_input(t['chat_input'], key="chat_input")
     if st.button(t['send'], use_container_width=True, key="send_btn"):
         if user_input.strip():
@@ -574,12 +501,36 @@ def chat_interface(t):
         st.session_state.conversation_history = []
         st.rerun()
 
+def dictionary_manager(t):
+    # ... (keep your existing implementation)
+    pass
+
+def voice_training(t):
+    # ... (keep your existing implementation)
+    pass
+
+def bulk_training(t):
+    # ... (keep your existing implementation)
+    pass
+
+def manage_trained_facts(t):
+    # ... (keep your existing implementation)
+    pass
+
+def test_training_section(t):
+    # ... (keep your existing implementation)
+    pass
+
+def training_center(t):
+    # ... (keep your existing implementation)
+    pass
+
 def show_sidebar():
-    # ... (same as before, spinning globe)
+    # ... (keep your existing sidebar)
     pass
 
 def main():
-    # ... (same)
+    # ... (keep your main logic)
     pass
 
 if __name__ == "__main__":
