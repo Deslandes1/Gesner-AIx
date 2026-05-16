@@ -84,7 +84,7 @@ def initialize_default_training():
 # ---------- STREAMLIT PAGE CONFIG ----------
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 
-# ---------- CSS (dark theme + inline audio button) ----------
+# ---------- CSS (dark theme + spinning glow brain) ----------
 st.markdown(
     """
     <style>
@@ -196,6 +196,33 @@ st.markdown(
     }
     .char-btn:hover {
         background-color: #e94560;
+    }
+    /* Spinning brain with glow */
+    @keyframes spin-globe {
+        0% { transform: rotate(0deg); filter: drop-shadow(0 0 2px gold); }
+        50% { filter: drop-shadow(0 0 15px #ffaa33) drop-shadow(0 0 5px orange); }
+        100% { transform: rotate(360deg); filter: drop-shadow(0 0 2px gold); }
+    }
+    .spinning-brain {
+        animation: spin-globe 3s linear infinite;
+        display: inline-block;
+        font-size: 3rem;
+        text-align: center;
+        width: 100%;
+    }
+    .sidebar-info {
+        text-align: center;
+        margin-top: 1rem;
+        padding: 0.5rem;
+        border-top: 1px solid #e94560;
+        font-size: 0.9rem;
+    }
+    .sidebar-info a {
+        color: #ffaa33 !important;
+        text-decoration: none;
+    }
+    .sidebar-info a:hover {
+        text-decoration: underline;
     }
     </style>
     """,
@@ -668,7 +695,6 @@ def chat_interface(t):
         if msg["role"] == "user":
             st.markdown(f'<div class="chat-message user-message">🧑‍💻 {msg["content"]}</div>', unsafe_allow_html=True)
         else:
-            # Use a single row with two columns to keep button inline
             with st.container():
                 col_text, col_btn = st.columns([10, 1])
                 with col_text:
@@ -676,10 +702,8 @@ def chat_interface(t):
                 with col_btn:
                     if not msg.get("skip_audio", False):
                         user_q = st.session_state.conversation_history[idx-1]["content"] if idx > 0 else ""
-                        # Apply a custom class to the button container for inline styling
-                        with st.container():
-                            show_audio_button(msg["content"], user_q, f"chat_{idx}")
-            st.markdown("")  # spacer
+                        show_audio_button(msg["content"], user_q, f"chat_{idx}")
+            st.markdown("")
     render_audio_player()
     user_input = st.text_input(t['chat_input'], key="chat_input")
     if st.button(t['send'], use_container_width=True, key="send_btn"):
@@ -699,7 +723,24 @@ def chat_interface(t):
 
 def show_sidebar():
     with st.sidebar:
-        st.markdown("<div style='text-align:center;'><span style='font-size:3rem;'>🧠</span><br>Gesner AI</div>", unsafe_allow_html=True)
+        # Spinning brain with glow
+        st.markdown('<div class="spinning-brain">🧠</div>', unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Personal information
+        st.markdown(
+            """
+            <div class="sidebar-info">
+                <strong>Gesner AI</strong><br>
+                Created by <strong>Gesner Deslandes</strong><br>
+                Founder of <strong>GlobalInternet.py</strong><br>
+                ✉️ <a href="mailto:gesner@globalinternet.py">gesner@globalinternet.py</a><br>
+                🌐 <a href="https://globalinternet.py" target="_blank">globalinternet.py</a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
         lang_choice = st.selectbox("🌐 Interface Language", list(LANGUAGES.keys()), key="lang_select")
         st.session_state.ui_language = LANGUAGES[lang_choice]
         t = TEXTS.get(st.session_state.ui_language, TEXTS["en"])
