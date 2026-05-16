@@ -84,7 +84,7 @@ def initialize_default_training():
 # ---------- STREAMLIT PAGE CONFIG ----------
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 
-# ---------- CSS (dark theme) ----------
+# ---------- CSS (dark theme + inline audio button) ----------
 st.markdown(
     """
     <style>
@@ -134,11 +134,19 @@ st.markdown(
         color: white !important;
         border-radius: 30px !important;
         font-weight: bold !important;
-        width: 100%;
         border: none;
     }
-    .stButton button:hover {
-        background-color: #ff6b6b !important;
+    /* Make buttons smaller and inline when inside the chat row */
+    .chat-row .stButton button {
+        background-color: #ffaa33 !important;
+        padding: 0px 8px !important;
+        border-radius: 20px !important;
+        font-size: 1rem !important;
+        width: auto !important;
+        min-width: 40px;
+    }
+    .chat-row .stButton button:hover {
+        background-color: #ffcc66 !important;
         transform: scale(1.02);
     }
     .stTextInput input, .stTextArea textarea {
@@ -509,17 +517,15 @@ def generate_response(user_input):
             return logic, False, False
     return "Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon.", True, False
 
-# ---------- AUDIO PLAYBACK (no custom JS, fixed) ----------
+# ---------- AUDIO PLAYBACK (inline button) ----------
 def show_audio_button(text, user_question, key_suffix):
-    """Display a button that sets st.session_state.play_audio to the audio data/URL."""
-    # Check predefined voice URL
+    """Display an inline audio button (🔊) at the end of the message."""
     url = get_predefined_voice_url(user_question) if user_question else None
     if url:
         if st.button("🔊", key=f"audio_btn_{key_suffix}", help="Play audio"):
             st.session_state.play_audio = ("url", url)
             st.rerun()
         return
-    # Check cached audio bytes
     audio_bytes = get_voice_for_text(text)
     if audio_bytes:
         if st.button("🔊", key=f"audio_btn_{key_suffix}", help="Play audio"):
@@ -528,7 +534,7 @@ def show_audio_button(text, user_question, key_suffix):
         return
 
 def render_audio_player():
-    """If play_audio is set, display the audio component and clear the flag (no extra rerun)."""
+    """Display the audio component if requested."""
     if st.session_state.play_audio:
         audio_type = st.session_state.play_audio[0]
         if audio_type == "url":
@@ -537,7 +543,6 @@ def render_audio_player():
         elif audio_type == "bytes":
             _, data, mime = st.session_state.play_audio
             st.audio(data, format=mime)
-        # Clear the flag after displaying – no rerun needed, the player stays on the page
         st.session_state.play_audio = None
 
 # ---------- UI COMPONENTS ----------
@@ -663,14 +668,19 @@ def chat_interface(t):
         if msg["role"] == "user":
             st.markdown(f'<div class="chat-message user-message">🧑‍💻 {msg["content"]}</div>', unsafe_allow_html=True)
         else:
-            col1, col2 = st.columns([10,1])
-            with col1:
-                st.markdown(f'<div class="chat-message assistant-message" style="width:100%;">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
-            with col2:
-                if not msg.get("skip_audio", False):
-                    user_q = st.session_state.conversation_history[idx-1]["content"] if idx > 0 else ""
-                    show_audio_button(msg["content"], user_q, f"chat_{idx}")
-    render_audio_player()   # <-- displays the audio component if requested
+            # Use a single row with two columns to keep button inline
+            with st.container():
+                col_text, col_btn = st.columns([10, 1])
+                with col_text:
+                    st.markdown(f'<div class="assistant-message" style="padding:0.5rem; border-radius:20px;">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
+                with col_btn:
+                    if not msg.get("skip_audio", False):
+                        user_q = st.session_state.conversation_history[idx-1]["content"] if idx > 0 else ""
+                        # Apply a custom class to the button container for inline styling
+                        with st.container():
+                            show_audio_button(msg["content"], user_q, f"chat_{idx}")
+            st.markdown("")  # spacer
+    render_audio_player()
     user_input = st.text_input(t['chat_input'], key="chat_input")
     if st.button(t['send'], use_container_width=True, key="send_btn"):
         if user_input.strip():
