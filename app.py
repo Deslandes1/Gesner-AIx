@@ -347,7 +347,7 @@ if "play_audio" not in st.session_state:
 
 VOICE_CACHE = load_voice_cache()
 
-# ---------- PRE‑DEFINED VOICE MAPPING ----------
+# ---------- PRE‑DEFINED VOICE MAPPING (UPDATED WITH CORRECT RAW URL) ----------
 PREDEFINED_VOICES = {
     "kijan ou rele": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording.wav",
     "site konbyen let ki genhen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(1).wav",
@@ -512,7 +512,6 @@ def reason_answer(query, retrieved_facts):
             return retrieved_facts[0]
     return retrieved_facts[0]
 
-# ========== FIXED: ALPHABET ANSWER WITHOUT REPEATING THE QUESTION ==========
 def generate_response(user_input):
     normalized = user_input.strip().lower()
     # Patterns for the alphabet question
