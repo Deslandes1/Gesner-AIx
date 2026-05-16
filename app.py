@@ -203,15 +203,13 @@ LANGUAGES = {
 }
 
 # ============================================================
-#  IMPORTANT: Replace this minimal TEXTS dictionary with your
-#  own complete multilingual strings (English, French, Kreyòl).
-#  The keys used in the code are:
-#    'app_title', 'chat_input', 'send', 'clear',
-#    'dictionary', 'voice_training', 'training_center',
-#    'bulk_training', 'manage_facts', 'test_training',
-#    'train_new', 'fact_text', 'add_fact', 'upload_csv',
-#    'upload_audio', 'save_voice', 'play', 'delete', 'edit',
-#    'update', 'chat_interface_label'
+#  REPLACE THIS MINIMAL TEXTS DICTIONARY WITH YOUR FULL TEXTS
+#  Required keys: 'app_title', 'chat_input', 'send', 'clear',
+#  'dictionary', 'voice_training', 'training_center',
+#  'bulk_training', 'manage_facts', 'test_training',
+#  'train_new', 'fact_text', 'add_fact', 'upload_csv',
+#  'upload_audio', 'save_voice', 'play', 'delete', 'edit',
+#  'update', 'chat_interface_label'
 # ============================================================
 TEXTS = {
     "en": {
@@ -511,14 +509,17 @@ def generate_response(user_input):
             return logic, False, False
     return "Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon.", True, False
 
-# ---------- AUDIO PLAYBACK (no custom JS) ----------
+# ---------- AUDIO PLAYBACK (no custom JS, fixed) ----------
 def show_audio_button(text, user_question, key_suffix):
+    """Display a button that sets st.session_state.play_audio to the audio data/URL."""
+    # Check predefined voice URL
     url = get_predefined_voice_url(user_question) if user_question else None
     if url:
         if st.button("🔊", key=f"audio_btn_{key_suffix}", help="Play audio"):
             st.session_state.play_audio = ("url", url)
             st.rerun()
         return
+    # Check cached audio bytes
     audio_bytes = get_voice_for_text(text)
     if audio_bytes:
         if st.button("🔊", key=f"audio_btn_{key_suffix}", help="Play audio"):
@@ -527,6 +528,7 @@ def show_audio_button(text, user_question, key_suffix):
         return
 
 def render_audio_player():
+    """If play_audio is set, display the audio component and clear the flag (no extra rerun)."""
     if st.session_state.play_audio:
         audio_type = st.session_state.play_audio[0]
         if audio_type == "url":
@@ -535,8 +537,8 @@ def render_audio_player():
         elif audio_type == "bytes":
             _, data, mime = st.session_state.play_audio
             st.audio(data, format=mime)
+        # Clear the flag after displaying – no rerun needed, the player stays on the page
         st.session_state.play_audio = None
-        st.rerun()
 
 # ---------- UI COMPONENTS ----------
 def dictionary_manager(t):
@@ -668,7 +670,7 @@ def chat_interface(t):
                 if not msg.get("skip_audio", False):
                     user_q = st.session_state.conversation_history[idx-1]["content"] if idx > 0 else ""
                     show_audio_button(msg["content"], user_q, f"chat_{idx}")
-    render_audio_player()
+    render_audio_player()   # <-- displays the audio component if requested
     user_input = st.text_input(t['chat_input'], key="chat_input")
     if st.button(t['send'], use_container_width=True, key="send_btn"):
         if user_input.strip():
