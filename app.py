@@ -61,14 +61,55 @@ def load_voice_cache():
         return cache
     return {}
 
-# ---------- DEFAULT TRAINING FACTS ----------
+# ---------- DEFAULT TRAINING FACTS (Ti Malice + Creole levels) ----------
 def get_default_training_facts():
     return [
+        # Ti Malice software book
+        "Ti Malice se yon lojisyèl edikatif ki anseye timoun yo Kreyòl Ayisyen atravè jwèt ak istwa.",
+        "Ti Malice gen yon liv ki rele 'Ti Malice aprann Kreyòl' ki gen 12 chapit.",
+        "Chapit 1 Ti Malice: Alfabè kreyòl la ak pwononsyasyon.",
+        "Chapit 2 Ti Malice: Nonm 1 rive 100 an Kreyòl.",
+        "Chapit 3 Ti Malice: Koulè ak fòm an Kreyòl.",
+        "Chapit 4 Ti Malice: Fanmi ak zanmi.",
+        "Chapit 5 Ti Malice: Manje Ayisyen.",
+        "Chapit 6 Ti Malice: Bèt ak natir.",
+        "Chapit 7 Ti Malice: Vèb ki pi komen yo.",
+        "Chapit 8 Ti Malice: Tan pase, tan prezan, tan kap vini.",
+        "Chapit 9 Ti Malice: Fraz senp.",
+        "Chapit 10 Ti Malice: Konvèsasyon chak jou.",
+        "Chapit 11 Ti Malice: Pwovèb ak ekspresyon Kreyòl.",
+        "Chapit 12 Ti Malice: Istwa kout pou li.",
+        "Ti Malice gen yon seksyon egzèsis ki gen 50 kesyon pou pratike.",
+        "Ou ka telechaje Ti Malice sou sitwèb globalinternet.py.",
+        "Ti Malice fèt pa Gesner Deslandes pou ede timoun Ayisyen aprann Kreyòl fasilman.",
+        # Beginner Creole
         "Alfabè kreyòl la gen 32 lèt.",
-        "Kreyòl Ayisyen se lang ofisyèl Ayiti.",
-        "Ayiti te endepandan an 1804.",
-        "Pòtoprens se kapital Ayiti.",
-        "Jan bèl espwa se deviz Ayiti."
+        "Pwonon pèsonèl an Kreyòl: Mwen, ou, li, nou, yo.",
+        "Vèb 'se' (to be) nan prezan: Mwen se, ou se, li se, nou se, yo se.",
+        "Vèb 'gen' (to have) nan prezan: Mwen gen, ou gen, li gen, nou gen, yo gen.",
+        "Salitasyon debaz: Bonjou (Bondye), Bonswa (Aswe), Kijan ou rele? (Ki jan ou rele?), Mwen rele...",
+        "Kesyon debaz: Kijan ou ye? (How are you?), Mwen byen (I'm fine), Mèsi (Thank you), Pa dekwa (You're welcome).",
+        "Nonm 1-10: youn, de, twa, kat, senk, sis, sèt, uit, nèf, dis.",
+        "Koulè debaz: wouj (red), ble (blue), vèt (green), jòn (yellow), nwa (black), blan (white).",
+        # Intermediate Creole
+        "Tan pase (past tense): yo itilize 'te' devan vèb. Egzanp: Mwen te manje (I ate).",
+        "Tan kap vini (future tense): yo itilize 'ap' oswa 'pral'. Egzanp: Mwen ap manje (I will eat).",
+        "Nègasyon (negation): yo itilize 'pa' apre vèb. Egzanp: Mwen pa manje (I don't eat).",
+        "Pwopozisyon komen: nan (in), sou (on), anba (under), devan (in front of), dèyè (behind), bò (beside).",
+        "Fraz konplèks: Itilize 'ki' (that/which), 'kote' (where), 'poukisa' (why).",
+        "Vèb modèl: vle (to want), kapab (can), dwe (must), konnen (to know), fè (to do/make).",
+        # Advanced Creole
+        "Pawòl konpoze (compound words): pote + chay = potechay (backpack), bwa + chemen = bwachemen (forest path).",
+        "Pwovèb Kreyòl popilè: 'Dèyè mòn gen mòn' (Beyond mountains there are mountains - life is full of challenges).",
+        "Pwovèb: 'Men anpil, chay pa lou' (Many hands make light work).",
+        "Pwovèb: 'Ti ponyen fè gwo chay' (Little by little, big load is carried).",
+        "Anplwaye tan ki konpoze: Mwen te ap manje (I was eating).",
+        "Vwa pasif: Liv la te ekri pa Jan (The book was written by John).",
+        "Sijonktif (subjunctive): Fòk ou vini (You must come).",
+        "Liteati kreyòl: ekriven tankou Frankétienne, Gary Victor, ak Lyonel Trouillot.",
+        "Diferans ant Kreyòl Ayisyen ak Kreyòl Matinik oswa Giyàn.",
+        "Analiz powèm Kreyòl: 'Kreyon mwen' pa Gesner Deslandes.",
+        "Rédaksyon avançée: kijan pou ekri yon lèt fòmèl an Kreyòl."
     ]
 
 def initialize_default_training():
@@ -347,7 +388,7 @@ if "play_audio" not in st.session_state:
 
 VOICE_CACHE = load_voice_cache()
 
-# ---------- PRE‑DEFINED VOICE MAPPING (UPDATED WITH CORRECT RAW URL) ----------
+# ---------- PRE‑DEFINED VOICE MAPPING (raw GitHub URLs) ----------
 PREDEFINED_VOICES = {
     "kijan ou rele": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording.wav",
     "site konbyen let ki genhen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(1).wav",
@@ -443,7 +484,7 @@ def character_picker(key_prefix, label="Insert Kreyòl characters:"):
                     st.session_state[key] = current + ch
                 st.rerun()
 
-def retrieve_facts_hybrid(query, k=3):
+def retrieve_facts_hybrid(query, k=5):
     if st.session_state.index is None or st.session_state.index.ntotal == 0:
         return []
     query_embedding = st.session_state.embedding_model.encode([query])[0].astype(np.float32).reshape(1, -1)
@@ -463,6 +504,25 @@ def retrieve_facts_hybrid(query, k=3):
 
 def direct_keyword_answer(query):
     q_lower = query.lower().strip()
+    # Ti Malice
+    if "ti malice" in q_lower:
+        if "kiyès" in q_lower or "who" in q_lower or "kreyatè" in q_lower:
+            return "Ti Malice se yon lojisyèl edikatif ki fèt pa Gesner Deslandes pou anseye Kreyòl Ayisyen atravè jwèt ak istwa."
+        if "chapit" in q_lower or "chapter" in q_lower:
+            return "Ti Malice gen 12 chapit. Chapit 1: Alfabè, Chapit 2: Nonm, Chapit 3: Koulè, Chapit 4: Fanmi, Chapit 5: Manje, Chapit 6: Bèt, Chapit 7: Vèb, Chapit 8: Tan, Chapit 9: Fraz senp, Chapit 10: Konvèsasyon, Chapit 11: Pwovèb, Chapit 12: Istwa."
+        if "telechaje" in q_lower or "download" in q_lower:
+            return "Ou ka telechaje Ti Malice sou sitwèb globalinternet.py."
+        return "Ti Malice se yon lojisyèl k ap anseye Kreyòl Ayisyen. Li gen 12 chapit ak egzèsis. Pou plis enfòmasyon, mande m 'chapit Ti Malice' oswa 'telechaje Ti Malice'."
+    # Beginner
+    if any(w in q_lower for w in ["beginner", "debutan", "debutant", "aprann kreyòl deba"]):
+        return "Kou Kreyòl pou debitan (Beginner): Alfabè 32 lèt, pwonon (mwen, ou, li, nou, yo), vèb 'se' ak 'gen', salitasyon (Bonjou, Bonswa), nonm 1-10, koulè debaz. Kisa ou ta renmen aprann an premye?"
+    # Intermediate
+    if any(w in q_lower for w in ["intermediate", "entèmedyè", "mwayen", "intermédiaire"]):
+        return "Kou Kreyòl entèmedyè: Tan pase ak 'te', tan kap vini ak 'ap' oswa 'pral', nègasyon ak 'pa', pwopozisyon (nan, sou, anba), fraz konplèks ak 'ki', 'kote', 'poukisa'. Vle w pran yon egzèsis?"
+    # Advanced
+    if any(w in q_lower for w in ["advanced", "avanse", "avancé"]):
+        return "Kou Kreyòl avansé: Pawòl konpoze, pwovèb popilè (Dèyè mòn gen mòn, Men anpil chay pa lou), tan ki konpoze (Mwen te ap manje), vwa pasif, sijonktif (Fòk ou vini), literati kreyòl, ak analiz powèm. Eksplore youn nan sijè sa yo."
+    # Name / identity
     if any(q in q_lower for q in ["kijan ou rele", "kiyès ou ye", "kisa ou ye", "ki moun ou ye", "what is your name", "who are you"]):
         return "Non pa mwen se Gesner L’IA, kreyatè mwen an se Gesner Deslandes nan GlobalInternet.py."
     if any(q in q_lower for q in ["kiyès ki kreye ou", "ki moun ki fè ou", "who created you", "ki moun ki devlope ou", "kiyès ki te kreye ou"]):
@@ -503,6 +563,23 @@ def reason_answer(query, retrieved_facts):
     if len(retrieved_facts) == 1:
         return retrieved_facts[0]
     q_lower = query.lower()
+    # Prioritize level-based learning
+    if any(w in q_lower for w in ["beginner", "debutan", "debutant"]):
+        beginner_facts = [f for f in retrieved_facts if "beginner" in f.lower() or "debitan" in f.lower() or "alfabè" in f.lower() or "pwonon" in f.lower()]
+        if beginner_facts:
+            return ". ".join(beginner_facts[:3])
+    if any(w in q_lower for w in ["intermediate", "entèmedyè"]):
+        inter_facts = [f for f in retrieved_facts if "intermediate" in f.lower() or "entèmedyè" in f.lower() or "tan pase" in f.lower()]
+        if inter_facts:
+            return ". ".join(inter_facts[:3])
+    if any(w in q_lower for w in ["advanced", "avanse"]):
+        adv_facts = [f for f in retrieved_facts if "advanced" in f.lower() or "avanse" in f.lower() or "pwovèb" in f.lower()]
+        if adv_facts:
+            return ". ".join(adv_facts[:3])
+    if "ti malice" in q_lower:
+        malice_facts = [f for f in retrieved_facts if "ti malice" in f.lower()]
+        if malice_facts:
+            return ". ".join(malice_facts[:3])
     if any(word in q_lower for word in ["raconte", "rakonte", "istwa", "history", "histoire"]):
         history_facts = [f for f in retrieved_facts if any(kw in f.lower() for kw in ["endepandan", "revolisyon", "duvalier", "tranblemanntè", "1804", "1915", "1957", "bwa kayiman"])]
         if history_facts:
@@ -512,6 +589,7 @@ def reason_answer(query, retrieved_facts):
             return retrieved_facts[0]
     return retrieved_facts[0]
 
+# ========== FIXED: ALPHABET ANSWER RETURNS ONLY THE SENTENCE ==========
 def generate_response(user_input):
     normalized = user_input.strip().lower()
     # Patterns for the alphabet question
@@ -525,18 +603,19 @@ def generate_response(user_input):
     ]
     for pat in patterns:
         if pat in normalized:
-            # Return ONLY the alphabet list (no question repeat)
-            answer = "A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z"
-            return answer, False, True  # skip_audio = True (predefined voice will still play)
+            # Return ONLY the short sentence (no list), and allow audio button to appear
+            answer = "Alfabè kreyol la gen 32 let."
+            return answer, False, False   # skip_audio=False so the 🔊 button shows
 
     with st.spinner("🧠 Gesner AI ap reflechi... (thinking...)"):
         time.sleep(0.8)
-        math_result = reason_about_question(user_input)
-        if math_result and ("+" in user_input or "-" in user_input or "*" in user_input or "/" in user_input):
-            return math_result, False, False
+        # Check direct keyword answers first (levels, Ti Malice, etc.)
         direct = direct_keyword_answer(user_input)
         if direct:
             return direct, False, False
+        math_result = reason_about_question(user_input)
+        if math_result and ("+" in user_input or "-" in user_input or "*" in user_input or "/" in user_input):
+            return math_result, False, False
         facts = retrieve_facts_hybrid(user_input, k=5)
         if facts:
             reasoned = reason_answer(user_input, facts)
