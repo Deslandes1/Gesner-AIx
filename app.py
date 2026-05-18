@@ -388,11 +388,14 @@ if "play_audio" not in st.session_state:
 
 VOICE_CACHE = load_voice_cache()
 
-# ---------- PRE‑DEFINED VOICE MAPPING (UPDATED WITH NEW ALPHABET AUDIO) ----------
+# ---------- PRE‑DEFINED VOICE MAPPING (RAW GITHUB URLS) ----------
 PREDEFINED_VOICES = {
-    "kijan ou rele": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording.wav",
-    "site konbyen let ki genhen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AI/main/recording%20(3).wav",
-    "konbyen let ki gehen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AI/main/recording%20(3).wav"
+    # Question: "Site konbyen let ki genhen nan alfabe kreyol la?" -> alphabet list
+    "site konbyen let ki genhen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(1).wav",
+    # Question: "Konbyen let ki genhen nan alfabe kreyol la?" -> simple sentence
+    "konbyen let ki gehen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(3).wav",
+    # Question: "Kijan ou rele?" -> name answer
+    "kijan ou rele": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(4).wav"
 }
 
 def normalize_text(text):
@@ -400,6 +403,7 @@ def normalize_text(text):
 
 def get_predefined_voice_url(user_question):
     norm_q = normalize_text(user_question)
+    # Check for exact patterns or partial matches
     for key, url in PREDEFINED_VOICES.items():
         if key in norm_q or norm_q.startswith(key):
             return url
@@ -522,13 +526,6 @@ def direct_keyword_answer(query):
     # Advanced
     if any(w in q_lower for w in ["advanced", "avanse", "avancé"]):
         return "Kou Kreyòl avansé: Pawòl konpoze, pwovèb popilè (Dèyè mòn gen mòn, Men anpil chay pa lou), tan ki konpoze (Mwen te ap manje), vwa pasif, sijonktif (Fòk ou vini), literati kreyòl, ak analiz powèm. Eksplore youn nan sijè sa yo."
-    # Name / identity
-    if any(q in q_lower for q in ["kijan ou rele", "kiyès ou ye", "kisa ou ye", "ki moun ou ye", "what is your name", "who are you"]):
-        return "Non pa mwen se Gesner L’IA, kreyatè mwen an se Gesner Deslandes nan GlobalInternet.py."
-    if any(q in q_lower for q in ["kiyès ki kreye ou", "ki moun ki fè ou", "who created you", "ki moun ki devlope ou", "kiyès ki te kreye ou"]):
-        return "Mwen te kreye pa Gesner Deslandes, fondatè GlobalInternet.py. Li se yon enjenyè ki renmen edike Ayiti."
-    if q_lower in ["bonjou","bonswa","hello","hi","salut"]:
-        return "Bonjou! Kijan ou ye? Mwen la pou reponn kesyon ou."
     return None
 
 def reason_about_question(query):
@@ -589,27 +586,30 @@ def reason_answer(query, retrieved_facts):
             return retrieved_facts[0]
     return retrieved_facts[0]
 
-# ========== UPDATED: ALPHABET ANSWER WITH NEW TEXT ==========
+# ========== NEW: SPECIFIC HANDLING FOR THE THREE QUESTIONS ==========
 def generate_response(user_input):
     normalized = user_input.strip().lower()
-    # Patterns for the alphabet question
-    patterns = [
-        "site konbyen let ki genhen nan alfabe kreyol la",
-        "site konbyen let ki genhen nan alfabe kreyol",
-        "site konbyen let ki genhen nan alfabe kreyòl la",
-        "site konbyen let ki genhen nan alfabe kreyòl",
-        "konbyen let ki gehen nan alfabe kreyol la",
-        "site konbyen let ki genhen"
-    ]
-    for pat in patterns:
-        if pat in normalized:
-            # New answer as requested
-            answer = "Alfabe (\"e\" aksan fos) genhen 32 let."
-            return answer, False, False  # skip_audio=False so the 🔊 button shows (audio will play via predefined voice)
+    
+    # 1. Question: "Site konbyen let ki genhen nan alfabe kreyol la?" -> return alphabet list
+    pattern1 = re.compile(r"site konbyen let ki genhen nan alfabe kreyol la")
+    if pattern1.search(normalized):
+        answer = "A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z"
+        return answer, False, False  # audio will be played via predefined voice
+    
+    # 2. Question: "Konbyen let ki genhen nan alfabe kreyol la?" -> simple sentence
+    pattern2 = re.compile(r"konbyen let ki gehen nan alfabe kreyol la")
+    if pattern2.search(normalized):
+        answer = "Nan alfabe kreyol la genhen 32 let."
+        return answer, False, False
+    
+    # 3. Question: "Kijan ou rele?" -> name answer
+    if "kijan ou rele" in normalized or "ki jan ou rele" in normalized:
+        answer = "Non pa mwen se Gesner L'AI kreyate mwen se Gesner Deslandes nan Globalinternet.py."
+        return answer, False, False
 
+    # Fallback to existing logic
     with st.spinner("🧠 Gesner AI ap reflechi... (thinking...)"):
         time.sleep(0.8)
-        # Check direct keyword answers first (levels, Ti Malice, etc.)
         direct = direct_keyword_answer(user_input)
         if direct:
             return direct, False, False
@@ -642,7 +642,6 @@ def show_audio_button(text, user_question, key_suffix):
         return
 
 def render_audio_player():
-    """Display the audio component if requested."""
     if st.session_state.play_audio:
         audio_type = st.session_state.play_audio[0]
         if audio_type == "url":
@@ -808,7 +807,7 @@ def show_sidebar():
         st.markdown('<div class="spinning-brain">🧠</div>', unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Personal information
+        # Personal information (updated with correct phone/email)
         st.markdown(
             """
             <div class="sidebar-info">
