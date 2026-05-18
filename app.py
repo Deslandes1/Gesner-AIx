@@ -61,10 +61,78 @@ def load_voice_cache():
         return cache
     return {}
 
-# ---------- DEFAULT TRAINING FACTS (UPDATED WITH ALL CHAPTER 4, 5 & WORKRISE POLICIES) ----------
+# ========== DEFINITIVE LIST OF WORKRISE POLICY FACTS (ALL SECTIONS 5.13, 6.01-6.12, ARBITRATION) ==========
+WORKRISE_POLICY_FACTS = [
+    # 5.13 RECREATIONAL ACTIVITIES AND PROGRAMS
+    "Workrise pap peye konpansasyon aksidan travay pou blesi ki rive pandan anplwaye patisipe volontè nan aktivite lwazi, sosyal, oswa espòtif lè li pa nan travay, si aktivite sa a pa fè pati devwa travay li.",
+    
+    # 6.01 BENEFITS ELIGIBILITY & DOMESTIC PARTNER DEFINITION
+    "Workrise bay benefis pou anplwaye regilye aplentan (full-time) ak anplwaye a tan pasyèl (part-time) k ap travay 30 èdtan oswa plis pa semèn. Anplwaye tanporè pa kalifye pou benefis eksepte PTO.",
+    "Definisyon 'Domestic Partner' nan Workrise: yon moun menm sèks oswa diferan sèks ak anplwaye a, ki gen 18 an oswa plis, ki pa marye, k ap viv nan menm kay, epi ki pa gen relasyon fanmi ki ta anpeche maryaj nan eta kote yo rete a.",
+    
+    # 6.02 LEAVES OF ABSENCE
+    "Workrise bay konje (leaves of absence) selon lwa ak politik konpayi pou anplwaye ki andikape, ki bezwen konje long pou devwa sivik, swen fanmi, oswa rezon pèsonèl. Ou dwe notifye manadjè oswa Field HR pi vit posib.",
+    "Si ou pa retounen nan travay apre konje a fini, sa pral konsidere kòm yon demisyon volontè. Lè w retounen apre yon konje medikal, ou dwe bay yon sètifikasyon doktè ki di ou kapab travay.",
+    
+    # 6.03 PAID TIME OFF (PTO)
+    "Kantite PTO pou anplwaye travayè Workrise ekri nan lèt òf la. PTO a gen ladann nenpòt konje maladi peye dapre lwa eta a. Anplwaye travayè ka roule (roll over) jiska 80 èdtan PTO ki pa itilize nan fen chak ane.",
+    "Ou ka itilize PTO pou nenpòt rezon: repo, detant, maladi, sante mantal, aktivite lekòl timoun, oswa vakans. Ou pa gen dwa gen balans PTO negatif.",
+    "Pou mande PTO, fè demann nan Paylocity oswa sistèm HRIS la. Si ou pran plis pase 3 jou pou rekipere apre maladi, Workrise ka mande dokimantasyon.",
+    "PTO ki pa itilize yo pa peye lè w separe ak konpayi an, sof si lwa eta a egzije. Men si w retravay nan konpayi an nan 1 an, w ap jwenn balans PTO ou te genyen an.",
+    
+    # 6.04 FAMILY AND MEDICAL LEAVE ACT (FMLA)
+    "Dapre FMLA, Workrise bay jiska 12 semèn konje nan yon peryòd 12 mwa pou anplwaye ki kalifye, oswa jiska 26 semèn pou konje pou pran swen yon manm militè blese.",
+    "Pou kalifye pou FMLA, ou dwe travay pou Workrise omwen 12 mwa, travay 1250 èdtan nan 12 mwa anvan konje a, epi travay nan yon lokal ki gen omwen 50 anplwaye nan 75 mil.",
+    "Rezon pou FMLA: nesans yon timoun, adopsyon oswa plasman nan fanmi, pran swen yon konjwen, timoun oswa paran ki gen yon pwoblèm sante grav, ou menm ki gen yon pwoblèm sante grav, oswa ijans militè.",
+    "Workrise mezire 12 mwa FMLA kòm yon peryòd glisman (rolling backward). Ou ka pran konje FMLA kontinyèlman oswa pa ti bout (intermittent).",
+    "Pandan w nan konje FMLA, Workrise kontinye benefis sante ou nan menm nivo. Si w pa peye pati ou nan prim asirans, konpayi an ka sispann kouvèti apre 30 jou.",
+    "Si w pa retounen travay apre FMLA pou rezon ki pa sante ou oswa fanmi w, Workrise ka mande w ranbouse prim asirans sante konpayi an te peye pandan konje a.",
+    "Anplwaye ki pran FMLA dwe bay sipèvizè oswa Field HR yon avi vèbal oswa ekri. Si konje a previzib, bay 30 jou avans.",
+    
+    # 6.05 LACTATION BREAKS
+    "Workrise bay repo rezonab pou fanm k ap bay tete pou yo ka eksprime lèt. Gen yon chanm prive ak ti frijidè pou estoke lèt. Ou dwe make lèt la ak non ou ak dat. Repo plis pase 20 minit pa peye pou anplwaye non-egzante.",
+    
+    # 6.06 MILITARY LEAVE
+    "Workrise bay konje militè pou manm Rezèv oswa Gad Nasyonal ki patisipe nan antrennman oswa devwa aktif. Konje a dapre lwa federal ak eta. Workrise pa fè diskriminasyon kont moun ki nan sèvis militè.",
+    
+    # 6.07 VOTING LEAVE
+    "Workrise bay konje peye oswa san peye pou ale vote si biwo vòt yo pa louvri omwen 3 anvan oswa apre chèf travay ou. Fè demann nan Paylocity omwen 2 jou davans.",
+    
+    # 6.08 JURY DUTY LEAVE
+    "Workrise bay konje peye oswa san peye pou sèvi nan jiri selon lwa eta a. Prezante konvokasyon jiri a pi vit posib. Ou ka itilize PTO pandan konje jiri.",
+    
+    # 6.09 VOLUNTEER EMERGENCY RESPONDER LEAVE
+    "Workrise bay konje san peye pou ponpye volontè, ofisye rezèv lapè, oswa sekouris ki reponn a ijans oswa ki patisipe nan fòmasyon planifye (jiska 14 jou pa ane). Anplwaye travayè ka itilize PTO pandan konje sa a.",
+    
+    # 6.10 CRIME VICTIM LEAVE
+    "Workrise bay konje san peye pou viktim krim oswa fanmi pwòch ki dwe ale nan tribinal. Ou ka itilize PTO pandan konje a. Bay dokimantasyon (konvokasyon, kòmandman tribinal).",
+    
+    # 6.11 STATE SPECIFIC LEAVE
+    "Gen lòt kalite konje dapre lwa eta. Gade apendis eta yo nan Liv Referans. Kontakte Field HR pou kesyon.",
+    
+    # 6.12 WORKER’S COMPENSATION
+    "Si ou blese nan travay, Workrise gen asirans konpansasyon travayè. Rapòte blesi a imedyatman bay manadjè ou oswa hsereporting@workrise.com. Rele Axiom nan (281) 419-7063 pou yon infimyè avant ou ale doktè.",
+    "Konpansasyon travayè ka bay swen medikal, lajan kach san taks pou ranplase salè pèdi, ak reyabilitasyon pwofesyonèl.",
+    "Lè w retounen apre yon blesi travay, Workrise ofri w menm pòsyon oswa yon pòsyon ekivalan, sof si sa ta afekte operasyon sekirite ak efikasite konpayi an.",
+    
+    # MUTUAL ARBITRATION AGREEMENT
+    "Workrise gen yon Akò Abitraj Mityèl. Sa vle di ou ak konpayi an dakò pou rezoud tout diskisyon ki gen rapò ak travay atravè abitraj, pa nan tribinal devan yon jiri. Lwa Federal sou Abitraj (FAA) aplike.",
+    "Akò abitraj la kouvri tout reklamasyon sot pase ak lavni: diskriminasyon, asèlman, revanj, salè, lè siplemantè, benefis, ak lòt lit anplwaye. Men ou ka toujou pote plent bay EEOC, NLRB, oswa lòt ajans.",
+    "Pou kòmanse abitraj, ou dwei premye swiv Pwosedi Pre-Abitraj: voye yon lèt bay Depatman Legal Workrise, Lè sa a, medyasyon. Si sa pa mache, ou ka depoze yon demand abitraj nan AAA (American Arbitration Association).",
+    "Detèminasyon abitraj la dwe fèt nan Austin, Texas, oswa nan zòn metwopolitèn ki pi pre kote ou te travay. Chak pati peye pwòp avoka yo, men Workrise peye pifò frè abitraj eksepte $200 frè depo si anplwaye a kòmanse abitraj la.",
+    "Nan abitraj, ou pa ka fè yon aksyon klas (class action) oswa kolektif. Ou dwe pote reklamasyon ou sèlman nan non pèsonèl ou. Anyen nan akò sa a pa anpeche w pale ak yon avoka.",
+    
+    # REFERENCE BOOK ACKNOWLEDGMENT & AT-WILL
+    "Liv Referans Workrise a pa yon kontra travay. Travay la se 'at-will', sa vle di ou kapab kite travay nenpòt lè, epi Workrise kapab revoke ou nenpòt lè, avèk oswa san rezon.",
+    "Lè w siyen Akonisman Liv Referans la, ou konfime ou te resevwa ak li Liv la, ou konprann règleman yo ka chanje, epi ou dakò ak Akò Abitraj Mityèl la. Si w kontinye travay plis pase 45 jou apre ou resevwa akò a, ou konsidere kòm ou aksepte l.",
+]
+
+# ---------- DEFAULT TRAINING FACTS (ALL PREVIOUS + WORKRISE) ----------
 def get_default_training_facts():
+    # All previous facts (Ti Malice, grammar, existing Workrise policies)
+    # This list is long but necessary for full functionality.
     return [
-        # ---------- PREVIOUS FACTS (keep all) ----------
+        # ---------- TI MALICE & KREYÒL FACTS ----------
         "Ti Malice se yon lojisyèl edikatif ki anseye timoun yo Kreyòl Ayisyen atravè jwèt ak istwa.",
         "Ti Malice gen yon liv ki rele 'Ti Malice aprann Kreyòl' ki gen 12 chapit.",
         "Chapit 1 Ti Malice: Alfabè kreyòl la ak pwononsyasyon.",
@@ -106,7 +174,7 @@ def get_default_training_facts():
         "Analiz powèm: 'Kreyon mwen' pa Gesner Deslandes.",
         "Rédaksyon avançée: kijan pou ekri yon lèt fòmèl an Kreyòl.",
         
-        # ---------- WORKRISE POLICIES (existing) ----------
+        # ---------- WORKRISE POLICIES (existing from previous version) ----------
         "Workrise se yon konpayi ki sipòte moun ki fè travay di. Yo byen kontan ou rantre nan ekip la.",
         "Nan Workrise, nou gen yon kilti kote tout moun kolabore, aprann, ak ede youn lòt.",
         "Valè Workrise yo se: Posede Misyon an, Solisyon anvan Ego, Monte Bawo a, Aprann ak Grandi.",
@@ -206,7 +274,7 @@ def get_default_training_facts():
         "Workrise bezwen konnen tout lòt travay anplwaye yo fè pou evite konfli enterè.",
         "Si ou pa jwenn apwobasyon avan ou kòmanse yon lòt travay, ou kapab sibi sanksyon jiska revokasyon.",
         
-        # ========== CHAPTER 4 – STANDARDS OF CONDUCT ==========
+        # ---------- CHAPTER 4 – STANDARDS OF CONDUCT ----------
         "Workrise entèdi fo dokiman, vòl, domaj pwopriyete, itilizasyon san otorizasyon, vyolasyon sekirite, batay, pote zam, konduit kriminèl.",
         "Si ou refize obeyi sipèvizè ou, ou kapab sibi sanksyon.",
         "Ou dwe avèti sipèvizè ou anvan ou absan. Absans san rezon legal ka mennen nan revokasyon.",
@@ -232,7 +300,7 @@ def get_default_training_facts():
         "Vyolasyon sa kapab revokasyon. Workrise pap peye amann pou itilizasyon telefòn.",
         "Lè w itilize machin pèsonèl pou travay, ou dwe gen lisans ak asirans. Workrise peye yon alokasyon kilométraj (IRS rate).",
         
-        # ========== CHAPTER 5 – OPERATIONAL CONSIDERATIONS ==========
+        # ---------- CHAPTER 5 – OPERATIONAL CONSIDERATIONS ----------
         "Workrise ranbouse depans biznis rezonab. Soumèt depans ak resi nan 30 jou. Ranbousman fèt nan Payroll.",
         "Anplwaye ki vwayaje resevwa per diem pou manje, lojman, ak depans pandan vwayaj. Montan varye selon pwojè.",
         "Pwopriyete Workrise (laptop, biwo, sistèm) dwe itilize sèlman pou travay. Pa espere vi prive. Workrise kapab enspekte nenpòt lè.",
@@ -248,45 +316,27 @@ def get_default_training_facts():
         "Rapòte tout kondisyon danjere. Pa janm revanj kont moun ki rapòte. Rapòte blesi imedyatman.",
         "Pa solisite oswa distribye literati pandan lè travay. Entèdi pou non‑anplwaye.",
         "Workrise ka enstale kamera sekirite nan zòn travay. Pa espere vi prive. Pa gen kamera nan twalèt oswa chanje rad.",
-        
-        # ========== NEW WORKRISE POLICY FACTS (from 5.13, 6.01-6.12, Arbitration) ==========
-        "Workrise pap peye konpansasyon aksidan travay pou blesi ki rive pandan anplwaye patisipe volontè nan aktivite lwazi, sosyal, oswa espòtif lè li pa nan travay, si aktivite sa a pa fè pati devwa travay li.",
-        "Workrise bay benefis pou anplwaye regilye aplentan (full-time) ak anplwaye a tan pasyèl (part-time) k ap travay 30 èdtan oswa plis pa semèn. Anplwaye tanporè pa kalifye pou benefis eksepte PTO.",
-        "Definisyon 'Domestic Partner' nan Workrise: yon moun menm sèks oswa diferan sèks ak anplwaye a, ki gen 18 an oswa plis, ki pa marye, k ap viv nan menm kay, epi ki pa gen relasyon fanmi ki ta anpeche maryaj nan eta kote yo rete a.",
-        "Workrise bay konje (leaves of absence) selon lwa ak politik konpayi pou anplwaye ki andikape, ki bezwen konje long pou devwa sivik, swen fanmi, oswa rezon pèsonèl. Ou dwe notifye manadjè oswa Field HR pi vit posib.",
-        "Si ou pa retounen nan travay apre konje a fini, sa pral konsidere kòm yon demisyon volontè. Lè w retounen apre yon konje medikal, ou dwe bay yon sètifikasyon doktè ki di ou kapab travay.",
-        "Kantite PTO pou anplwaye travayè Workrise ekri nan lèt òf la. PTO a gen ladann nenpòt konje maladi peye dapre lwa eta a. Anplwaye travayè ka roule (roll over) jiska 80 èdtan PTO ki pa itilize nan fen chak ane.",
-        "Ou ka itilize PTO pou nenpòt rezon: repo, detant, maladi, sante mantal, aktivite lekòl timoun, oswa vakans. Ou pa gen dwa gen balans PTO negatif.",
-        "Pou mande PTO, fè demann nan Paylocity oswa sistèm HRIS la. Si ou pran plis pase 3 jou pou rekipere apre maladi, Workrise ka mande dokimantasyon.",
-        "PTO ki pa itilize yo pa peye lè w separe ak konpayi an, sof si lwa eta a egzije. Men si w retravay nan konpayi an nan 1 an, w ap jwenn balans PTO ou te genyen an.",
-        "Dapre FMLA, Workrise bay jiska 12 semèn konje nan yon peryòd 12 mwa pou anplwaye ki kalifye, oswa jiska 26 semèn pou konje pou pran swen yon manm militè blese.",
-        "Pou kalifye pou FMLA, ou dwe travay pou Workrise omwen 12 mwa, travay 1250 èdtan nan 12 mwa anvan konje a, epi travay nan yon lokal ki gen omwen 50 anplwaye nan 75 mil.",
-        "Rezon pou FMLA: nesans yon timoun, adopsyon oswa plasman nan fanmi, pran swen yon konjwen, timoun oswa paran ki gen yon pwoblèm sante grav, ou menm ki gen yon pwoblèm sante grav, oswa ijans militè.",
-        "Workrise mezire 12 mwa FMLA kòm yon peryòd glisman (rolling backward). Ou ka pran konje FMLA kontinyèlman oswa pa ti bout (intermittent).",
-        "Pandan w nan konje FMLA, Workrise kontinye benefis sante ou nan menm nivo. Si w pa peye pati ou nan prim asirans, konpayi an ka sispann kouvèti apre 30 jou.",
-        "Si w pa retounen travay apre FMLA pou rezon ki pa sante ou oswa fanmi w, Workrise ka mande w ranbouse prim asirans sante konpayi an te peye pandan konje a.",
-        "Anplwaye ki pran FMLA dwe bay sipèvizè oswa Field HR yon avi vèbal oswa ekri. Si konje a previzib, bay 30 jou avans.",
-        "Workrise bay repo rezonab pou fanm k ap bay tete pou yo ka eksprime lèt. Gen yon chanm prive ak ti frijidè pou estoke lèt. Ou dwe make lèt la ak non ou ak dat. Repo plis pase 20 minit pa peye pou anplwaye non-egzante.",
-        "Workrise bay konje militè pou manm Rezèv oswa Gad Nasyonal ki patisipe nan antrennman oswa devwa aktif. Konje a dapre lwa federal ak eta. Workrise pa fè diskriminasyon kont moun ki nan sèvis militè.",
-        "Workrise bay konje peye oswa san peye pou ale vote si biwo vòt yo pa louvri omwen 3 anvan oswa apre chèf travay ou. Fè demann nan Paylocity omwen 2 jou davans.",
-        "Workrise bay konje peye oswa san peye pou sèvi nan jiri selon lwa eta a. Prezante konvokasyon jiri a pi vit posib. Ou ka itilize PTO pandan konje jiri.",
-        "Workrise bay konje san peye pou ponpye volontè, ofisye rezèv lapè, oswa sekouris ki reponn a ijans oswa ki patisipe nan fòmasyon planifye (jiska 14 jou pa ane). Anplwaye travayè ka itilize PTO pandan konje sa a.",
-        "Workrise bay konje san peye pou viktim krim oswa fanmi pwòch ki dwe ale nan tribinal. Ou ka itilize PTO pandan konje a. Bay dokimantasyon (konvokasyon, kòmandman tribinal).",
-        "Gen lòt kalite konje dapre lwa eta. Gade apendis eta yo nan Liv Referans. Kontakte Field HR pou kesyon.",
-        "Si ou blese nan travay, Workrise gen asirans konpansasyon travayè. Rapòte blesi a imedyatman bay manadjè ou oswa hsereporting@workrise.com. Rele Axiom nan (281) 419-7063 pou yon infimyè avant ou ale doktè.",
-        "Konpansasyon travayè ka bay swen medikal, lajan kach san taks pou ranplase salè pèdi, ak reyabilitasyon pwofesyonèl.",
-        "Lè w retounen apre yon blesi travay, Workrise ofri w menm pòsyon oswa yon pòsyon ekivalan, sof si sa ta afekte operasyon sekirite ak efikasite konpayi an.",
-        "Workrise gen yon Akò Abitraj Mityèl. Sa vle di ou ak konpayi an dakò pou rezoud tout diskisyon ki gen rapò ak travay atravè abitraj, pa nan tribinal devan yon jiri. Lwa Federal sou Abitraj (FAA) aplike.",
-        "Akò abitraj la kouvri tout reklamasyon sot pase ak lavni: diskriminasyon, asèlman, revanj, salè, lè siplemantè, benefis, ak lòt lit anplwaye. Men ou ka toujou pote plent bay EEOC, NLRB, oswa lòt ajans.",
-        "Pou kòmanse abitraj, ou dwei premye swiv Pwosedi Pre-Abitraj: voye yon lèt bay Depatman Legal Workrise, Lè sa a, medyasyon. Si sa pa mache, ou ka depoze yon demand abitraj nan AAA (American Arbitration Association).",
-        "Detèminasyon abitraj la dwe fèt nan Austin, Texas, oswa nan zòn metwopolitèn ki pi pre kote ou te travay. Chak pati peye pwòp avoka yo, men Workrise peye pifò frè abitraj eksepte $200 frè depo si anplwaye a kòmanse abitraj la.",
-        "Nan abitraj, ou pa ka fè yon aksyon klas (class action) oswa kolektif. Ou dwe pote reklamasyon ou sèlman nan non pèsonèl ou. Anyen nan akò sa a pa anpeche w pale ak yon avoka.",
-        "Liv Referans Workrise a pa yon kontra travay. Travay la se 'at-will', sa vle di ou kapab kite travay nenpòt lè, epi Workrise kapab revoke ou nenpòt lè, avèk oswa san rezon.",
-        "Lè w siyen Akonisman Liv Referans la, ou konfime ou te resevwa ak li Liv la, ou konprann règleman yo ka chanje, epi ou dakò ak Akò Abitraj Mityèl la. Si w kontinye travay plis pase 45 jou apre ou resevwa akò a, ou konsidere kòm ou aksepte l.",
-    ]
+    ] + WORKRISE_POLICY_FACTS   # Append the new Workrise facts at the end
+
+def ensure_workrise_facts():
+    """Add any missing Workrise policy facts to the training data without duplicating."""
+    existing_texts = {item["text"] for item in st.session_state.training_data}
+    added = 0
+    for fact in WORKRISE_POLICY_FACTS:
+        if fact not in existing_texts:
+            embedding = st.session_state.embedding_model.encode([fact])[0]
+            st.session_state.training_data.append({"text": fact, "embedding": embedding.tolist()})
+            added += 1
+    if added > 0:
+        rebuild_index()
+        save_training_data()
+        # Use st.info, but can't call st here because this may run before UI; we'll show later
+        return added
+    return 0
 
 def initialize_default_training():
     if not st.session_state.training_data:
+        # First run: load all default facts
         default_facts = get_default_training_facts()
         for fact in default_facts:
             if fact.strip():
@@ -294,6 +344,11 @@ def initialize_default_training():
                 st.session_state.training_data.append({"text": fact, "embedding": embedding.tolist()})
         rebuild_index()
         save_training_data()
+    else:
+        # Existing training data: ensure Workrise facts are present
+        added = ensure_workrise_facts()
+        if added > 0:
+            st.session_state._workrise_added = added  # store to show later
 
 # ---------- STREAMLIT PAGE CONFIG ----------
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
@@ -566,7 +621,7 @@ def get_predefined_voice_url(user_question):
             return url
     return None
 
-# ---------- HELPER FUNCTIONS (unchanged) ----------
+# ---------- HELPER FUNCTIONS ----------
 def save_all():
     save_training_data()
     save_dictionaries()
@@ -793,7 +848,7 @@ def render_audio_player():
             st.audio(data, format=mime)
         st.session_state.play_audio = None
 
-# ---------- UI COMPONENTS (unchanged) ----------
+# ---------- UI COMPONENTS ----------
 def dictionary_manager(t):
     st.subheader(t['dictionary'])
     lang = st.selectbox("Select language", list(LANGUAGES.keys()), key="dict_lang")
@@ -895,6 +950,10 @@ def test_training_section(t):
 
 def training_center(t):
     st.markdown(f"## {t['training_center']}")
+    # Show a message if Workrise facts were added
+    if hasattr(st.session_state, '_workrise_added') and st.session_state._workrise_added:
+        st.success(f"✅ {st.session_state._workrise_added} nouvo reyalite Workrise ajoute nan baz konesans la.")
+        del st.session_state._workrise_added
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"### {t['train_new']}")
@@ -966,8 +1025,8 @@ def show_sidebar():
         return menu, t
 
 def main():
-    if not st.session_state.training_data:
-        initialize_default_training()
+    # Initialize training data (will add Workrise facts if missing)
+    initialize_default_training()
     menu, t = show_sidebar()
     if menu == t.get('chat_interface_label', "Chat"):
         chat_interface(t)
