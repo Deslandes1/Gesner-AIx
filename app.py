@@ -61,9 +61,10 @@ def load_voice_cache():
         return cache
     return {}
 
-# ---------- DEFAULT TRAINING FACTS ----------
+# ---------- DEFAULT TRAINING FACTS (UPDATED WITH ALL CHAPTER 4 & 5) ----------
 def get_default_training_facts():
     return [
+        # ---------- PREVIOUS FACTS (keep all) ----------
         "Ti Malice se yon lojisyèl edikatif ki anseye timoun yo Kreyòl Ayisyen atravè jwèt ak istwa.",
         "Ti Malice gen yon liv ki rele 'Ti Malice aprann Kreyòl' ki gen 12 chapit.",
         "Chapit 1 Ti Malice: Alfabè kreyòl la ak pwononsyasyon.",
@@ -103,7 +104,191 @@ def get_default_training_facts():
         "Liteati kreyòl: ekriven tankou Frankétienne, Gary Victor, Lyonel Trouillot.",
         "Diferans ant Kreyòl Ayisyen ak lòt kreyòl.",
         "Analiz powèm: 'Kreyon mwen' pa Gesner Deslandes.",
-        "Rédaksyon avançée: kijan pou ekri yon lèt fòmèl an Kreyòl."
+        "Rédaksyon avançée: kijan pou ekri yon lèt fòmèl an Kreyòl.",
+        
+        # ---------- WORKRISE POLICIES (existing) ----------
+        "Workrise se yon konpayi ki sipòte moun ki fè travay di. Yo byen kontan ou rantre nan ekip la.",
+        "Nan Workrise, nou gen yon kilti kote tout moun kolabore, aprann, ak ede youn lòt.",
+        "Valè Workrise yo se: Posede Misyon an, Solisyon anvan Ego, Monte Bawo a, Aprann ak Grandi.",
+        "Posede Misyon an vle di nou toujou mete misyon an premye, nou pran inisyativ pou rezoud pwoblèm, epi nou posede rezilta yo.",
+        "Solisyon anvan Ego vle di nou pran desizyon ki baze sou reyalite ak done, nou respekte youn lòt, epi nou kolabore pou jwenn pi bon solisyon an.",
+        "Monte Bawo a vle di nou vize wo, nou toujou ap chache amelyore, epi nou livre solisyon ki ekselan.",
+        "Aprann ak Grandi vle di nou aprann nan echèk nou yo, nou kapitalize sou viktwa, nou louvri lespri, rezistan, epi nou chanje rapidman.",
+        "Anviwònman travay Workrise se yon espas ki an sekirite e ki pwodiktif. Nou espere ou deplase vit avèk nou.",
+        "Nan Workrise, kominikasyon se kle. Sèvi ak tout teknoloji yo bay pou kolabore.",
+        "Ou reprezante Workrise sou tout platfòm kominikasyon ou itilize. Tout kominikasyon ou yo kapab gade nenpòt moman.",
+        "Liv Referans sa a aplike pou tout anplwaye Workrise atravè tout filiales li yo.",
+        "Liv Referans sa a se pa yon kontra travay. Workrise kapab chanje l nenpòt lè san avètisman.",
+        "Nan Workrise, travay la se 'at‑will'. Sa vle di ou kapab kite travay la nenpòt lè, epi konpayi an kapab revoke ou nenpòt lè, avèk oswa san avètisman.",
+        "Workrise pa fè diskriminasyon sou baz ras, koulè, relijyon, laj, orijin, andikap, gwosès, idantite sèks, seksyalite, oswa estati militè.",
+        "Si ou kwè w ap sibi diskriminasyon, ou dwe rapòte sa bay sipèvizè ou oswa Field HR. Tout plent yo pral envestige.",
+        "Workrise entèdi tout fòm asèlman (harassment) ki baze sou seks, ras, laj, relijyon, andikap, oswa lòt karakteristik pwoteje.",
+        "Asèlman seksyèl gen ladan demand favè seksyèl, komèks ofansif sou kò yon moun, oswa kreye yon anviwònman ostil.",
+        "Si w ap temwen asèlman, ou dwe rapòte l imedyatman bay Field HR oswa lè l sèvi avèk liy dirèk Red Flag (1-877-647-3335).",
+        "Workrise pran tout mezi pou pwoteje moun ki rapòte asèlman oswa diskriminasyon kont revanj.",
+        "Konpayi an fè aranjman rezonab pou anplwaye andikape ki kapab fè travay la. Kontakte Field HR pou demann.",
+        "Anplwaye yo gen dwa patisipe nan aktivite pwoteje tankou pote plent bay EEOC, SEC, oswa NLRB. Konpayi an pa ka revanj kont yo.",
+        "Workrise gen yon politik 'pòt louvri'. Ou ka pale ak sipèvizè ou, manadjè, oswa Field HR sou nenpòt enkyetid.",
+        "Whistleblower (moun ki denonse fwod) yo pwoteje kont revanj. Yo ka rapòte ilegalite nan 1-877-647-3335.",
+        "Lafèm ak zam yo entèdi sou lokal Workrise. Tout menas oswa vyolans rapòte imedyatman.",
+        "Anplwaye regilye aplentan travay 40 èdtan semèn. Yo kalifye pou tout benefis.",
+        "Anplwaye tanporè travay mwens pase 3 mwa. Yo gen PTO men yo pa gen lòt benefis.",
+        "Anplwaye ki egzante (exempt) pa gen dwa pou lè siplemantè. Anplwaye ki non‑egzante (nonexempt) gen dwa pou lè siplemantè.",
+        "Workrise fè verification background sou tout moun ki aksepte yon òf travay. Si rapò a pa bon, òf la kapab anile.",
+        "Nou dwe verifye dwa ou pou travay Ozetazini nan twa jou apre premye jou travay ou.",
+        "Anplwaye yo dwe enfòme direktè yo de chanjman adrès, nimewo, oswa sitiyasyon familyal.",
+        "Referans pou ansyen anplwaye: Workrise sèlman bay dat travay ak tit pòsyon. Salè bay sèlman si ansyen anplwaye bay otorizasyon ekri.",
+        "Yon anplwaye pa ka sipèvize yon manm fanmi. Si sa rive, youn nan yo kapab transfere oswa revoke.",
+        "Pandan w ap travay, ou pa dwe fè komès ak enfòmasyon konfidansyèl sou Workrise. Sa vyole lwa sou komès anndan.",
+        "Anplwaye non‑egzante dwe anrejistre tout èdtan travay yo. Yo gen dwa pou repo manje ak repo pandan jounen an.",
+        "Anplwaye non‑egzante ki travay plis pase 40 èdtan nan yon semèn gen dwa pou lè siplemantè a 1.5 fwa salè regilye yo.",
+        "Anplwaye egzante pa gen dwa pou lè siplemantè men yo toujou gen pou yo fini travay yo.",
+        "Salè yo peye chak semèn. Ou ka wè dediksyon sou fèy salè ou.",
+        "Konduit entèdi: vòl, fo, fraz menasan, move itilizasyon pwopriyete konpayi, oswa enfliyans sou lòt anplwaye.",
+        "Pandan w pa nan travay, ou dwe evite konduit ki kapab afekte non Workrise oswa anpeche lòt anplwaye travay.",
+        "Fimen ak itilize dwòg ilegal entèdi sou lokal Workrise. Alkòl pèmèt sèlman nan evènman otorize.",
+        "Anplwaye yo dwe konfòme yo ak orè yo. Absans san avètisman ka mennen nan revokasyon.",
+        "Nan ka ijans (tranblemanntè, move tan), Workrise kapab fèmen. Anplwaye dwe kontakte sipèvizè yo.",
+        "Enfòmasyon konfidansyèl (done kliyan, estrateji) pa dwe pataje san otorizasyon.",
+        "Telefòn ak aparèy pèsonèl yo dwe itilize avèk jijman. Anplwaye yo pa dwe gen apèl twò long oswa voye SMS pandan lè travay.",
+        "Depans biznis (vwayaj, repa) kapab ranbouse si yo apwouve davans. Mande sipèvizè ou.",
+        "Pwopriyete konpayi (laptop, telefòn) yo dwe itilize sèlman pou travay. Pa enstale lojisyèl san pèmisyon.",
+        "Anplwaye yo gen aksè sèlman nan zòn yo bezwen. Kat aksè pa dwe prete.",
+        "Yo pa gen dwa itilize lokal Workrise lè yo pa nan travay san otorizasyon.",
+        "Anplwaye dwe rapòte nenpòt aksidan oswa blesi imedyatman. Sekirite se responsablite tout moun.",
+        "Yo pa gen dwa solisite oswa distribye literati politik sou lokal travay san pèmisyon.",
+        "Workrise gen kamera sekirite pou pwoteje moun ak byen. Anplwaye yo dwe konnen sa.",
+        "Anplwaye aplentan (40 èdtan) gen dwa pou asirans sante, PTO, ak lòt benefis.",
+        "Anplwaye a tan pasyèl (30-40 èdtan) gen dwa pou PTO ak asirans sante, men pwopòsyonèl.",
+        "PTO (Paid Time Off) – kantite jou depann sou ansyènte. Ou dwe fè demann davans.",
+        "Lwa FMLA bay moun ki malad, ki fèk fè yon tibebe, oswa k ap pran swen yon fanmi – 12 semèn konje san salè. Yo dwe travay 12 mwa ak 1250 èdtan pou kalifye.",
+        "Fanm ansent gen dwa pran repo pou bay tete. Workrise dwe bay yon espas prive.",
+        "Anplwaye ki nan rezèv militè yo gen dwa pou konje militè san pèdi travay yo.",
+        "Anplwaye gen dwa pou konje pou ale vote. Fè demann nan Field HR.",
+        "Konje pou jiri (jury duty) pèmèt. Workrise peye diferans lan si jiri la pa peye.",
+        "Viktim krim kapab pran konje pou ale nan tribinal. Kontakte Field HR.",
+        "Workrise gen konpansasyon aksidan travay. Si ou blese nan travay, rapòte imedyatman.",
+        "Nenpòt diskisyon ant anplwaye ak Workrise dwe ale nan abitraj (arbitration), pa nan tribinal. Sa vle di ou renonse dwa pou jiri.",
+        "Ou gen dwa pale ak yon avoka anvan ou siyen akò abitraj la.",
+        "Men ou ka toujou pote plent bay EEOC, NLRB, oswa lòt ajans gouvènman yo.",
+        "Workrise gen yon sant èd pou anplwaye (Field HR) ki disponib pou reponn kesyon. Imèl yo se fieldhr@workrise.com.",
+        "Ou ka fè rapò anonim atravè Red Flag Reporting: 1-877-647-3335 oswa redflag@redflagreporting.com.",
+        "Anplwaye dwe li tout Liv Referans sa a. Si ou gen kesyon, mande Field HR.",
+        "Si yon anplwaye Workrise kite travay li volontèman, li dwe remèt tout pwopriyete konpayi an imedyatman.",
+        "Si yon anplwaye pa vini travay pandan 3 jou san li pa avèti sipèvizè li, sa konsidere kòm demisyon volontè.",
+        "Tout bagay ki pou konpayi an (laptop, badj, kle, inifòm, katy kredi, ekipman sekirite) dwe retounen lè w sispann travay.",
+        "Vyolasyon règleman Workrise kapab mennen nan sanksyon jiska revokasyon.",
+        "Anplwaye travayè yo ap separe administrativman 30 jou apre dènye jou travay yo, si yo pa resevwa nouvo pwojè oswa yo pa nan konje apwouve.",
+        "Si w ap kite Workrise, mande ou fè sa pa yon lèt ekri ak rezon, dat, ak nouvo adrès.",
+        "Workrise apresye ke ou bay avètisman pi vit posib pou yo kapab ranplase w.",
+        "Si w kite travay san avètisman, w ap resevwa dènye chèk ou nan biwo a. Ou pap kapab rekite ankò si ou pa bay avètisman.",
+        "Lè yon pwojè fini, Workrise ap chèche lòt pwojè pou kenbe w travay.",
+        "Si w deside kite yon pwojè anvan l fini, w pap ranbouse pou demobilizasyon. Ou dwe retounen tout ekipman an.",
+        "Orè travay la fikse pa kliyan an pou chak pwojè. Semèn travay la kòmanse dimanch 12:00 AM CST epi li fini samdi 11:59 PM CST.",
+        "Anplwaye travayè yo peye chak semèn oswa chak de semèn, dapre lèt òf la. Si jou peman tonbe nan wikenn oswa jou ferye, yo peye anvan.",
+        "Anplwaye ki non‑egzante dwe anrejistre tout èdtan travay yo chak jou. Yo dwe chache apwobasyon sipèvizè anvan yo fè lè siplemantè.",
+        "Menm si yo pa resevwa apwobasyon davans, yo dwe rapòte tout èdtan yo travay epi yo p ap peye lè siplemantè san apwobasyon.",
+        "Ou dwe anrejistre lè w kòmanse, lè w kanpe pou repo, lè w kòmanse ankò, ak lè w sispann nan fen jounen an.",
+        "Repo kout yo peye si yo mwens pase 20 minit. Pa janm anrejistre tan pou yon lòt anplwaye. Fòsifikasyon tan se yon vyolasyon grav.",
+        "Si w wè yon erè nan tan ou, kontakte sipèvizè ou imedyatman pou l kominike ak Payroll.",
+        "Anplwaye non‑egzante gen dwa pou de repo peye 10 minit chak jou. Yo gen dwa pou 30 minit repo pou manje ki pa peye.",
+        "Anplwaye non‑egzante peye pou lè siplemantè a 1.5 fwa salè regilye. Yo dwe gen apwobasyon ekri sipèvizè anvan yo fè lè siplemantè.",
+        "Lè siplemantè kòmanse apre 40 èdtan travay nan yon semèn. Jou konje (PTO, vakans, maladi) pa konte nan 40 èdtan sa yo.",
+        "Anplwaye egzante pa gen lè siplemantè; salè yo kouvri lè siplemantè si bezwen.",
+        "Dediksyon obligatwa yo: taks federal ak eta, sekirite sosyal, Medicare, ak lòt dediksyon lalwa mande.",
+        "Lòt dediksyon (asirans, charite, ekipman) dwe gen otorizasyon ekri ou. Ou ka kontakte Payroll pou chanje alokasyon taks ou.",
+        "Si w pa retounen pwopriyete konpayi an, Workrise kapab pran sou chèk ou pou sa.",
+        "Anplwaye egzante (salary) ap resevwa salè yo pou nenpòt semèn kote yo fè yon ti travay. Semèn kòmanse dimanch 12:00 AM rive samdi 11:59 PM.",
+        "Workrise konfòme ak lwa federal (FLSA) ak lwa eta konsènan dediksyon salè pou anplwaye egzante.",
+        "Dediksyon ki pa otorize pa lwa FLSA entèdi. Si ou kwè gen yon dediksyon ki pa bon, rapòte sa bay Field HR imedyatman.",
+        "Field HR ap envestige tout rapò sou dediksyon ki pa bon. Si yo jwenn erè, w ap ranbouse epi yo pran mezi pou evite sa rive ankò.",
+        "Anplwaye Workrise dwe diskite ak sipèvizè yo anvan yo kòmanse yon lòt travay deyò. Sa gen ladan sèvi nan komisyon piblik oswa gouvènman.",
+        "Workrise bezwen konnen tout lòt travay anplwaye yo fè pou evite konfli enterè.",
+        "Si ou pa jwenn apwobasyon avan ou kòmanse yon lòt travay, ou kapab sibi sanksyon jiska revokasyon.",
+        
+        # ========== NEW: CHAPTER 4 – STANDARDS OF CONDUCT ==========
+        # 4.01 Prohibited Conduct
+        "Workrise entèdi fo dokiman, vòl, domaj pwopriyete, itilizasyon san otorizasyon, vyolasyon sekirite, batay, pote zam, konduit kriminèl.",
+        "Si ou refize obeyi sipèvizè ou, ou kapab sibi sanksyon.",
+        "Ou dwe avèti sipèvizè ou anvan ou absan. Absans san rezon legal ka mennen nan revokasyon.",
+        "Ou pa gen dwa kite travay san pèmisyon pandan lè travay (sèlman repo ak manje).",
+        "Fè lè siplemantè san apwobasyon entèdi. Refize fè lè siplemantè asiyen tou entèdi.",
+        "Workrise pa chanje politik at‑will. Ou toujou kapab kite travay nenpòt lè.",
+        
+        # 4.02 Off-Duty Conduct
+        "Konduit ilegal pandan w pa nan travay ki afekte Workrise oswa kapasite w pou fè travay w ap tolere.",
+        "Dezyèm travay dekouraje anpil. Entèdi si l kreye konfli, afekte pèfòmans, oswa konpetisyon ak Workrise.",
+        "Workrise pap peye konpansasyon aksidan pou blesi ki rive nan aktivite lwazi pandan w pa nan travay.",
+        
+        # 4.03 Smoking, Drug, and Alcohol Policy
+        "Fimen (vap, sigarèt elektwonik) entèdi andedan lokal Workrise oswa nan 20 pye nan pòt, fenèt, oswa priz lè.",
+        "Pa travay anba enfliyans dwòg ilegal, alkòl, oswa medikaman ki afekte kapasite w.",
+        "Itilizasyon marijana rekreyatif oswa medikal entèdi menm nan eta legal.",
+        "Workrise ka fè tès dwòg ak alkòl anvan travay, apre aksidan, oswa oaza. Refi tès se rezon pou revokasyon.",
+        "Si ou kondane pou vyolasyon lwa sou dwòg oswa alkòl, ou dwe notifye Field HR nan 5 jou, sinon ou kapab revoke.",
+        
+        # 4.04 Punctuality and Attendance
+        "Asiduite ak ponktyalite esansyèl. Si ou pa kapab vini, avèti sipèvizè ou omwen yon èdtan anvan.",
+        "Move tandans prezans (reta, kite bonè, absans repete) kapab mennen nan revokasyon.",
+        
+        # 4.05 Emergencies and Inclement Weather
+        "Si move tan anpeche w vini, avèti sipèvizè ou. Ou dwe vini le kondisyon amelyore.",
+        "Si Workrise fèmen pou lajounen, yo ap eseye notifye ou.",
+        
+        # 4.06 Confidentiality
+        "Ou dwe siyen yon akò konfidansyalite anvan ou kòmanse travay. Pa divilge enfòmasyon konfidansyèl san otorizasyon.",
+        "Obligasyon konfidansyalite kontinye apre w fin kite Workrise.",
+        
+        # 4.07 Business Conduct, Ethics and Corporate Policies
+        "Workrise entèdi koripsyon, trayizon, konfli enterè. Pa bay kado oswa peman san apwobasyon.",
+        "Pa aksepte kado nan men moun k ap postile pou travay. Sa kapab revokasyon.",
+        
+        # 4.08 Telephone and Device Use Policy
+        "Pandan w ap condui, itilize telefòn men lib (hands‑free). Pa voye SMS. Pa reponn apèl biznis pandan w ap condui.",
+        "Vyolasyon sa kapab revokasyon. Workrise pap peye amann pou itilizasyon telefòn.",
+        
+        # 4.09 Use of a Personal Vehicle
+        "Lè w itilize machin pèsonèl pou travay, ou dwe gen lisans ak asirans. Workrise peye yon alokasyon kilométraj (IRS rate).",
+        
+        # ========== CHAPTER 5 – OPERATIONAL CONSIDERATIONS ==========
+        # 5.01 Business-Related Expense Reimbursement
+        "Workrise ranbouse depans biznis rezonab. Soumèt depans ak resi nan 30 jou. Ranbousman fèt nan Payroll.",
+        
+        # 5.02 Travel & Per Diem
+        "Anplwaye ki vwayaje resevwa per diem pou manje, lojman, ak depans pandan vwayaj. Montan varye selon pwojè.",
+        
+        # 5.03 Company Property
+        "Pwopriyete Workrise (laptop, biwo, sistèm) dwe itilize sèlman pou travay. Pa espere vi prive. Workrise kapab enspekte nenpòt lè.",
+        
+        # 5.04 Acceptable Use
+        "Itilizasyon entènèt ak sistèm Workrise dwe pou travay. Pa enstale lojisyèl san otorizasyon.",
+        "Pa voyè spam, èrèl mas, oswa atake sistèm. Pa pataje modpas ou.",
+        "Pa pibliye enfòmasyon konfidansyèl sou rezo sosyal. Deklare ke opinyon pa fòtman reprezante Workrise.",
+        "Workrise ka kontwole tout itilizasyon sistèm. Vyolasyon kapab revokasyon.",
+        
+        # 5.05 Security and Access
+        "Pa pote zam sou lokal. Pa pataje modpas. Pa espere vi prive nan emèl oswa ot sistèm Workrise.",
+        
+        # 5.06 Off-Duty Use of Facilities
+        "Pa itilize lokal Workrise oswa pwopriyete konpayi lè w pa nan travay.",
+        
+        # 5.07 Employee Property
+        "Workrise ka enspekte bagaj pèsonèl si gen dout rezonab sou vòl oswa dwòg.",
+        
+        # 5.08 Security
+        "Rapòte moun ki san rezon. Sekirize biwo w lè w ale.",
+        
+        # 5.09 Visitor Policy
+        "Vizitè dwe siyen ak pase badj. Anplwaye dwe akonpaye yo tout tan.",
+        
+        # 5.10 Health and Safety
+        "Rapòte tout kondisyon danjere. Pa janm revanj kont moun ki rapòte. Rapòte blesi imedyatman.",
+        
+        # 5.11 Solicitation and Distribution of Literature
+        "Pa solisite oswa distribye literati pandan lè travay. Entèdi pou non‑anplwaye.",
+        
+        # 5.12 Video Surveillance
+        "Workrise ka enstale kamera sekirite nan zòn travay. Pa espere vi prive. Pa gen kamera nan twalèt oswa chanje rad."
     ]
 
 def initialize_default_training():
@@ -119,7 +304,7 @@ def initialize_default_training():
 # ---------- STREAMLIT PAGE CONFIG ----------
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 
-# ---------- CSS ----------
+# ---------- CSS (same as before) ----------
 st.markdown(
     """
     <style>
@@ -138,6 +323,31 @@ st.markdown(
     [data-testid="stSidebar"] .stSelectbox {
         background-color: #000000 !important;
         border-radius: 12px !important;
+    }
+    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
+        background-color: #000000 !important;
+        border: 1px solid #e94560 !important;
+        border-radius: 12px !important;
+    }
+    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
+        background-color: #000000 !important;
+        color: white !important;
+    }
+    [data-testid="stSidebar"] .stSelectbox svg {
+        fill: #e94560 !important;
+        stroke: #e94560 !important;
+    }
+    div[data-baseweb="popover"] ul {
+        background-color: #000000 !important;
+        border: 1px solid #e94560 !important;
+    }
+    div[data-baseweb="popover"] li {
+        color: white !important;
+        background-color: #000000 !important;
+    }
+    div[data-baseweb="popover"] li:hover {
+        background-color: #e94560 !important;
+        color: white !important;
     }
     .stButton button {
         background-color: #e94560 !important;
@@ -345,7 +555,7 @@ if "play_audio" not in st.session_state:
 
 VOICE_CACHE = load_voice_cache()
 
-# ---------- PRE‑DEFINED VOICE MAPPING (RAW URLs) ----------
+# ---------- PRE‑DEFINED VOICE MAPPING ----------
 PREDEFINED_VOICES = {
     "site konbyen let ki genhen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(1).wav",
     "konbyen let ki genhen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AI/main/recording%20(3).wav",
@@ -362,7 +572,7 @@ def get_predefined_voice_url(user_question):
             return url
     return None
 
-# ---------- HELPER FUNCTIONS ----------
+# ---------- HELPER FUNCTIONS (unchanged) ----------
 def save_all():
     save_training_data()
     save_dictionaries()
@@ -534,27 +744,18 @@ def reason_answer(query, retrieved_facts):
             return retrieved_facts[0]
     return retrieved_facts[0]
 
-# ========== FIXED: SPECIFIC HANDLING FOR THE THREE QUESTIONS ==========
 def generate_response(user_input):
     normalized = user_input.strip().lower()
-    
-    # 1. Question: "Site konbyen let ki genhen nan alfabe kreyol la?" -> return alphabet list
     if "site konbyen let ki genhen nan alfabe kreyol la" in normalized:
         answer = "A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z"
         return answer, False, False
-    
-    # 2. Question: "Konbyen let ki genhen nan alfabe kreyol la?" -> simple sentence
-    # Match both "genhen" and "gehen" (typo) to be safe
     if re.search(r"konbyen let ki (genhen|gehen) nan alfabe kreyol la", normalized):
         answer = "Nan alfabe kreyol la genhen 32 let."
         return answer, False, False
-    
-    # 3. Question: "Kijan ou rele?" -> name answer
     if "kijan ou rele" in normalized or "ki jan ou rele" in normalized:
         answer = "Non pa mwen se Gesner L'AI kreyate mwen se Gesner Deslandes nan Globalinternet.py."
         return answer, False, False
 
-    # Fallback to existing logic
     with st.spinner("🧠 Gesner AI ap reflechi... (thinking...)"):
         time.sleep(0.8)
         direct = direct_keyword_answer(user_input)
@@ -598,7 +799,7 @@ def render_audio_player():
             st.audio(data, format=mime)
         st.session_state.play_audio = None
 
-# ---------- UI COMPONENTS ----------
+# ---------- UI COMPONENTS (unchanged) ----------
 def dictionary_manager(t):
     st.subheader(t['dictionary'])
     lang = st.selectbox("Select language", list(LANGUAGES.keys()), key="dict_lang")
