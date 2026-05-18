@@ -61,10 +61,9 @@ def load_voice_cache():
         return cache
     return {}
 
-# ---------- DEFAULT TRAINING FACTS (Ti Malice + Creole levels) ----------
+# ---------- DEFAULT TRAINING FACTS ----------
 def get_default_training_facts():
     return [
-        # Ti Malice software book
         "Ti Malice se yon lojisyèl edikatif ki anseye timoun yo Kreyòl Ayisyen atravè jwèt ak istwa.",
         "Ti Malice gen yon liv ki rele 'Ti Malice aprann Kreyòl' ki gen 12 chapit.",
         "Chapit 1 Ti Malice: Alfabè kreyòl la ak pwononsyasyon.",
@@ -82,33 +81,28 @@ def get_default_training_facts():
         "Ti Malice gen yon seksyon egzèsis ki gen 50 kesyon pou pratike.",
         "Ou ka telechaje Ti Malice sou sitwèb globalinternet.py.",
         "Ti Malice fèt pa Gesner Deslandes pou ede timoun Ayisyen aprann Kreyòl fasilman.",
-        # Beginner Creole
         "Alfabè kreyòl la gen 32 lèt.",
         "Pwonon pèsonèl an Kreyòl: Mwen, ou, li, nou, yo.",
         "Vèb 'se' (to be) nan prezan: Mwen se, ou se, li se, nou se, yo se.",
         "Vèb 'gen' (to have) nan prezan: Mwen gen, ou gen, li gen, nou gen, yo gen.",
-        "Salitasyon debaz: Bonjou (Bondye), Bonswa (Aswe), Kijan ou rele? (Ki jan ou rele?), Mwen rele...",
-        "Kesyon debaz: Kijan ou ye? (How are you?), Mwen byen (I'm fine), Mèsi (Thank you), Pa dekwa (You're welcome).",
+        "Salitasyon debaz: Bonjou, Bonswa, Kijan ou rele?, Mwen rele...",
+        "Kesyon debaz: Kijan ou ye?, Mwen byen, Mèsi, Pa dekwa.",
         "Nonm 1-10: youn, de, twa, kat, senk, sis, sèt, uit, nèf, dis.",
-        "Koulè debaz: wouj (red), ble (blue), vèt (green), jòn (yellow), nwa (black), blan (white).",
-        # Intermediate Creole
-        "Tan pase (past tense): yo itilize 'te' devan vèb. Egzanp: Mwen te manje (I ate).",
-        "Tan kap vini (future tense): yo itilize 'ap' oswa 'pral'. Egzanp: Mwen ap manje (I will eat).",
-        "Nègasyon (negation): yo itilize 'pa' apre vèb. Egzanp: Mwen pa manje (I don't eat).",
-        "Pwopozisyon komen: nan (in), sou (on), anba (under), devan (in front of), dèyè (behind), bò (beside).",
-        "Fraz konplèks: Itilize 'ki' (that/which), 'kote' (where), 'poukisa' (why).",
-        "Vèb modèl: vle (to want), kapab (can), dwe (must), konnen (to know), fè (to do/make).",
-        # Advanced Creole
-        "Pawòl konpoze (compound words): pote + chay = potechay (backpack), bwa + chemen = bwachemen (forest path).",
-        "Pwovèb Kreyòl popilè: 'Dèyè mòn gen mòn' (Beyond mountains there are mountains - life is full of challenges).",
-        "Pwovèb: 'Men anpil, chay pa lou' (Many hands make light work).",
-        "Pwovèb: 'Ti ponyen fè gwo chay' (Little by little, big load is carried).",
-        "Anplwaye tan ki konpoze: Mwen te ap manje (I was eating).",
-        "Vwa pasif: Liv la te ekri pa Jan (The book was written by John).",
-        "Sijonktif (subjunctive): Fòk ou vini (You must come).",
-        "Liteati kreyòl: ekriven tankou Frankétienne, Gary Victor, ak Lyonel Trouillot.",
-        "Diferans ant Kreyòl Ayisyen ak Kreyòl Matinik oswa Giyàn.",
-        "Analiz powèm Kreyòl: 'Kreyon mwen' pa Gesner Deslandes.",
+        "Koulè debaz: wouj, ble, vèt, jòn, nwa, blan.",
+        "Tan pase: yo itilize 'te' devan vèb. Egzanp: Mwen te manje.",
+        "Tan kap vini: yo itilize 'ap' oswa 'pral'. Egzanp: Mwen ap manje.",
+        "Nègasyon: yo itilize 'pa' apre vèb. Egzanp: Mwen pa manje.",
+        "Pwopozisyon: nan, sou, anba, devan, dèyè, bò.",
+        "Fraz konplèks: itilize 'ki', 'kote', 'poukisa'.",
+        "Vèb modèl: vle, kapab, dwe, konnen, fè.",
+        "Pawòl konpoze: pote + chay = potechay, bwa + chemen = bwachemen.",
+        "Pwovèb: 'Dèyè mòn gen mòn', 'Men anpil, chay pa lou', 'Ti ponyen fè gwo chay'.",
+        "Anplwaye tan ki konpoze: Mwen te ap manje.",
+        "Vwa pasif: Liv la te ekri pa Jan.",
+        "Sijonktif: Fòk ou vini.",
+        "Liteati kreyòl: ekriven tankou Frankétienne, Gary Victor, Lyonel Trouillot.",
+        "Diferans ant Kreyòl Ayisyen ak lòt kreyòl.",
+        "Analiz powèm: 'Kreyon mwen' pa Gesner Deslandes.",
         "Rédaksyon avançée: kijan pou ekri yon lèt fòmèl an Kreyòl."
     ]
 
@@ -125,7 +119,7 @@ def initialize_default_training():
 # ---------- STREAMLIT PAGE CONFIG ----------
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 
-# ---------- CSS (dark theme + spinning glow brain) ----------
+# ---------- CSS ----------
 st.markdown(
     """
     <style>
@@ -145,31 +139,6 @@ st.markdown(
         background-color: #000000 !important;
         border-radius: 12px !important;
     }
-    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
-        background-color: #000000 !important;
-        border: 1px solid #e94560 !important;
-        border-radius: 12px !important;
-    }
-    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
-        background-color: #000000 !important;
-        color: white !important;
-    }
-    [data-testid="stSidebar"] .stSelectbox svg {
-        fill: #e94560 !important;
-        stroke: #e94560 !important;
-    }
-    div[data-baseweb="popover"] ul {
-        background-color: #000000 !important;
-        border: 1px solid #e94560 !important;
-    }
-    div[data-baseweb="popover"] li {
-        color: white !important;
-        background-color: #000000 !important;
-    }
-    div[data-baseweb="popover"] li:hover {
-        background-color: #e94560 !important;
-        color: white !important;
-    }
     .stButton button {
         background-color: #e94560 !important;
         color: white !important;
@@ -177,7 +146,6 @@ st.markdown(
         font-weight: bold !important;
         border: none;
     }
-    /* Make buttons smaller and inline when inside the chat row */
     .chat-row .stButton button {
         background-color: #ffaa33 !important;
         padding: 0px 8px !important;
@@ -238,7 +206,6 @@ st.markdown(
     .char-btn:hover {
         background-color: #e94560;
     }
-    /* Spinning brain with glow */
     @keyframes spin-globe {
         0% { transform: rotate(0deg); filter: drop-shadow(0 0 2px gold); }
         50% { filter: drop-shadow(0 0 15px #ffaa33) drop-shadow(0 0 5px orange); }
@@ -278,15 +245,6 @@ LANGUAGES = {
     "Español": "es"
 }
 
-# ============================================================
-#  REPLACE THIS MINIMAL TEXTS DICTIONARY WITH YOUR FULL TEXTS
-#  Required keys: 'app_title', 'chat_input', 'send', 'clear',
-#  'dictionary', 'voice_training', 'training_center',
-#  'bulk_training', 'manage_facts', 'test_training',
-#  'train_new', 'fact_text', 'add_fact', 'upload_csv',
-#  'upload_audio', 'save_voice', 'play', 'delete', 'edit',
-#  'update', 'chat_interface_label'
-# ============================================================
 TEXTS = {
     "en": {
         "app_title": "Gesner AI - Kreyòl Assistant",
@@ -361,7 +319,6 @@ TEXTS = {
         "chat_interface_label": "Chat"
     }
 }
-# ============================================================
 
 # ---------- SESSION STATE ----------
 if "conversation_history" not in st.session_state:
@@ -388,13 +345,10 @@ if "play_audio" not in st.session_state:
 
 VOICE_CACHE = load_voice_cache()
 
-# ---------- PRE‑DEFINED VOICE MAPPING (RAW GITHUB URLS) ----------
+# ---------- PRE‑DEFINED VOICE MAPPING (RAW URLs) ----------
 PREDEFINED_VOICES = {
-    # Question: "Site konbyen let ki genhen nan alfabe kreyol la?" -> alphabet list
     "site konbyen let ki genhen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(1).wav",
-    # Question: "Konbyen let ki genhen nan alfabe kreyol la?" -> simple sentence
-    "konbyen let ki gehen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(3).wav",
-    # Question: "Kijan ou rele?" -> name answer
+    "konbyen let ki genhen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AI/main/recording%20(3).wav",
     "kijan ou rele": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(4).wav"
 }
 
@@ -403,7 +357,6 @@ def normalize_text(text):
 
 def get_predefined_voice_url(user_question):
     norm_q = normalize_text(user_question)
-    # Check for exact patterns or partial matches
     for key, url in PREDEFINED_VOICES.items():
         if key in norm_q or norm_q.startswith(key):
             return url
@@ -508,7 +461,6 @@ def retrieve_facts_hybrid(query, k=5):
 
 def direct_keyword_answer(query):
     q_lower = query.lower().strip()
-    # Ti Malice
     if "ti malice" in q_lower:
         if "kiyès" in q_lower or "who" in q_lower or "kreyatè" in q_lower:
             return "Ti Malice se yon lojisyèl edikatif ki fèt pa Gesner Deslandes pou anseye Kreyòl Ayisyen atravè jwèt ak istwa."
@@ -517,13 +469,10 @@ def direct_keyword_answer(query):
         if "telechaje" in q_lower or "download" in q_lower:
             return "Ou ka telechaje Ti Malice sou sitwèb globalinternet.py."
         return "Ti Malice se yon lojisyèl k ap anseye Kreyòl Ayisyen. Li gen 12 chapit ak egzèsis. Pou plis enfòmasyon, mande m 'chapit Ti Malice' oswa 'telechaje Ti Malice'."
-    # Beginner
     if any(w in q_lower for w in ["beginner", "debutan", "debutant", "aprann kreyòl deba"]):
         return "Kou Kreyòl pou debitan (Beginner): Alfabè 32 lèt, pwonon (mwen, ou, li, nou, yo), vèb 'se' ak 'gen', salitasyon (Bonjou, Bonswa), nonm 1-10, koulè debaz. Kisa ou ta renmen aprann an premye?"
-    # Intermediate
     if any(w in q_lower for w in ["intermediate", "entèmedyè", "mwayen", "intermédiaire"]):
         return "Kou Kreyòl entèmedyè: Tan pase ak 'te', tan kap vini ak 'ap' oswa 'pral', nègasyon ak 'pa', pwopozisyon (nan, sou, anba), fraz konplèks ak 'ki', 'kote', 'poukisa'. Vle w pran yon egzèsis?"
-    # Advanced
     if any(w in q_lower for w in ["advanced", "avanse", "avancé"]):
         return "Kou Kreyòl avansé: Pawòl konpoze, pwovèb popilè (Dèyè mòn gen mòn, Men anpil chay pa lou), tan ki konpoze (Mwen te ap manje), vwa pasif, sijonktif (Fòk ou vini), literati kreyòl, ak analiz powèm. Eksplore youn nan sijè sa yo."
     return None
@@ -560,7 +509,6 @@ def reason_answer(query, retrieved_facts):
     if len(retrieved_facts) == 1:
         return retrieved_facts[0]
     q_lower = query.lower()
-    # Prioritize level-based learning
     if any(w in q_lower for w in ["beginner", "debutan", "debutant"]):
         beginner_facts = [f for f in retrieved_facts if "beginner" in f.lower() or "debitan" in f.lower() or "alfabè" in f.lower() or "pwonon" in f.lower()]
         if beginner_facts:
@@ -586,19 +534,18 @@ def reason_answer(query, retrieved_facts):
             return retrieved_facts[0]
     return retrieved_facts[0]
 
-# ========== NEW: SPECIFIC HANDLING FOR THE THREE QUESTIONS ==========
+# ========== FIXED: SPECIFIC HANDLING FOR THE THREE QUESTIONS ==========
 def generate_response(user_input):
     normalized = user_input.strip().lower()
     
     # 1. Question: "Site konbyen let ki genhen nan alfabe kreyol la?" -> return alphabet list
-    pattern1 = re.compile(r"site konbyen let ki genhen nan alfabe kreyol la")
-    if pattern1.search(normalized):
+    if "site konbyen let ki genhen nan alfabe kreyol la" in normalized:
         answer = "A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z"
-        return answer, False, False  # audio will be played via predefined voice
+        return answer, False, False
     
     # 2. Question: "Konbyen let ki genhen nan alfabe kreyol la?" -> simple sentence
-    pattern2 = re.compile(r"konbyen let ki gehen nan alfabe kreyol la")
-    if pattern2.search(normalized):
+    # Match both "genhen" and "gehen" (typo) to be safe
+    if re.search(r"konbyen let ki (genhen|gehen) nan alfabe kreyol la", normalized):
         answer = "Nan alfabe kreyol la genhen 32 let."
         return answer, False, False
     
@@ -625,9 +572,8 @@ def generate_response(user_input):
             return logic, False, False
     return "Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon.", True, False
 
-# ---------- AUDIO PLAYBACK (inline button) ----------
+# ---------- AUDIO PLAYBACK ----------
 def show_audio_button(text, user_question, key_suffix):
-    """Display an inline audio button (🔊) at the end of the message."""
     url = get_predefined_voice_url(user_question) if user_question else None
     if url:
         if st.button("🔊", key=f"audio_btn_{key_suffix}", help="Play audio"):
@@ -803,11 +749,8 @@ def chat_interface(t):
 
 def show_sidebar():
     with st.sidebar:
-        # Spinning brain with glow
         st.markdown('<div class="spinning-brain">🧠</div>', unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
-        
-        # Personal information (updated with correct phone/email)
         st.markdown(
             """
             <div class="sidebar-info">
@@ -821,7 +764,6 @@ def show_sidebar():
             """,
             unsafe_allow_html=True
         )
-        
         lang_choice = st.selectbox("🌐 Interface Language", list(LANGUAGES.keys()), key="lang_select")
         st.session_state.ui_language = LANGUAGES[lang_choice]
         t = TEXTS.get(st.session_state.ui_language, TEXTS["en"])
