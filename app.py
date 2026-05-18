@@ -388,11 +388,11 @@ if "play_audio" not in st.session_state:
 
 VOICE_CACHE = load_voice_cache()
 
-# ---------- PRE‑DEFINED VOICE MAPPING (raw GitHub URLs) ----------
+# ---------- PRE‑DEFINED VOICE MAPPING (UPDATED WITH NEW ALPHABET AUDIO) ----------
 PREDEFINED_VOICES = {
     "kijan ou rele": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording.wav",
-    "site konbyen let ki genhen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(1).wav",
-    "konbyen let ki gehen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AIx/main/recording%20(3).wav"
+    "site konbyen let ki genhen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AI/main/recording%20(3).wav",
+    "konbyen let ki gehen nan alfabe kreyol la": "https://raw.githubusercontent.com/Deslandes1/Gesner-AI/main/recording%20(3).wav"
 }
 
 def normalize_text(text):
@@ -589,7 +589,7 @@ def reason_answer(query, retrieved_facts):
             return retrieved_facts[0]
     return retrieved_facts[0]
 
-# ========== FIXED: ALPHABET ANSWER RETURNS THE LIST (MATCHES AUDIO) ==========
+# ========== UPDATED: ALPHABET ANSWER WITH NEW TEXT ==========
 def generate_response(user_input):
     normalized = user_input.strip().lower()
     # Patterns for the alphabet question
@@ -603,9 +603,9 @@ def generate_response(user_input):
     ]
     for pat in patterns:
         if pat in normalized:
-            # Return the full alphabet list (matches the audio)
-            answer = "A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z"
-            return answer, False, False  # skip_audio=False so the 🔊 button shows
+            # New answer as requested
+            answer = "Alfabe (\"e\" aksan fos) genhen 32 let."
+            return answer, False, False  # skip_audio=False so the 🔊 button shows (audio will play via predefined voice)
 
     with st.spinner("🧠 Gesner AI ap reflechi... (thinking...)"):
         time.sleep(0.8)
@@ -815,8 +815,9 @@ def show_sidebar():
                 <strong>Gesner AI</strong><br>
                 Created by <strong>Gesner Deslandes</strong><br>
                 Founder of <strong>GlobalInternet.py</strong><br>
-                ✉️ <a href="mailto:gesner@globalinternet.py">gesner@globalinternet.py</a><br>
-                🌐 <a href="https://globalinternet.py" target="_blank">globalinternet.py</a>
+                ✉️ <a href="mailto:deslandes78@gmail.com">deslandes78@gmail.com</a><br>
+                📞 +509 4738-5663<br>
+                🌐 <a href="https://globalinternetsitepy-abh7v6tnmskxxnuplrdcgk.streamlit.app/" target="_blank">globalinternetsitepy-abh7v6tnmskxxnuplrdcgk.streamlit.app/</a>
             </div>
             """,
             unsafe_allow_html=True
