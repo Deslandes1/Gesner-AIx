@@ -61,7 +61,7 @@ def load_voice_cache():
         return cache
     return {}
 
-# ---------- DEFAULT TRAINING FACTS (UPDATED WITH ALL CHAPTER 4 & 5) ----------
+# ---------- DEFAULT TRAINING FACTS (UPDATED WITH ALL CHAPTER 4, 5 & WORKRISE POLICIES) ----------
 def get_default_training_facts():
     return [
         # ---------- PREVIOUS FACTS (keep all) ----------
@@ -206,89 +206,83 @@ def get_default_training_facts():
         "Workrise bezwen konnen tout lòt travay anplwaye yo fè pou evite konfli enterè.",
         "Si ou pa jwenn apwobasyon avan ou kòmanse yon lòt travay, ou kapab sibi sanksyon jiska revokasyon.",
         
-        # ========== NEW: CHAPTER 4 – STANDARDS OF CONDUCT ==========
-        # 4.01 Prohibited Conduct
+        # ========== CHAPTER 4 – STANDARDS OF CONDUCT ==========
         "Workrise entèdi fo dokiman, vòl, domaj pwopriyete, itilizasyon san otorizasyon, vyolasyon sekirite, batay, pote zam, konduit kriminèl.",
         "Si ou refize obeyi sipèvizè ou, ou kapab sibi sanksyon.",
         "Ou dwe avèti sipèvizè ou anvan ou absan. Absans san rezon legal ka mennen nan revokasyon.",
         "Ou pa gen dwa kite travay san pèmisyon pandan lè travay (sèlman repo ak manje).",
         "Fè lè siplemantè san apwobasyon entèdi. Refize fè lè siplemantè asiyen tou entèdi.",
         "Workrise pa chanje politik at‑will. Ou toujou kapab kite travay nenpòt lè.",
-        
-        # 4.02 Off-Duty Conduct
         "Konduit ilegal pandan w pa nan travay ki afekte Workrise oswa kapasite w pou fè travay w ap tolere.",
         "Dezyèm travay dekouraje anpil. Entèdi si l kreye konfli, afekte pèfòmans, oswa konpetisyon ak Workrise.",
-        "Workrise pap peye konpansasyon aksidan pou blesi ki rive nan aktivite lwazi pandan w pa nan travay.",
-        
-        # 4.03 Smoking, Drug, and Alcohol Policy
         "Fimen (vap, sigarèt elektwonik) entèdi andedan lokal Workrise oswa nan 20 pye nan pòt, fenèt, oswa priz lè.",
         "Pa travay anba enfliyans dwòg ilegal, alkòl, oswa medikaman ki afekte kapasite w.",
         "Itilizasyon marijana rekreyatif oswa medikal entèdi menm nan eta legal.",
         "Workrise ka fè tès dwòg ak alkòl anvan travay, apre aksidan, oswa oaza. Refi tès se rezon pou revokasyon.",
         "Si ou kondane pou vyolasyon lwa sou dwòg oswa alkòl, ou dwe notifye Field HR nan 5 jou, sinon ou kapab revoke.",
-        
-        # 4.04 Punctuality and Attendance
         "Asiduite ak ponktyalite esansyèl. Si ou pa kapab vini, avèti sipèvizè ou omwen yon èdtan anvan.",
         "Move tandans prezans (reta, kite bonè, absans repete) kapab mennen nan revokasyon.",
-        
-        # 4.05 Emergencies and Inclement Weather
         "Si move tan anpeche w vini, avèti sipèvizè ou. Ou dwe vini le kondisyon amelyore.",
         "Si Workrise fèmen pou lajounen, yo ap eseye notifye ou.",
-        
-        # 4.06 Confidentiality
         "Ou dwe siyen yon akò konfidansyalite anvan ou kòmanse travay. Pa divilge enfòmasyon konfidansyèl san otorizasyon.",
         "Obligasyon konfidansyalite kontinye apre w fin kite Workrise.",
-        
-        # 4.07 Business Conduct, Ethics and Corporate Policies
         "Workrise entèdi koripsyon, trayizon, konfli enterè. Pa bay kado oswa peman san apwobasyon.",
         "Pa aksepte kado nan men moun k ap postile pou travay. Sa kapab revokasyon.",
-        
-        # 4.08 Telephone and Device Use Policy
         "Pandan w ap condui, itilize telefòn men lib (hands‑free). Pa voye SMS. Pa reponn apèl biznis pandan w ap condui.",
         "Vyolasyon sa kapab revokasyon. Workrise pap peye amann pou itilizasyon telefòn.",
-        
-        # 4.09 Use of a Personal Vehicle
         "Lè w itilize machin pèsonèl pou travay, ou dwe gen lisans ak asirans. Workrise peye yon alokasyon kilométraj (IRS rate).",
         
         # ========== CHAPTER 5 – OPERATIONAL CONSIDERATIONS ==========
-        # 5.01 Business-Related Expense Reimbursement
         "Workrise ranbouse depans biznis rezonab. Soumèt depans ak resi nan 30 jou. Ranbousman fèt nan Payroll.",
-        
-        # 5.02 Travel & Per Diem
         "Anplwaye ki vwayaje resevwa per diem pou manje, lojman, ak depans pandan vwayaj. Montan varye selon pwojè.",
-        
-        # 5.03 Company Property
         "Pwopriyete Workrise (laptop, biwo, sistèm) dwe itilize sèlman pou travay. Pa espere vi prive. Workrise kapab enspekte nenpòt lè.",
-        
-        # 5.04 Acceptable Use
         "Itilizasyon entènèt ak sistèm Workrise dwe pou travay. Pa enstale lojisyèl san otorizasyon.",
         "Pa voyè spam, èrèl mas, oswa atake sistèm. Pa pataje modpas ou.",
         "Pa pibliye enfòmasyon konfidansyèl sou rezo sosyal. Deklare ke opinyon pa fòtman reprezante Workrise.",
         "Workrise ka kontwole tout itilizasyon sistèm. Vyolasyon kapab revokasyon.",
-        
-        # 5.05 Security and Access
         "Pa pote zam sou lokal. Pa pataje modpas. Pa espere vi prive nan emèl oswa ot sistèm Workrise.",
-        
-        # 5.06 Off-Duty Use of Facilities
         "Pa itilize lokal Workrise oswa pwopriyete konpayi lè w pa nan travay.",
-        
-        # 5.07 Employee Property
         "Workrise ka enspekte bagaj pèsonèl si gen dout rezonab sou vòl oswa dwòg.",
-        
-        # 5.08 Security
         "Rapòte moun ki san rezon. Sekirize biwo w lè w ale.",
-        
-        # 5.09 Visitor Policy
         "Vizitè dwe siyen ak pase badj. Anplwaye dwe akonpaye yo tout tan.",
-        
-        # 5.10 Health and Safety
         "Rapòte tout kondisyon danjere. Pa janm revanj kont moun ki rapòte. Rapòte blesi imedyatman.",
-        
-        # 5.11 Solicitation and Distribution of Literature
         "Pa solisite oswa distribye literati pandan lè travay. Entèdi pou non‑anplwaye.",
+        "Workrise ka enstale kamera sekirite nan zòn travay. Pa espere vi prive. Pa gen kamera nan twalèt oswa chanje rad.",
         
-        # 5.12 Video Surveillance
-        "Workrise ka enstale kamera sekirite nan zòn travay. Pa espere vi prive. Pa gen kamera nan twalèt oswa chanje rad."
+        # ========== NEW WORKRISE POLICY FACTS (from 5.13, 6.01-6.12, Arbitration) ==========
+        "Workrise pap peye konpansasyon aksidan travay pou blesi ki rive pandan anplwaye patisipe volontè nan aktivite lwazi, sosyal, oswa espòtif lè li pa nan travay, si aktivite sa a pa fè pati devwa travay li.",
+        "Workrise bay benefis pou anplwaye regilye aplentan (full-time) ak anplwaye a tan pasyèl (part-time) k ap travay 30 èdtan oswa plis pa semèn. Anplwaye tanporè pa kalifye pou benefis eksepte PTO.",
+        "Definisyon 'Domestic Partner' nan Workrise: yon moun menm sèks oswa diferan sèks ak anplwaye a, ki gen 18 an oswa plis, ki pa marye, k ap viv nan menm kay, epi ki pa gen relasyon fanmi ki ta anpeche maryaj nan eta kote yo rete a.",
+        "Workrise bay konje (leaves of absence) selon lwa ak politik konpayi pou anplwaye ki andikape, ki bezwen konje long pou devwa sivik, swen fanmi, oswa rezon pèsonèl. Ou dwe notifye manadjè oswa Field HR pi vit posib.",
+        "Si ou pa retounen nan travay apre konje a fini, sa pral konsidere kòm yon demisyon volontè. Lè w retounen apre yon konje medikal, ou dwe bay yon sètifikasyon doktè ki di ou kapab travay.",
+        "Kantite PTO pou anplwaye travayè Workrise ekri nan lèt òf la. PTO a gen ladann nenpòt konje maladi peye dapre lwa eta a. Anplwaye travayè ka roule (roll over) jiska 80 èdtan PTO ki pa itilize nan fen chak ane.",
+        "Ou ka itilize PTO pou nenpòt rezon: repo, detant, maladi, sante mantal, aktivite lekòl timoun, oswa vakans. Ou pa gen dwa gen balans PTO negatif.",
+        "Pou mande PTO, fè demann nan Paylocity oswa sistèm HRIS la. Si ou pran plis pase 3 jou pou rekipere apre maladi, Workrise ka mande dokimantasyon.",
+        "PTO ki pa itilize yo pa peye lè w separe ak konpayi an, sof si lwa eta a egzije. Men si w retravay nan konpayi an nan 1 an, w ap jwenn balans PTO ou te genyen an.",
+        "Dapre FMLA, Workrise bay jiska 12 semèn konje nan yon peryòd 12 mwa pou anplwaye ki kalifye, oswa jiska 26 semèn pou konje pou pran swen yon manm militè blese.",
+        "Pou kalifye pou FMLA, ou dwe travay pou Workrise omwen 12 mwa, travay 1250 èdtan nan 12 mwa anvan konje a, epi travay nan yon lokal ki gen omwen 50 anplwaye nan 75 mil.",
+        "Rezon pou FMLA: nesans yon timoun, adopsyon oswa plasman nan fanmi, pran swen yon konjwen, timoun oswa paran ki gen yon pwoblèm sante grav, ou menm ki gen yon pwoblèm sante grav, oswa ijans militè.",
+        "Workrise mezire 12 mwa FMLA kòm yon peryòd glisman (rolling backward). Ou ka pran konje FMLA kontinyèlman oswa pa ti bout (intermittent).",
+        "Pandan w nan konje FMLA, Workrise kontinye benefis sante ou nan menm nivo. Si w pa peye pati ou nan prim asirans, konpayi an ka sispann kouvèti apre 30 jou.",
+        "Si w pa retounen travay apre FMLA pou rezon ki pa sante ou oswa fanmi w, Workrise ka mande w ranbouse prim asirans sante konpayi an te peye pandan konje a.",
+        "Anplwaye ki pran FMLA dwe bay sipèvizè oswa Field HR yon avi vèbal oswa ekri. Si konje a previzib, bay 30 jou avans.",
+        "Workrise bay repo rezonab pou fanm k ap bay tete pou yo ka eksprime lèt. Gen yon chanm prive ak ti frijidè pou estoke lèt. Ou dwe make lèt la ak non ou ak dat. Repo plis pase 20 minit pa peye pou anplwaye non-egzante.",
+        "Workrise bay konje militè pou manm Rezèv oswa Gad Nasyonal ki patisipe nan antrennman oswa devwa aktif. Konje a dapre lwa federal ak eta. Workrise pa fè diskriminasyon kont moun ki nan sèvis militè.",
+        "Workrise bay konje peye oswa san peye pou ale vote si biwo vòt yo pa louvri omwen 3 anvan oswa apre chèf travay ou. Fè demann nan Paylocity omwen 2 jou davans.",
+        "Workrise bay konje peye oswa san peye pou sèvi nan jiri selon lwa eta a. Prezante konvokasyon jiri a pi vit posib. Ou ka itilize PTO pandan konje jiri.",
+        "Workrise bay konje san peye pou ponpye volontè, ofisye rezèv lapè, oswa sekouris ki reponn a ijans oswa ki patisipe nan fòmasyon planifye (jiska 14 jou pa ane). Anplwaye travayè ka itilize PTO pandan konje sa a.",
+        "Workrise bay konje san peye pou viktim krim oswa fanmi pwòch ki dwe ale nan tribinal. Ou ka itilize PTO pandan konje a. Bay dokimantasyon (konvokasyon, kòmandman tribinal).",
+        "Gen lòt kalite konje dapre lwa eta. Gade apendis eta yo nan Liv Referans. Kontakte Field HR pou kesyon.",
+        "Si ou blese nan travay, Workrise gen asirans konpansasyon travayè. Rapòte blesi a imedyatman bay manadjè ou oswa hsereporting@workrise.com. Rele Axiom nan (281) 419-7063 pou yon infimyè avant ou ale doktè.",
+        "Konpansasyon travayè ka bay swen medikal, lajan kach san taks pou ranplase salè pèdi, ak reyabilitasyon pwofesyonèl.",
+        "Lè w retounen apre yon blesi travay, Workrise ofri w menm pòsyon oswa yon pòsyon ekivalan, sof si sa ta afekte operasyon sekirite ak efikasite konpayi an.",
+        "Workrise gen yon Akò Abitraj Mityèl. Sa vle di ou ak konpayi an dakò pou rezoud tout diskisyon ki gen rapò ak travay atravè abitraj, pa nan tribinal devan yon jiri. Lwa Federal sou Abitraj (FAA) aplike.",
+        "Akò abitraj la kouvri tout reklamasyon sot pase ak lavni: diskriminasyon, asèlman, revanj, salè, lè siplemantè, benefis, ak lòt lit anplwaye. Men ou ka toujou pote plent bay EEOC, NLRB, oswa lòt ajans.",
+        "Pou kòmanse abitraj, ou dwei premye swiv Pwosedi Pre-Abitraj: voye yon lèt bay Depatman Legal Workrise, Lè sa a, medyasyon. Si sa pa mache, ou ka depoze yon demand abitraj nan AAA (American Arbitration Association).",
+        "Detèminasyon abitraj la dwe fèt nan Austin, Texas, oswa nan zòn metwopolitèn ki pi pre kote ou te travay. Chak pati peye pwòp avoka yo, men Workrise peye pifò frè abitraj eksepte $200 frè depo si anplwaye a kòmanse abitraj la.",
+        "Nan abitraj, ou pa ka fè yon aksyon klas (class action) oswa kolektif. Ou dwe pote reklamasyon ou sèlman nan non pèsonèl ou. Anyen nan akò sa a pa anpeche w pale ak yon avoka.",
+        "Liv Referans Workrise a pa yon kontra travay. Travay la se 'at-will', sa vle di ou kapab kite travay nenpòt lè, epi Workrise kapab revoke ou nenpòt lè, avèk oswa san rezon.",
+        "Lè w siyen Akonisman Liv Referans la, ou konfime ou te resevwa ak li Liv la, ou konprann règleman yo ka chanje, epi ou dakò ak Akò Abitraj Mityèl la. Si w kontinye travay plis pase 45 jou apre ou resevwa akò a, ou konsidere kòm ou aksepte l.",
     ]
 
 def initialize_default_training():
