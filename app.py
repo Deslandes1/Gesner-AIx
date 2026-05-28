@@ -1,7 +1,5 @@
 import streamlit as st
 import requests
-import json
-import os
 
 # =========================
 # CONFIG
@@ -9,7 +7,7 @@ import os
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 
 # =========================
-# DATA (TRAINING CENTER ONLY DISPLAY)
+# TRAINING CENTER (READ ONLY)
 # =========================
 HAITIAN_KNOWLEDGE_FACTS = [
     "Kristòf Kolon te dekouvri Ayiti an 1492.",
@@ -20,56 +18,61 @@ HAITIAN_KNOWLEDGE_FACTS = [
 ]
 
 # =========================
-# GROK API
+# GROQ API KEY
 # =========================
-def get_grok_key():
+def get_groq_key():
     try:
-        return st.secrets["GROK_API_KEY"]
+        return st.secrets["GROQ_API_KEY"]
     except:
         return None
 
-def call_grok(prompt):
-    key = get_grok_key()
+# =========================
+# GROQ CALL (ONLY BRAIN)
+# =========================
+def call_groq(prompt):
+    key = get_groq_key()
+
     if not key:
-        return "Grok API key pa jwenn nan secrets."
+        return "GROQ API key pa jwenn nan secrets."
+
+    url = "https://api.groq.com/openai/v1/chat/completions"
+
+    headers = {
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model": "llama3-70b-8192",
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are Gesner AI. "
+                    "Answer directly in Haitian Creole. "
+                    "Do NOT repeat the question. "
+                    "Be short, correct, and clear."
+                )
+            },
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.7,
+        "max_tokens": 500
+    }
 
     try:
-        response = requests.post(
-            "https://api.x.ai/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {key}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "grok-1",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are Gesner AI. "
-                            "Answer ALL questions directly in Haitian Creole. "
-                            "Do NOT repeat the question. "
-                            "Be accurate and concise."
-                        )
-                    },
-                    {"role": "user", "content": prompt}
-                ],
-                "temperature": 0.7,
-                "max_tokens": 500
-            },
-            timeout=8
-        )
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
 
         if response.status_code == 200:
             return response.json()["choices"][0]["message"]["content"]
 
-        return "Erè nan Grok API."
+        return f"Groq Error: {response.text}"
 
     except Exception:
-        return "Mwen pa ka konekte ak Grok kounye a."
+        return "Pa ka konekte ak Groq kounye a."
 
 # =========================
-# UI STYLE (LIGHT MODE)
+# LIGHT UI STYLE
 # =========================
 st.markdown("""
 <style>
@@ -114,20 +117,21 @@ Built by Gesner Deslandes
 """)
 
     st.markdown("---")
-    st.markdown("### 📚 Training Center (Read Only)")
+    st.markdown("### 📚 Training Center")
+
     for fact in HAITIAN_KNOWLEDGE_FACTS:
         st.write("• " + fact)
 
 # =========================
-# CHAT MEMORY
+# CHAT MEMORY SAFE
 # =========================
 if "chat" not in st.session_state:
     st.session_state.chat = []
 
 # =========================
-# CHAT DISPLAY
+# CHAT DISPLAY (SAFE FIX)
 # =========================
-st.title("🧠 Gesner AI (Grok Powered)")
+st.title("🧠 Gesner AI (Groq Powered)")
 
 for msg in st.session_state.chat:
     role = msg.get("role", "bot")
@@ -152,10 +156,10 @@ if st.button("Send"):
             "text": user_input.strip()
         })
 
-        # GROK ONLY RESPONSE
-        answer = call_grok(user_input)
+        # GROQ ONLY RESPONSE
+        answer = call_groq(user_input)
 
-        # save bot message
+        # save assistant message
         st.session_state.chat.append({
             "role": "bot",
             "text": answer
