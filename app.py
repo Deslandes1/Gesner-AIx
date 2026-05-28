@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import faiss
-from transformers import pipeline, Conversation
+from transformers import pipeline   # <-- removed 'Conversation'
 import json
 import base64
 import time
@@ -106,9 +106,9 @@ def retrieve_context(query, top_k=3):
 # 4. LLM Response Generation (with RAG)
 # -------------------------------------------------------------------
 @st.cache_resource
-def load_llm():
-    # Using a conversational pipeline; replace with your preferred model
-    return pipeline("conversational", model=LLM_MODEL_NAME)
+def load_generator():
+    # Using a text generation pipeline
+    return pipeline("text-generation", model=LLM_MODEL_NAME)
 
 def get_ai_response(user_input):
     """Generate response using LLM + retrieved context."""
@@ -121,10 +121,8 @@ Context:
 User: {user_input}
 Gesner AI:"""
     
-    llm = load_llm()
-    # For simplicity, we use text generation pipeline
-    generator = pipeline("text-generation", model=LLM_MODEL_NAME, max_new_tokens=150)
-    result = generator(prompt, do_sample=True, temperature=0.7)[0]["generated_text"]
+    generator = load_generator()
+    result = generator(prompt, do_sample=True, max_new_tokens=150, temperature=0.7)[0]["generated_text"]
     # Extract only the assistant's answer (after "Gesner AI:")
     answer = result.split("Gesner AI:")[-1].strip()
     return answer
