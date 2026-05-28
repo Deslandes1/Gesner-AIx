@@ -3,7 +3,6 @@ import json
 import numpy as np
 import faiss
 import os
-import re
 import requests
 from sentence_transformers import SentenceTransformer
 
@@ -15,10 +14,8 @@ st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 DATA_DIR = ".gesner_data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
-TRAINING_FILE = os.path.join(DATA_DIR, "training.json")
-
 # =========================
-# LIGHT UI
+# UI (LIGHT MODE)
 # =========================
 st.markdown("""
 <style>
@@ -28,7 +25,7 @@ st.markdown("""
 [data-testid="stSidebar"] {
     background-color: #eef2ff;
 }
-.stTextInput input, .stTextArea textarea {
+.stTextInput input {
     background-color: white !important;
     color: black !important;
 }
@@ -40,40 +37,29 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================
-# KNOWLEDGE BASE
+# CORE KNOWLEDGE (ONLY SAFE FACTS)
 # =========================
-HAITIAN_KNOWLEDGE_FACTS = [
-    "Kristòf Kolon te dekouvri Ayiti nan 1492.",
-    "Pòtoprens se kapital Ayiti.",
-    "Ayiti sitiye nan Karayib la.",
-    "Jan Jak Desalin te pwoklame endepandans 1804."
-]
-
 CORE_ANSWERS = {
     "kijan ou rele": "Mwen rele Gesner AI.",
     "ki kote ayiti ye": "Ayiti sitiye nan Karayib la.",
-    "ki moun ki dekouvri ayiti": "Kristòf Kolon te dekouvri Ayiti nan 1492.",
-    "soup joumou": "Soup joumou se manje endepandans Ayiti."
+    "ki moun ki dekouvri ayiti": "Kristòf Kolon te dekouvri Ayiti nan 1492."
 }
 
 # =========================
-# MODEL
+# MODEL (FOR OPTIONAL MEMORY ONLY)
 # =========================
 if "model" not in st.session_state:
     st.session_state.model = SentenceTransformer("all-MiniLM-L6-v2")
 
 if "training_data" not in st.session_state:
-    if os.path.exists(TRAINING_FILE):
-        st.session_state.training_data = json.load(open(TRAINING_FILE, "r", encoding="utf-8"))
-    else:
-        st.session_state.training_data = []
+    st.session_state.training_data = []
 
 if "index" not in st.session_state:
     st.session_state.index = None
     st.session_state.texts = []
 
 # =========================
-# SAFE INDEX
+# SAFE FAISS BUILD
 # =========================
 def rebuild_index():
     texts = []
@@ -85,7 +71,7 @@ def rebuild_index():
             vec = st.session_state.model.encode(item["text"])
             vectors.append(vec)
 
-    if len(vectors) == 0:
+    if not vectors:
         return
 
     dim = len(vectors[0])
@@ -96,64 +82,13 @@ def rebuild_index():
     st.session_state.texts = texts
 
 # =========================
-# INIT TRAINING
-# =========================
-def init_training():
-    existing = {x["text"] for x in st.session_state.training_data if "text" in x}
-
-    for fact in HAITIAN_KNOWLEDGE_FACTS:
-        if fact not in existing:
-            st.session_state.training_data.append({"text": fact})
-
-    rebuild_index()
-
-init_training()
-
-# =========================
-# CORE ANSWERS
+# CORE ANSWER CHECK
 # =========================
 def core_answer(q):
     return CORE_ANSWERS.get(q.lower().strip())
 
 # =========================
-# INTENT ROUTER
-# =========================
-def intent_router(q):
-    q = q.lower()
-
-    if "kijan ou rele" in q:
-        return "Mwen rele Gesner AI."
-
-    if "ki kote ayiti ye" in q:
-        return "Ayiti sitiye nan Karayib la."
-
-    if "ki moun ki dekouvri ayiti" in q:
-        return "Kristòf Kolon te dekouvri Ayiti nan 1492."
-
-    if "soup joumou" in q:
-        return "Soup joumou se manje endepandans Ayiti."
-
-    return None
-
-# =========================
-# MEMORY SEARCH
-# =========================
-def search_memory(query):
-    if st.session_state.index is None:
-        return []
-
-    vec = st.session_state.model.encode(query).astype("float32").reshape(1, -1)
-    _, idx = st.session_state.index.search(vec, 3)
-
-    results = []
-    for i in idx[0]:
-        if i != -1 and i < len(st.session_state.texts):
-            results.append(st.session_state.texts[i])
-
-    return results
-
-# =========================
-# GROK API (ONLINE BRAIN)
+# GROK (ONLINE BRAIN)
 # =========================
 def grok_call(prompt):
     try:
@@ -167,11 +102,14 @@ def grok_call(prompt):
             json={
                 "model": "grok-1",
                 "messages": [
-                    {"role": "system", "content": "Answer ONLY in Haitian Creole. Be direct and concise."},
+                    {
+                        "role": "system",
+                        "content": "You are Gesner AI. Always answer in Haitian Creole. Be direct and accurate."
+                    },
                     {"role": "user", "content": prompt}
                 ]
             },
-            timeout=6
+            timeout=8
         )
 
         if res.status_code == 200:
@@ -180,47 +118,34 @@ def grok_call(prompt):
         return None
 
 # =========================
-# MAIN INTELLIGENCE ENGINE (FIXED)
+# MAIN ENGINE (GROK-FIRST LOGIC)
 # =========================
 def generate_answer(user_input):
     q = user_input.lower().strip()
 
-    # 1. CORE
-    ca = core_answer(q)
-    if ca:
-        return ca
+    # 1. CORE LOCAL ANSWERS
+    if core_answer(q):
+        return core_answer(q)
 
-    # 2. INTENT
-    intent = intent_router(q)
-    if intent:
-        return intent
-
-    # 3. MEMORY (ONLY SAFE MATCH)
-    mem = search_memory(user_input)
-    if mem:
-        best = mem[0]
-        if any(w in best.lower() for w in q.split()[:2]):
-            return best
-
-    # 4. GROK = PRIMARY ONLINE BRAIN FOR UNKNOWN QUESTIONS
+    # 2. ALWAYS USE GROK FOR UNKNOWN QUESTIONS
     grok = grok_call(user_input)
     if grok:
         return grok
 
-    # 5. FINAL FALLBACK
+    # 3. FINAL FALLBACK
     return "Mwen pa gen repons sa kounye a."
 
 # =========================
 # CHAT UI
 # =========================
 def chat():
-    st.title("🧠 Gesner AI")
+    st.title("🧠 Gesner AI (Grok Powered)")
 
     if "chat" not in st.session_state:
         st.session_state.chat = []
 
-    for r, t in st.session_state.chat:
-        st.write("🧑" if r == "user" else "🤖", t)
+    for role, msg in st.session_state.chat:
+        st.write("🧑" if role == "user" else "🤖", msg)
 
     user = st.text_input("Poze kestyon")
 
@@ -229,7 +154,7 @@ def chat():
 
         answer = generate_answer(user)
 
-        # CLEAN OUTPUT (no repetition)
+        # clean output
         answer = answer.replace(user, "").strip()
 
         st.session_state.chat.append(("ai", answer))
@@ -248,7 +173,7 @@ Built by Gesner Deslandes
 """)
 
 # =========================
-# RUN APP
+# RUN
 # =========================
 sidebar()
 chat()
