@@ -73,7 +73,7 @@ def load_cognitive_examples():
             return json.load(f)
     return []
 
-# ========== WORKRISE POLICY FACTS (partial list – add your full list) ==========
+# ========== WORKRISE POLICY FACTS (partial – add your full list) ==========
 WORKRISE_POLICY_FACTS = [
     "Workrise pap peye konpansasyon aksidan travay pou blesi ki rive pandan anplwaye patisipe volontè nan aktivite lwazi, sosyal, oswa espòtif lè li pa nan travay, si aktivite sa a pa fè pati devwa travay li.",
     "Workrise bay benefis pou anplwaye regilye aplentan (full-time) ak anplwaye a tan pasyèl (part-time) k ap travay 30 èdtan oswa plis pa semèn.",
@@ -121,12 +121,14 @@ def get_default_training_facts():
         # Workrise policies
         *WORKRISE_POLICY_FACTS,
         
-        # History (examples)
+        # History (important facts)
         "Ayiti te vin endepandan 1ye janvye 1804. Se te premye repiblik nwa endepandan nan mond lan.",
         "Etazini te okipe Ayiti soti 1915 rive 1934.",
         "François Duvalier (Papa Dok) te vin prezidan an 1957.",
         "Tranblemanntè 12 janvye 2010 te touye plis pase 200,000 moun.",
         "Jovenel Moïse te asasine 7 jiyè 2021.",
+        # Bwa Kayiman fact (strong, clear, will be hardcoded as well)
+        "Bwa Kayiman se kote seremoni sekrè esklav yo te fèt 21 out 1791 pou lanse revolisyon esklav la. Se te yon reyinyon ki te dirije pa Boukmann Dutty ak yon prèt vodou. Sa te kòmanse revolisyon ayisyen an."
     ]
     return facts
 
@@ -148,6 +150,12 @@ def initialize_default_training():
                 embedding = st.session_state.embedding_model.encode([fact])[0]
                 st.session_state.training_data.append({"text": fact, "embedding": embedding.tolist()})
                 added += 1
+        # Also ensure Bwa Kayiman fact exists
+        bwa_fact = "Bwa Kayiman se kote seremoni sekrè esklav yo te fèt 21 out 1791 pou lanse revolisyon esklav la. Se te yon reyinyon ki te dirije pa Boukmann Dutty ak yon prèt vodou. Sa te kòmanse revolisyon ayisyen an."
+        if bwa_fact not in existing:
+            embedding = st.session_state.embedding_model.encode([bwa_fact])[0]
+            st.session_state.training_data.append({"text": bwa_fact, "embedding": embedding.tolist()})
+            added += 1
         if added > 0:
             rebuild_index()
             save_training_data()
@@ -221,16 +229,14 @@ def find_cognitive_match(query):
     return None
 
 def apply_cognitive_format(query, matched_example):
-    # Simple placeholder replacement – you can enhance
     output = matched_example["output"]
-    # If the output contains {query}, replace it
     output = output.replace("{query}", query)
     return output
 
 # ---------- STREAMLIT PAGE CONFIG ----------
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 
-# ---------- CSS ----------
+# ---------- CSS (unchanged – same as previous) ----------
 st.markdown(
     """
     <style>
@@ -599,7 +605,6 @@ def retrieve_facts_hybrid(query, k=5):
 
 def direct_keyword_answer(query):
     q_lower = query.lower().strip()
-    # Ti Malice
     if "ti malice" in q_lower:
         if "kiyès" in q_lower or "who" in q_lower or "kreyatè" in q_lower:
             return "Ti Malice se yon lojisyèl edikatif ki fèt pa Gesner Deslandes pou anseye Kreyòl Ayisyen atravè jwèt ak istwa."
@@ -608,7 +613,6 @@ def direct_keyword_answer(query):
         if "telechaje" in q_lower or "download" in q_lower:
             return "Ou ka telechaje Ti Malice sou sitwèb globalinternet.py."
         return "Ti Malice se yon lojisyèl k ap anseye Kreyòl Ayisyen. Li gen 12 chapit ak egzèsis. Pou plis enfòmasyon, mande m 'chapit Ti Malice' oswa 'telechaje Ti Malice'."
-    # Learning levels
     if any(w in q_lower for w in ["beginner", "debutan", "debutant", "aprann kreyòl deba"]):
         return "Kou Kreyòl pou debitan (Beginner): Alfabè 32 lèt, pwonon (mwen, ou, li, nou, yo), vèb 'se' ak 'gen', salitasyon (Bonjou, Bonswa), nonm 1-10, koulè debaz. Kisa ou ta renmen aprann an premye?"
     if any(w in q_lower for w in ["intermediate", "entèmedyè", "mwayen", "intermédiaire"]):
@@ -671,10 +675,11 @@ def reason_answer(query, retrieved_facts):
             return ". ".join(history_facts[:3])
     return retrieved_facts[0]
 
+# ========== ENHANCED generate_response with hardcoded Bwa Kayiman ==========
 def generate_response(user_input):
     normalized = user_input.strip().lower()
     
-    # 1. Hardcoded special cases (alphabet list)
+    # Hardcoded special cases
     if "site konbyen let ki genhen nan alfabe kreyol la" in normalized:
         return "A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z", False, False
     if re.search(r"konbyen let ki (genhen|gehen) nan alfabe kreyol la", normalized):
@@ -682,27 +687,31 @@ def generate_response(user_input):
     if "kijan ou rele" in normalized or "ki jan ou rele" in normalized:
         return "Non pa mwen se Gesner L'AI kreyate mwen se Gesner Deslandes nan Globalinternet.py.", False, False
     
-    # 2. Direct keyword answers
+    # NEW: Hardcoded Bwa Kayiman question
+    if "bwa kayiman" in normalized:
+        return "Bwa Kayiman se kote seremoni sekrè esklav yo te fèt 21 out 1791 pou lanse revolisyon esklav la. Se te yon reyinyon ki te dirije pa Boukmann Dutty ak yon prèt vodou. Sa te kòmanse revolisyon ayisyen an.", False, False
+    
+    # Direct keyword answers
     direct = direct_keyword_answer(user_input)
     if direct:
         return direct, False, False
     
-    # 3. Cognitive example match
+    # Cognitive example match
     cog_match = find_cognitive_match(user_input)
     if cog_match:
         return apply_cognitive_format(user_input, cog_match), False, False
     
-    # 4. Local retrieval
+    # Local retrieval
     facts = retrieve_facts_hybrid(user_input, k=5)
     if facts:
         return reason_answer(user_input, facts), False, False
     
-    # 5. Math / logic
+    # Math / logic
     math_result = reason_about_question(user_input)
     if math_result:
         return math_result, False, False
     
-    # 6. Grok API
+    # Grok API
     grok_answer = call_grok_api(user_input)
     if grok_answer:
         return grok_answer, False, False
