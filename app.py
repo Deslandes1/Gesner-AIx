@@ -75,55 +75,44 @@ def load_cognitive_examples():
             return json.load(f)
     return []
 
-# ========== HAITIAN KNOWLEDGE BASE ==========
+# ========== DATA ==========
 HAITIAN_KNOWLEDGE_FACTS = [
     "Kristòf Kolon te dekouvri zile Ispanyola (kote Ayiti ye jodi a) nan 5 desanm 1492.",
-    "Kolon te rele zile a 'La Isla Española'. Pita fransè yo te rele l 'Saint-Domingue'.",
-    "Anvan Kolon, Endyen Taino yo te rete sou zile a depi anviwon 300 anvan epòk nou an.",
-    "Pòtoprens se kapital Ayiti. Li sou kòt lwès peyi a.",
-    "Ayiti sitiye nan Karayib la, sou zile Ispanyola ki gen tou Repiblik Dominikèn.",
-    "Ayiti gen yon sipèfisi 27,750 kilomèt kare. Li se twazyèm pi gwo peyi Karayib la.",
-    "Gwo rivyè Ayiti yo se Latibonit, Lakay, ak Ladesdèyè.",
-    "Toupatou nan Ayiti gen bèl plaj, sitou nan Kokoye (Labade) ak Jakmèl.",
-    "Tousen Louverture te yon lidè enpòtan nan revolisyon esklav la.",
+    "Pòtoprens se kapital Ayiti.",
+    "Ayiti sitiye nan Karayib la.",
+    "Tousen Louverture te yon lidè revolisyon esklav la.",
     "Jan Jak Desalin te pwoklame endepandans Ayiti 1ye janvye 1804.",
-    "Anri Kristòf te bati Sitadèl Laferyè a, youn nan pi gwo fò nan Amerik yo.",
-    "Etazini te okipe Ayiti soti 1915 rive 1934.",
-    "François Duvalier (Papa Dok) te dirije 1957-1971.",
-    "Jean-Claude Duvalier (Bébé Dok) te dirije 1971-1986.",
-    "Jean-Bertrand Aristide te premye prezidan demokratik eli an 1990.",
-    "Tranblemanntè 12 janvye 2010 te fè gwo ravaj nan Pòtoprens.",
-    "Jovenel Moïse te asasine 7 jiyè 2021.",
-    "Vodou se yon relijyon ki fèt nan melanj tradisyon Afriken ak Krisyanis.",
-    "Kanaval Ayiti fèt chak ane anvan Karèm.",
-    "Kompas (conpa) se yon dans ak mizik popilè an Ayiti.",
-    "Diri ak pwa se manje nasyonal Ayiti.",
-    "Soup joumou se manje senbolik pou 1ye janvye, jou endepandans.",
-    "Alfabè kreyòl la gen 32 lèt.",
-    "Pwonon pèsonèl an Kreyòl: Mwen, ou, li, nou, yo.",
-    "Salitasyon debaz: Bonjou, Bonswa, Kijan ou rele?, Mwen rele...",
-    "Tan pase: yo itilize 'te' devan vèb. Egzanp: Mwen te manje.",
-    "Tan kap vini: yo itilize 'ap' oswa 'pral'. Egzanp: Mwen ap manje.",
 ]
 
-def get_default_training_facts():
-    return HAITIAN_KNOWLEDGE_FACTS
+# ---------- INIT TRAINING ----------
+def rebuild_index():
+    if st.session_state.training_data:
+        st.session_state.texts = [x["text"] for x in st.session_state.training_data]
+        embeddings = [np.array(x["embedding"], dtype=np.float32) for x in st.session_state.training_data]
+        dim = len(embeddings[0])
+        st.session_state.index = faiss.IndexFlatL2(dim)
+        st.session_state.index.add(np.array(embeddings))
+    else:
+        st.session_state.index = None
+        st.session_state.texts = []
 
 def initialize_default_training():
     if not st.session_state.training_data:
         for fact in HAITIAN_KNOWLEDGE_FACTS:
-            embedding = st.session_state.embedding_model.encode([fact])[0]
-            st.session_state.training_data.append({"text": fact, "embedding": embedding.tolist()})
+            emb = st.session_state.embedding_model.encode([fact])[0]
+            st.session_state.training_data.append({
+                "text": fact,
+                "embedding": emb.tolist()
+            })
         rebuild_index()
         save_training_data()
 
-# ---------- CORE FIX: SAFE CHAT CLEAR STATE ----------
+# ---------- FIXED CORE CRASH ----------
 if "conversation_history" not in st.session_state:
     st.session_state.conversation_history = []
 
-# ---------- SESSION STATE ----------
 if "embedding_model" not in st.session_state:
-    with st.spinner("Loading AI model..."):
+    with st.spinner("Loading AI model... (first time only)"):
         st.session_state.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
     st.session_state.index = None
     st.session_state.texts = []
@@ -148,38 +137,42 @@ if "play_audio" not in st.session_state:
 
 VOICE_CACHE = load_voice_cache()
 
-# ---------- INDEX ----------
-def rebuild_index():
-    if st.session_state.training_data:
-        st.session_state.texts = [x["text"] for x in st.session_state.training_data]
-        embeddings = [np.array(x["embedding"], dtype=np.float32) for x in st.session_state.training_data]
-        dim = len(embeddings[0])
-        st.session_state.index = faiss.IndexFlatL2(dim)
-        st.session_state.index.add(np.array(embeddings))
-    else:
-        st.session_state.index = None
-        st.session_state.texts = []
+# ---------- SAFE RESPONSE ----------
+def generate_response(user_input, uploaded_image_bytes=None):
+    try:
+        if uploaded_image_bytes:
+            return "Mwen resevwa imaj la, men mwen pa ka analize li kounye a.", False, False
 
-# ---------- FIXED CHAT RESPONSE ----------
-def generate_response(user_input):
-    return f"Ou te di: {user_input}"
+        if user_input.strip():
+            return f"Ou di: {user_input}", False, False
 
-# ---------- CHAT UI ----------
-def chat_interface():
-    st.title("Gesner AI")
+    except Exception:
+        pass
 
+    return "Mwen pa gen repons kounye a.", True, False
+
+# ---------- CHAT UI (FIXED INDENTATION ERROR HERE) ----------
+def chat_interface(t):
+    st.markdown(f"<h1 style='text-align:center'>{t['app_title']}</h1>", unsafe_allow_html=True)
+
+    chat_text = ""
     for msg in st.session_state.conversation_history:
         if msg["role"] == "user":
-            st.write("🧑", msg["content"])
+            chat_text += "🧑‍💻 " + msg["content"] + "\n\n"
         else:
-            st.write("🤖", msg["content"])
+            chat_text += "🤖 " + msg["content"] + "\n\n"
 
-    col1, col2 = st.columns([4,1])
+    st.text_area("Chat history", value=chat_text, height=400, disabled=True)
+
+    col1, col2, col3 = st.columns([6,1,1])
 
     with col1:
         user_input = st.text_input("Message")
 
     with col2:
+        uploaded_file = st.file_uploader("img", type=["jpg","png","jpeg"])
+
+    with col3:
         send = st.button("Send")
 
     if st.button("Clear Chat"):
@@ -187,17 +180,39 @@ def chat_interface():
         st.rerun()
 
     if send and user_input.strip():
-        st.session_state.conversation_history.append({"role":"user","content":user_input})
+        img_bytes = uploaded_file.read() if uploaded_file else None
 
-        answer = generate_response(user_input)
+        st.session_state.conversation_history.append({
+            "role": "user",
+            "content": user_input
+        })
 
-        if not answer:
+        answer, is_fallback, skip_audio = generate_response(user_input, img_bytes)
+
+        # SAFE BOX FIX (this prevents empty crash replies)
+        if not answer or not isinstance(answer, str):
             answer = "Mwen pa gen repons kounye a."
 
-        st.session_state.conversation_history.append({"role":"assistant","content":answer})
+        st.session_state.conversation_history.append({
+            "role": "assistant",
+            "content": answer
+        })
+
         st.rerun()
 
-# ---------- RUN ----------
-rebuild_index()
-initialize_default_training()
-chat_interface()
+# ---------- SIMPLE UI CONFIG ----------
+st.set_page_config(page_title="Gesner AI", layout="wide")
+
+TEXTS = {
+    "en": {"app_title": "Gesner AI"},
+    "fr": {"app_title": "Gesner AI"},
+    "ht": {"app_title": "Gesner AI - Asistan"}
+}
+
+def main():
+    rebuild_index()
+    initialize_default_training()
+    chat_interface(TEXTS["en"])
+
+if __name__ == "__main__":
+    main()
