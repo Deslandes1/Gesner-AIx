@@ -73,7 +73,7 @@ def load_cognitive_examples():
             return json.load(f)
     return []
 
-# ========== WORKRISE POLICY FACTS (partial) ==========
+# ========== WORKRISE POLICY FACTS (keep but deprioritize) ==========
 WORKRISE_POLICY_FACTS = [
     "Workrise pap peye konpansasyon aksidan travay pou blesi ki rive pandan anplwaye patisipe volontè nan aktivite lwazi, sosyal, oswa espòtif lè li pa nan travay, si aktivite sa a pa fè pati devwa travay li.",
     "Workrise bay benefis pou anplwaye regilye aplentan (full-time) ak anplwaye a tan pasyèl (part-time) k ap travay 30 èdtan oswa plis pa semèn.",
@@ -87,10 +87,58 @@ WORKRISE_POLICY_FACTS = [
     "Lwa Federal sou Abitraj (FAA) aplike. Akò abitraj la kouvri tout reklamasyon sot pase ak lavni.",
 ]
 
+# ========== HAITIAN KNOWLEDGE BASE (added to default training) ==========
+HAITIAN_KNOWLEDGE_FACTS = [
+    # Discovery
+    "Kristòf Kolon te dekouvri zile Ispanyola (kote Ayiti ye jodi a) nan 5 desanm 1492.",
+    "Kolon te rele zile a 'La Isla Española'. Pita fransè yo te rele l 'Saint-Domingue'.",
+    "Anvan Kolon, Endyen Taino yo te rete sou zile a depi anviwon 300 anvan epòk nou an.",
+    
+    # Geography
+    "Pòtoprens se kapital Ayiti. Li sou kòt lwès peyi a.",
+    "Ayiti sitiye nan Karayib la, sou zile Ispanyola ki gen tou Repiblik Dominikèn.",
+    "Ayiti gen yon sipèfisi 27,750 kilomèt kare. Li se twazyèm pi gwo peyi Karayib la.",
+    "Chèn montay ki pi wo nan Ayiti se 'Chèn la Sèl' ak 'Chèn a Bwa'. Pik lwès la wo 2,680 mèt.",
+    "Gwo rivyè Ayiti yo se Latibonit, Lakay, ak Ladesdèyè.",
+    "Toupatou nan Ayiti gen bèl plaj, sitou nan Kokoye (Labade) ak Jakmèl.",
+    
+    # History (additional)
+    "Tousen Louverture te yon lidè enpòtan nan revolisyon esklav la. Li te pran kontwòl tout Sen Domeng.",
+    "Jan Jak Desalin te pwoklame endepandans Ayiti 1ye janvye 1804.",
+    "Anri Kristòf te bati Sitadèl Laferyè a, youn nan pi gwo fò nan Amerik yo.",
+    "Etwazini te okipe Ayiti 1915-1934.",
+    "François Duvalier (Papa Dok) te dirije 1957-1971, li te kreye tonton makout yo.",
+    "Jean-Claude Duvalier (Bébé Dok) te dirije 1971-1986, li te kouri an Frans.",
+    "Jean-Bertrand Aristide te premye prezidan demokratik eli an 1990. Yo te ranvèse l nan koudeta 1991.",
+    "Tranblemanntè 12 janvye 2010 te fè gwo ravaj nan Pòtoprens.",
+    "Jovenel Moïse te asasine 7 jiyè 2021.",
+    
+    # Famous people
+    "Manno Charlemagne se yon chante-otè entènasyonal ayisyen.",
+    "Wyclef Jean se yon mizisyen ayisyen-ameriken manm Fugees.",
+    "Michaëlle Jean te Gouvènè Jeneral Kanada (2005-2010).",
+    "Edwidge Danticat se yon ekriven ayisyen-ameriken.",
+    "Garcelle Beauvais se yon aktris ak mannken ayisyen-ameriken.",
+    "Jason Derulo se yon chantè ameriken ki gen orijin ayisyèn.",
+    "Tony Yayo se rapè ameriken ki gen orijin ayisyèn.",
+    
+    # Culture
+    "Vodou se yon relijyon ki fèt nan melanj tradisyon Afriken ak Krisyanis.",
+    "Kanaval Ayiti fèt chak ane anvan Karèm, li gen gwo parad ak mizik.",
+    "Rara se yon fèt tradisyonèl ayisyèn ak mizik, tambou, ak vaksen.",
+    "Gwo mizik ayisyen gen ladan konpa, twoubadou, ak rasin.",
+    "Kompas (conpa) se yon dans ak mizik popilè pou Ayiti antye.",
+    "Gwo manje ayisyen: diri ak pwa (pwa nwa oswa pwa kongo), sòs pwa, bannann peze, ak salad.",
+    "Soup joumou se manje senbolik pou 1ye janvye, jou endepandans.",
+    "Diri ak pwa se manje nasyonal Ayiti.",
+    
+    # General knowledge added to core answers
+]
+
 # ========== DEFAULT TRAINING FACTS ==========
 def get_default_training_facts():
     facts = [
-        # Ti Malice & Kreyòl
+        # Ti Malice & Kreyòl grammar (keep all previous)
         "Ti Malice se yon lojisyèl edikatif ki anseye timoun yo Kreyòl Ayisyen atravè jwèt ak istwa.",
         "Ti Malice gen 12 chapit. Chapit 1: Alfabè, Chapit 2: Nonm, Chapit 3: Koulè, Chapit 4: Fanmi, Chapit 5: Manje, Chapit 6: Bèt, Chapit 7: Vèb, Chapit 8: Tan, Chapit 9: Fraz senp, Chapit 10: Konvèsasyon, Chapit 11: Pwovèb, Chapit 12: Istwa.",
         "Ou ka telechaje Ti Malice sou sitwèb globalinternet.py.",
@@ -117,18 +165,11 @@ def get_default_training_facts():
         "Diferans ant Kreyòl Ayisyen ak lòt kreyòl.",
         "Analiz powèm: 'Kreyon mwen' pa Gesner Deslandes.",
         "Rédaksyon avançée: kijan pou ekri yon lèt fòmèl an Kreyòl.",
-        
-        # Workrise policies
-        *WORKRISE_POLICY_FACTS,
-        
-        # History (important facts)
-        "Ayiti te vin endepandan 1ye janvye 1804. Se te premye repiblik nwa endepandan nan mond lan.",
-        "Etazini te okipe Ayiti soti 1915 rive 1934.",
-        "François Duvalier (Papa Dok) te vin prezidan an 1957.",
-        "Tranblemanntè 12 janvye 2010 te touye plis pase 200,000 moun.",
-        "Jovenel Moïse te asasine 7 jiyè 2021.",
-        "Bwa Kayiman se kote seremoni sekrè esklav yo te fèt 21 out 1791 pou lanse revolisyon esklav la. Se te yon reyinyon ki te dirije pa Boukmann Dutty ak yon prèt vodou. Sa te kòmanse revolisyon ayisyen an."
     ]
+    # Add all Workrise facts
+    facts.extend(WORKRISE_POLICY_FACTS)
+    # Add all Haitian knowledge facts
+    facts.extend(HAITIAN_KNOWLEDGE_FACTS)
     return facts
 
 def initialize_default_training():
@@ -141,24 +182,21 @@ def initialize_default_training():
         rebuild_index()
         save_training_data()
     else:
+        # Ensure new facts are added
         existing = {item["text"] for item in st.session_state.training_data}
         added = 0
-        for fact in WORKRISE_POLICY_FACTS:
+        all_extra = WORKRISE_POLICY_FACTS + HAITIAN_KNOWLEDGE_FACTS
+        for fact in all_extra:
             if fact not in existing:
                 embedding = st.session_state.embedding_model.encode([fact])[0]
                 st.session_state.training_data.append({"text": fact, "embedding": embedding.tolist()})
                 added += 1
-        bwa_fact = "Bwa Kayiman se kote seremoni sekrè esklav yo te fèt 21 out 1791 pou lanse revolisyon esklav la. Se te yon reyinyon ki te dirije pa Boukmann Dutty ak yon prèt vodou. Sa te kòmanse revolisyon ayisyen an."
-        if bwa_fact not in existing:
-            embedding = st.session_state.embedding_model.encode([bwa_fact])[0]
-            st.session_state.training_data.append({"text": bwa_fact, "embedding": embedding.tolist()})
-            added += 1
         if added > 0:
             rebuild_index()
             save_training_data()
             st.session_state._workrise_added = added
 
-# ========== GROK API ==========
+# ---------- GROK API ----------
 def get_grok_api_key():
     try:
         return st.secrets["GROK_API_KEY"]
@@ -192,7 +230,7 @@ def call_grok_api(prompt, system_prompt="You are Gesner AI, a helpful assistant 
         st.error(f"Grok API error: {e}")
     return None
 
-# ========== COGNITIVE TRAINING ==========
+# ---------- COGNITIVE TRAINING ----------
 def add_cognitive_example(input_text, output_format, description=""):
     example = {
         "input": input_text.strip(),
@@ -230,8 +268,7 @@ def apply_cognitive_format(query, matched_example):
     output = output.replace("{query}", query)
     return output
 
-# ========== CENTRAL CORE ANSWERS DICTIONARY ==========
-# Add any question and its exact answer here. The AI will check this first.
+# ========== CENTRAL CORE ANSWERS DICTIONARY (expanded) ==========
 CORE_ANSWERS = {
     # Alphabet
     "site konbyen let ki genhen nan alfabe kreyol la": "A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z",
@@ -239,26 +276,48 @@ CORE_ANSWERS = {
     "konbyen let ki gehen nan alfabe kreyol la": "Nan alfabe kreyol la gen 32 let.",
     "kijan ou rele": "Non pa mwen se Gesner L'AI kreyate mwen se Gesner Deslandes nan Globalinternet.py.",
     
-    # History
-    "kisa bwa kayiman ye": "Bwa Kayiman se kote seremoni sekrè esklav yo te fèt 21 out 1791 pou lanse revolisyon esklav la. Se te yon reyinyon ki te dirije pa Boukmann Dutty ak yon prèt vodou. Sa te kòmanse revolisyon ayisyen an.",
+    # Discovery of Haiti
+    "ki moun ki dekouvri ayiti": "Kristòf Kolon te dekouvri zile Ispanyola (kote Ayiti ye jodi a) nan 5 desanm 1492.",
+    "kiyès ki te dekouvri ayiti": "Kristòf Kolon te dekouvri Ayiti an 1492.",
+    "kisa ki te dekouvri ayiti": "Kristòf Kolon te dekouvri Ayiti an 1492.",
+    "ki moun ki te jwenn ayiti": "Kristòf Kolon te jwenn Ayiti an 1492.",
+    "kisyès ki dekouvri ayiti": "Kristòf Kolon.",
+    "ki moun ki te vin nan ayiti anvan kolon": "Endyen Taino yo te rete sou zile a anvan Kolon. Yo te rele zile a 'Ayiti' oswa 'Kiskeya'.",
+    
+    # History (continued)
+    "kisa bwa kayiman ye": "Bwa Kayiman se kote seremoni sekrè esklav yo te fèt 21 out 1791 pou lanse revolisyon esklav la.",
     "ki dat ayiti te vin endepandan": "Ayiti te vin endepandan 1ye janvye 1804.",
     "ki moun ki te papa dok": "François Duvalier (Papa Dok) te vin prezidan an 1957 e li te kreye yon diktati.",
-    "kisa tranblemanntè 2010 te fè": "Tranblemanntè 12 janvye 2010 te touye plis pase 200,000 moun, li te detwi Pòtoprens, epi li te deplase 1.5 milyon moun.",
+    "kisa tranblemanntè 2010 te fè": "Tranblemanntè 12 janvye 2010 te touye plis pase 200,000 moun, li te detwi Pòtoprens.",
+    "ki moun ki te tousen louverture": "Tousen Louverture se yon lidè revolisyon esklav la, li te pran kontwòl tout Sen Domeng.",
+    "ki moun ki te jan jak desalin": "Jan Jak Desalin se papa endepandans Ayiti. Li te pwoklame endepandans 1ye janvye 1804.",
+    "ki moun ki te anri kristòf": "Anri Kristòf se yon wa nan Nò Ayiti, li te bati Sitadèl Laferyè.",
     
-    # Other common ones (add as many as you want)
+    # Geography
+    "kisa kapital ayiti ye": "Pòtoprens se kapital Ayiti.",
+    "ki kote ayiti ye": "Ayiti sitiye nan Karayib la, sou zile Ispanyola, bò kote Repiblik Dominikèn.",
+    "kisa gwo larivyè ayiti yo ye": "Gwo larivyè Ayiti yo se Latibonit, Lakay, ak Ladesdèyè.",
+    "kisa bèl plaj ayiti yo ye": "Gen bèl plaj nan Kokoye (Labade) ak Jakmèl.",
+    
+    # Culture
+    "kisa diri ak pwa ye": "Diri ak pwa se manje nasyonal Ayiti.",
+    "kisa soup joumou ye": "Soup joumou se soup joumou ke Ayisyen manje 1ye janvye pou fete endepandans.",
+    "kisa kanaval ayiti ye": "Kanaval Ayiti se yon gwo fèt ak parad, mizik, ak danse anvan Karèm.",
+    "kisa konpa ye": "Konpa (compas) se yon mizik ak dans ki popilè an Ayiti.",
+    
+    # General (additional)
     "ki moun ki kreye gesner ai": "Gesner AI te kreye pa Gesner Deslandes, fondatè GlobalInternet.py.",
     "kijan ou fè tan pase an kreyòl": "Pou fè tan pase, mete 'te' anvan vèb la. Egzanp: Mwen te manje (I ate).",
     "kijan ou di mwen renmen ou an kreyòl": "Mwen renmen ou.",
 }
 
 def get_core_answer(question):
-    """Check if the normalized question matches any key in CORE_ANSWERS."""
     q = question.strip().lower()
     q = re.sub(r'\s+', ' ', q)
-    # First try exact match
+    # Exact match first
     if q in CORE_ANSWERS:
         return CORE_ANSWERS[q]
-    # Then try partial match (if a key is contained in the question)
+    # Then substring match
     for key, answer in CORE_ANSWERS.items():
         if key in q:
             return answer
@@ -684,6 +743,15 @@ def reason_answer(query, retrieved_facts):
     if len(retrieved_facts) == 1:
         return retrieved_facts[0]
     q_lower = query.lower()
+    # Prioritize facts that are clearly about Haiti (contains "Ayiti", "Haiti", "Kolon", etc.)
+    priority_keywords = ["ayiti", "haiti", "kolon", "tousen", "desalin", "kristòf", "bwa kayiman", "endepandan", "pòtoprens", "kapital"]
+    prioritized = []
+    for f in retrieved_facts:
+        if any(kw in f.lower() for kw in priority_keywords):
+            prioritized.append(f)
+    if prioritized:
+        return ". ".join(prioritized[:2])
+    # Original grouping by topic
     if any(w in q_lower for w in ["beginner", "debutan", "debutant"]):
         beginner_facts = [f for f in retrieved_facts if "beginner" in f.lower() or "debitan" in f.lower() or "alfabè" in f.lower() or "pwonon" in f.lower()]
         if beginner_facts:
@@ -700,15 +768,10 @@ def reason_answer(query, retrieved_facts):
         malice_facts = [f for f in retrieved_facts if "ti malice" in f.lower()]
         if malice_facts:
             return ". ".join(malice_facts[:3])
-    if any(word in q_lower for word in ["raconte", "rakonte", "istwa", "history", "histoire"]):
-        history_facts = [f for f in retrieved_facts if any(kw in f.lower() for kw in ["endepandan", "revolisyon", "duvalier", "tranblemanntè", "1804", "1915", "1957", "bwa kayiman"])]
-        if history_facts:
-            return ". ".join(history_facts[:3])
     return retrieved_facts[0]
 
-# ========== ENHANCED generate_response with core answers ==========
 def generate_response(user_input):
-    # 1. Check the core answers dictionary first
+    # 1. Core answers dictionary (highest priority)
     core_answer = get_core_answer(user_input)
     if core_answer:
         return core_answer, False, False
@@ -728,8 +791,8 @@ def generate_response(user_input):
     if cog_match:
         return apply_cognitive_format(user_input, cog_match), False, False
     
-    # 5. Local retrieval from training
-    facts = retrieve_facts_hybrid(user_input, k=5)
+    # 5. Local retrieval (with priority for Haitian knowledge)
+    facts = retrieve_facts_hybrid(user_input, k=7)  # get more facts to prioritize
     if facts:
         return reason_answer(user_input, facts), False, False
     
@@ -740,7 +803,7 @@ def generate_response(user_input):
     
     return "Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon oswa ajoute yon egzanp kognitif.", True, False
 
-# ---------- AUDIO PLAYBACK ----------
+# ---------- AUDIO PLAYBACK (unchanged) ----------
 def show_audio_button(text, user_question, key_suffix):
     url = get_predefined_voice_url(user_question) if user_question else None
     if url:
@@ -766,7 +829,7 @@ def render_audio_player():
             st.audio(data, format=mime)
         st.session_state.play_audio = None
 
-# ---------- UI COMPONENTS ----------
+# ---------- UI COMPONENTS (unchanged from previous) ----------
 def dictionary_manager(t):
     st.subheader(t['dictionary'])
     lang = st.selectbox("Select language", list(LANGUAGES.keys()), key="dict_lang")
@@ -904,7 +967,7 @@ def cognitive_training_ui(t):
 def training_center(t):
     st.markdown(f"## {t['training_center']}")
     if hasattr(st.session_state, '_workrise_added') and st.session_state._workrise_added:
-        st.success(f"✅ {st.session_state._workrise_added} nouvo reyalite Workrise ajoute nan baz konesans la.")
+        st.success(f"✅ {st.session_state._workrise_added} nouvo reyalite Workrise ak konesans Ayiti ajoute nan baz konesans la.")
         del st.session_state._workrise_added
     tabs = st.tabs(["📝 Train New Fact", "🧠 Cognitive Training", "📚 Manage Facts", "🎙️ Voice Training", "📖 Dictionaries"])
     with tabs[0]:
