@@ -633,7 +633,7 @@ def training_center(t):
     with tabs[4]:
         dictionary_manager(t)
 
-# ---------- CHAT INTERFACE (SINGLE TEXT AREA WITH BLACK BACKGROUND) ----------
+# ---------- CHAT INTERFACE (SINGLE TEXT AREA WITH BLACK BACKGROUND & BOLD WHITE TEXT) ----------
 def chat_interface(t):
     st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Mwen reponn sèlman an Kreyòl. Poze m kesyon oswa telechaje yon imaj.</p>", unsafe_allow_html=True)
@@ -649,7 +649,7 @@ def chat_interface(t):
             conversation_lines.append(f"🤖 {msg['content']}")
     conversation_text = "\n\n".join(conversation_lines)
     
-    # Single read‑only text area with black background and white text
+    # Single read‑only text area with black background, bold white text
     st.text_area("", value=conversation_text, height=400, key="chat_display", disabled=True, label_visibility="collapsed")
     
     # Input row
@@ -685,7 +685,7 @@ def chat_interface(t):
     
     render_audio_player()
 
-# ---------- STREAMLIT PAGE CONFIG & CSS (with dark textarea) ----------
+# ---------- STREAMLIT PAGE CONFIG & CSS (with bold white text in textarea) ----------
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 st.markdown(
     """
@@ -731,10 +731,11 @@ st.markdown(
         border-radius: 12px;
         border: 1px solid #e94560;
     }
-    /* Force all text areas to have black background and white text */
+    /* Text area: black background, bold white text */
     .stTextArea textarea {
         background-color: #000000 !important;
         color: #ffffff !important;
+        font-weight: bold !important;
         font-family: monospace;
         font-size: 1rem;
         border: 1px solid #e94560;
