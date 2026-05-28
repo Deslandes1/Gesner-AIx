@@ -4,102 +4,63 @@ import numpy as np
 import faiss
 import os
 import re
-import base64
-import hashlib
-import csv
-import io
 import requests
-from datetime import datetime
 from sentence_transformers import SentenceTransformer
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from datetime import datetime
 
-# =============================
+# =========================
 # CONFIG
-# =============================
+# =========================
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 
 DATA_DIR = ".gesner_data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
-TRAINING_FILE = os.path.join(DATA_DIR, "training_data.json")
-VOICE_FILE = os.path.join(DATA_DIR, "voice_cache.json")
-DICT_FILE = os.path.join(DATA_DIR, "dictionaries.json")
-COGNITIVE_FILE = os.path.join(DATA_DIR, "cognitive.json")
+TRAINING_FILE = os.path.join(DATA_DIR, "training.json")
 
-# =============================
-# STYLING (LIGHT THEME)
-# =============================
+# =========================
+# LIGHT UI
+# =========================
 st.markdown("""
 <style>
-.stApp {
-    background: #f5f7ff;
-}
-[data-testid="stSidebar"] {
-    background: #eaf0ff;
-}
-* {
-    color: #111 !important;
-}
+.stApp { background: #f4f7ff; }
+[data-testid="stSidebar"] { background: #e9efff; }
+
+* { color: #111 !important; }
+
 .stTextInput input, .stTextArea textarea {
-    background: white !important;
-    color: black !important;
+    background: #fff !important;
+    color: #000 !important;
     border-radius: 10px;
 }
+
 .stButton button {
-    background: #4f7cff !important;
+    background: #3b6cff !important;
     color: white !important;
     border-radius: 10px;
-    font-weight: bold;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# =============================
-# DATA LOAD/SAVE
-# =============================
-def load_json(path, default):
-    if os.path.exists(path):
-        return json.load(open(path, "r", encoding="utf-8"))
-    return default
+# =========================
+# LOAD / SAVE
+# =========================
+def load_training():
+    if os.path.exists(TRAINING_FILE):
+        return json.load(open(TRAINING_FILE, "r", encoding="utf-8"))
+    return []
 
-def save_json(path, data):
-    json.dump(data, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+def save_training():
+    json.dump(st.session_state.training, open(TRAINING_FILE, "w", encoding="utf-8"), indent=2)
 
-# =============================
-# HAITIAN KNOWLEDGE BASE
-# =============================
-HAITIAN_KNOWLEDGE_FACTS = [
-    "Kristòf Kolon te dekouvri Ayiti nan 1492.",
-    "Pòtoprens se kapital Ayiti.",
-    "Ayiti sitiye nan Karayib la.",
-    "Jan Jak Desalin te pwoklame endepandans 1 janvye 1804.",
-    "Tousen Louverture te yon lidè revolisyon.",
-    "Soup joumou se manje endepandans Ayiti.",
-    "Diri ak pwa se manje prensipal Ayiti.",
-    "Vodou se yon relijyon tradisyonèl Ayiti."
-]
+# =========================
+# INITIALIZATION
+# =========================
+if "training" not in st.session_state:
+    st.session_state.training = load_training()
 
-CORE_ANSWERS = {
-    "kijan ou rele": "Mwen rele Gesner AI.",
-    "ki moun ki dekouvri ayiti": "Kristòf Kolon te dekouvri Ayiti.",
-    "ki dat ayiti endepandan": "1 janvye 1804."
-}
-
-# =============================
-# INIT SESSION
-# =============================
-if "conversation" not in st.session_state:
-    st.session_state.conversation = []
-
-if "training_data" not in st.session_state:
-    st.session_state.training_data = load_json(TRAINING_FILE, [])
-
-if "dicts" not in st.session_state:
-    st.session_state.dicts = load_json(DICT_FILE, {})
-
-if "cognitive" not in st.session_state:
-    st.session_state.cognitive = load_json(COGNITIVE_FILE, [])
+if "chat" not in st.session_state:
+    st.session_state.chat = []
 
 if "model" not in st.session_state:
     st.session_state.model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -110,44 +71,48 @@ if "index" not in st.session_state:
 if "texts" not in st.session_state:
     st.session_state.texts = []
 
-# =============================
-# SAFE INDEX BUILD
-# =============================
+# =========================
+# HAITIAN KNOWLEDGE (SAFE)
+# =========================
+BASE_FACTS = [
+    "Kristòf Kolon te rive Ayiti an 1492.",
+    "Pòtoprens se kapital Ayiti.",
+    "Ayiti sitiye nan Karayib la.",
+    "Endepandans Ayiti se 1 janvye 1804."
+]
+
+CORE_ANSWERS = {
+    "kijan ou rele": "Mwen rele Gesner AI.",
+    "ki moun ki dekouvri ayiti": "Kristòf Kolon te dekouvri Ayiti.",
+    "ki dat ayiti endepandan": "1 janvye 1804."
+}
+
+# =========================
+# BUILD INDEX (SAFE)
+# =========================
 def rebuild_index():
-    if not st.session_state.training_data:
-        st.session_state.index = None
-        st.session_state.texts = []
-        return
+    texts = [x["text"] for x in st.session_state.training]
 
-    st.session_state.texts = [x["text"] for x in st.session_state.training_data]
+    # merge base facts if empty
+    if not texts:
+        texts = BASE_FACTS
 
-    vectors = []
-    for x in st.session_state.training_data:
-        if "embedding" in x:
-            vectors.append(np.array(x["embedding"], dtype=np.float32))
-        else:
-            emb = st.session_state.model.encode(x["text"])
-            vectors.append(np.array(emb, dtype=np.float32))
+    embeddings = []
+    for t in texts:
+        emb = st.session_state.model.encode(t)
+        embeddings.append(np.array(emb, dtype=np.float32))
 
-    if len(vectors) == 0:
-        return
-
-    dim = len(vectors[0])
+    dim = len(embeddings[0])
     index = faiss.IndexFlatL2(dim)
-    index.add(np.array(vectors))
+    index.add(np.array(embeddings))
 
     st.session_state.index = index
+    st.session_state.texts = texts
 
-# =============================
-# SAVE TRAINING
-# =============================
-def save_training():
-    save_json(TRAINING_FILE, st.session_state.training_data)
-
-# =============================
-# GROK API
-# =============================
-def call_grok(prompt):
+# =========================
+# GROK API (IMPORTANT FIX)
+# =========================
+def ask_grok(question):
     try:
         key = st.secrets.get("GROK_API_KEY")
         if not key:
@@ -161,42 +126,52 @@ def call_grok(prompt):
         payload = {
             "model": "grok-1",
             "messages": [
-                {"role": "system", "content": "You are Gesner AI. Answer in Haitian Creole only. Do not repeat the question."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": "You are Gesner AI. Answer ONLY in Haitian Creole. Do not repeat the question."
+                },
+                {"role": "user", "content": question}
             ],
-            "temperature": 0.4
+            "temperature": 0.2
         }
 
-        r = requests.post("https://api.x.ai/v1/chat/completions", json=payload, headers=headers, timeout=6)
+        r = requests.post(
+            "https://api.x.ai/v1/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=8
+        )
 
         if r.status_code == 200:
             return r.json()["choices"][0]["message"]["content"]
+
     except:
-        pass
+        return None
+
     return None
 
-# =============================
-# CLEAN OUTPUT (NO QUESTION REPEAT)
-# =============================
-def clean_answer(text, question):
+# =========================
+# CLEAN OUTPUT
+# =========================
+def clean(text, question):
     if not text:
         return text
+
     q = question.lower().strip()
     t = text.strip()
 
-    # remove echo
     if q in t.lower():
-        t = re.sub(q, "", t, flags=re.IGNORECASE).strip()
+        t = t.replace(q, "")
 
-    return t
+    return t.strip()
 
-# =============================
-# ANSWER ENGINE
-# =============================
+# =========================
+# MAIN ANSWER ENGINE (FIXED)
+# =========================
 def answer(question):
     q = question.lower().strip()
 
-    # CORE
+    # 1. CORE ANSWERS
     if q in CORE_ANSWERS:
         return CORE_ANSWERS[q]
 
@@ -204,36 +179,43 @@ def answer(question):
         if k in q:
             return v
 
-    # LOCAL TRAINING MATCH
-    if st.session_state.index:
-        emb = st.session_state.model.encode([question]).astype(np.float32)
+    # 2. FAISS ONLY IF STRONG MATCH
+    if st.session_state.index is not None:
+        emb = st.session_state.model.encode(question)
+        emb = np.array([emb], dtype=np.float32)
+
         D, I = st.session_state.index.search(emb, 1)
 
-        if I[0][0] != -1:
-            return st.session_state.texts[I[0][0]]
+        distance = D[0][0]
+        idx = I[0][0]
 
-    # GROK FALLBACK (IMPORTANT)
-    grok = call_grok(question)
+        # IMPORTANT FIX: strict threshold
+        if idx != -1 and distance < 0.85:
+            return st.session_state.texts[idx]
+
+    # 3. GROK ALWAYS FALLBACK (MAIN INTELLIGENCE)
+    grok = ask_grok(question)
     if grok:
-        return clean_answer(grok, question)
+        return clean(grok, question)
 
+    # 4. FINAL FALLBACK
     return "Mwen pa jwenn repons sa kounye a."
 
-# =============================
+# =========================
 # ADD TRAINING
-# =============================
-def add_fact(text):
+# =========================
+def add_training(text):
     emb = st.session_state.model.encode(text)
-    st.session_state.training_data.append({
+    st.session_state.training.append({
         "text": text,
         "embedding": emb.tolist()
     })
     save_training()
     rebuild_index()
 
-# =============================
-# UI SIDEBAR
-# =============================
+# =========================
+# SIDEBAR
+# =========================
 def sidebar():
     with st.sidebar:
         st.markdown("## 🧠 Gesner AI")
@@ -246,55 +228,55 @@ def sidebar():
 
         return st.radio("Menu", ["Chat", "Training Center"])
 
-# =============================
+# =========================
 # CHAT UI
-# =============================
-def chat():
-    st.title("Gesner AI")
+# =========================
+def chat_ui():
+    st.title("Gesner AI Chat")
 
-    for c in st.session_state.conversation:
-        if c["role"] == "user":
-            st.markdown("🧑 " + c["text"])
+    for m in st.session_state.chat:
+        if m["role"] == "user":
+            st.markdown("🧑 " + m["text"])
         else:
-            st.markdown("🤖 " + c["text"])
+            st.markdown("🤖 " + m["text"])
 
     msg = st.text_input("Ask something")
 
     if st.button("Send"):
         if msg:
-            st.session_state.conversation.append({"role": "user", "text": msg})
+            st.session_state.chat.append({"role": "user", "text": msg})
 
             res = answer(msg)
 
-            st.session_state.conversation.append({"role": "ai", "text": res})
+            st.session_state.chat.append({"role": "ai", "text": res})
 
             st.rerun()
 
-# =============================
+# =========================
 # TRAINING CENTER
-# =============================
-def training():
+# =========================
+def training_ui():
     st.title("Training Center")
 
     txt = st.text_area("Add knowledge")
 
-    if st.button("Add"):
-        if txt:
-            add_fact(txt)
+    if st.button("Save"):
+        if txt.strip():
+            add_training(txt)
             st.success("Saved!")
 
-    st.markdown("### Existing Data")
-    for i, t in enumerate(st.session_state.training_data):
+    st.markdown("### Data")
+    for i, t in enumerate(st.session_state.training):
         st.write(f"{i+1}. {t['text']}")
 
-# =============================
+# =========================
 # INIT
-# =============================
+# =========================
 rebuild_index()
 
 menu = sidebar()
 
 if menu == "Chat":
-    chat()
+    chat_ui()
 else:
-    training()
+    training_ui()
