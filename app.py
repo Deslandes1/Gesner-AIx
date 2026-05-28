@@ -73,7 +73,7 @@ def load_cognitive_examples():
             return json.load(f)
     return []
 
-# ========== HAITIAN KNOWLEDGE BASE ==========
+# ========== HAITIAN KNOWLEDGE BASE (NO WORKRISE) ==========
 HAITIAN_KNOWLEDGE_FACTS = [
     # Discovery
     "Kristòf Kolon te dekouvri zile Ispanyola (kote Ayiti ye jodi a) nan 5 desanm 1492.",
@@ -88,7 +88,7 @@ HAITIAN_KNOWLEDGE_FACTS = [
     "Gwo rivyè Ayiti yo se Latibonit, Lakay, ak Ladesdèyè.",
     "Toupatou nan Ayiti gen bèl plaj, sitou nan Kokoye (Labade) ak Jakmèl.",
     
-    # History (key events)
+    # History
     "Tousen Louverture te yon lidè enpòtan nan revolisyon esklav la. Li te pran kontwòl tout Sen Domeng.",
     "Jan Jak Desalin te pwoklame endepandans Ayiti 1ye janvye 1804.",
     "Anri Kristòf te bati Sitadèl Laferyè a, youn nan pi gwo fò nan Amerik yo.",
@@ -118,7 +118,7 @@ HAITIAN_KNOWLEDGE_FACTS = [
     "Soup joumou se manje senbolik pou 1ye janvye, jou endepandans.",
     "Diri ak pwa se manje nasyonal Ayiti.",
     
-    # Alphabet and grammar (keep essential)
+    # Alphabet and grammar
     "Alfabè kreyòl la gen 32 lèt.",
     "Pwonon pèsonèl an Kreyòl: Mwen, ou, li, nou, yo.",
     "Salitasyon debaz: Bonjou, Bonswa, Kijan ou rele?, Mwen rele...",
@@ -130,13 +130,12 @@ HAITIAN_KNOWLEDGE_FACTS = [
     
     # Ti Malice
     "Ti Malice se yon lojisyèl edikatif ki anseye timoun yo Kreyòl Ayisyen atravè jwèt ak istwa.",
-    "Ti Malice gen 12 chapit. Chapit 1: Alfabè, Chapit 2: Nonm, Chapit 3: Koulè, Chapit 4: Fanmi, Chapit 5: Manje, Chapit 6: Bèt, Chapit 7: Vèb, Chapit 8: Tan, Chapit 9: Fraz senp, Chapit 10: Konvèsasyon, Chapit 11: Pwovèb, Chapit 12: Istwa.",
+    "Ti Malice gen 12 chapit. Chapit 1: Alfabè, Chapit 2: Nonm, Chapit 3: Koulè ak fòm, Chapit 4: Fanmi, Chapit 5: Manje, Chapit 6: Bèt, Chapit 7: Vèb, Chapit 8: Tan, Chapit 9: Fraz senp, Chapit 10: Konvèsasyon, Chapit 11: Pwovèb, Chapit 12: Istwa.",
     "Ou ka telechaje Ti Malice sou sitwèb globalinternet.py.",
 ]
 
 # ========== DEFAULT TRAINING FACTS ==========
 def get_default_training_facts():
-    # Only Haitian knowledge, no Workrise
     return HAITIAN_KNOWLEDGE_FACTS
 
 def initialize_default_training():
@@ -149,7 +148,6 @@ def initialize_default_training():
         rebuild_index()
         save_training_data()
     else:
-        # Ensure all Haitian facts are present
         existing = {item["text"] for item in st.session_state.training_data}
         added = 0
         for fact in HAITIAN_KNOWLEDGE_FACTS:
@@ -169,7 +167,7 @@ def get_grok_api_key():
     except:
         return None
 
-def call_grok_api(prompt, system_prompt="You are Gesner AI, a helpful assistant that answers in Haitian Creole. Provide accurate, concise responses."):
+def call_grok_api(prompt, system_prompt="You are Gesner AI, a helpful assistant that answers in Haitian Creole. When asked to show an image or video, provide a direct URL to a relevant image (e.g., from Unsplash or a placeholder). Keep responses concise and accurate."):
     api_key = get_grok_api_key()
     if not api_key:
         return None
@@ -234,7 +232,7 @@ def apply_cognitive_format(query, matched_example):
     output = output.replace("{query}", query)
     return output
 
-# ========== CENTRAL CORE ANSWERS DICTIONARY ==========
+# ---------- CENTRAL CORE ANSWERS DICTIONARY ----------
 CORE_ANSWERS = {
     # Alphabet
     "site konbyen let ki genhen nan alfabe kreyol la": "A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z",
@@ -242,13 +240,10 @@ CORE_ANSWERS = {
     "konbyen let ki gehen nan alfabe kreyol la": "Nan alfabe kreyol la gen 32 let.",
     "kijan ou rele": "Non pa mwen se Gesner L'AI kreyate mwen se Gesner Deslandes nan Globalinternet.py.",
     
-    # Discovery of Haiti
+    # Discovery
     "ki moun ki dekouvri ayiti": "Kristòf Kolon te dekouvri zile Ispanyola (kote Ayiti ye jodi a) nan 5 desanm 1492.",
     "kiyès ki te dekouvri ayiti": "Kristòf Kolon te dekouvri Ayiti an 1492.",
-    "kisa ki te dekouvri ayiti": "Kristòf Kolon te dekouvri Ayiti an 1492.",
-    "ki moun ki te jwenn ayiti": "Kristòf Kolon te jwenn Ayiti an 1492.",
     "kisyès ki dekouvri ayiti": "Kristòf Kolon.",
-    "ki moun ki te vin nan ayiti anvan kolon": "Endyen Taino yo te rete sou zile a anvan Kolon. Yo te rele zile a 'Ayiti' oswa 'Kiskeya'.",
     
     # History
     "kisa bwa kayiman ye": "Bwa Kayiman se kote seremoni sekrè esklav yo te fèt 21 out 1791 pou lanse revolisyon esklav la.",
@@ -257,25 +252,51 @@ CORE_ANSWERS = {
     "kisa tranblemanntè 2010 te fè": "Tranblemanntè 12 janvye 2010 te touye plis pase 200,000 moun, li te detwi Pòtoprens.",
     "ki moun ki te tousen louverture": "Tousen Louverture se yon lidè revolisyon esklav la, li te pran kontwòl tout Sen Domeng.",
     "ki moun ki te jan jak desalin": "Jan Jak Desalin se papa endepandans Ayiti. Li te pwoklame endepandans 1ye janvye 1804.",
-    "ki moun ki te anri kristòf": "Anri Kristòf se yon wa nan Nò Ayiti, li te bati Sitadèl Laferyè.",
     
     # Geography
     "kisa kapital ayiti ye": "Pòtoprens se kapital Ayiti.",
     "ki kote ayiti ye": "Ayiti sitiye nan Karayib la, sou zile Ispanyola, bò kote Repiblik Dominikèn.",
-    "kisa gwo larivyè ayiti yo ye": "Gwo larivyè Ayiti yo se Latibonit, Lakay, ak Ladesdèyè.",
-    "kisa bèl plaj ayiti yo ye": "Gen bèl plaj nan Kokoye (Labade) ak Jakmèl.",
     
     # Culture
     "kisa diri ak pwa ye": "Diri ak pwa se manje nasyonal Ayiti.",
     "kisa soup joumou ye": "Soup joumou se soup joumou ke Ayisyen manje 1ye janvye pou fete endepandans.",
-    "kisa kanaval ayiti ye": "Kanaval Ayiti se yon gwo fèt ak parad, mizik, ak danse anvan Karèm.",
-    "kisa konpa ye": "Konpa (compas) se yon mizik ak dans ki popilè an Ayiti.",
     
     # Gesner AI
     "ki moun ki kreye gesner ai": "Gesner AI te kreye pa Gesner Deslandes, fondatè GlobalInternet.py.",
     "kijan ou fè tan pase an kreyòl": "Pou fè tan pase, mete 'te' anvan vèb la. Egzanp: Mwen te manje (I ate).",
     "kijan ou di mwen renmen ou an kreyòl": "Mwen renmen ou.",
 }
+
+# ---------- HANDLE "SHOW ME" REQUESTS (IMAGES) ----------
+def handle_show_request(user_input):
+    """Return an image URL and description for color show requests."""
+    q = user_input.strip().lower()
+    # Pattern: "montre m koule [color]" or "eske ou ka montre m koule [color]" or "show me color [color]"
+    match = re.search(r"(?:montre|show).*?koule\s+(\w+)", q)
+    if not match:
+        # Also check for "ki koulè [color]" but that's not a show request
+        return None
+    color_name = match.group(1).lower()
+    # Map Kreyòl/English color names to hex values
+    color_map = {
+        "nwa": "000000", "noir": "000000", "black": "000000",
+        "blan": "FFFFFF", "white": "FFFFFF",
+        "wouj": "FF0000", "rouge": "FF0000", "red": "FF0000",
+        "ble": "0000FF", "blue": "0000FF",
+        "vèt": "00FF00", "vert": "00FF00", "green": "00FF00",
+        "jòn": "FFFF00", "jaune": "FFFF00", "yellow": "FFFF00",
+        "violet": "800080", "mov": "800080",
+        "oranje": "FFA500", "orange": "FFA500",
+        "gri": "808080", "gray": "808080",
+        "mawon": "8B4513", "brown": "8B4513"
+    }
+    hex_color = color_map.get(color_name, "808080")  # default gray
+    # Use a free image service: placekitten or placeholder image
+    # Using via.placeholder.com is simple and reliable
+    image_url = f"https://via.placeholder.com/300x200/{hex_color}/FFFFFF?text={color_name.capitalize()}"
+    description = f"Men koulè {color_name.capitalize()}: yon kare ki gen koulè sa a."
+    # Return a markdown image and text
+    return f"{description}\n\n![{color_name}]({image_url})"
 
 def get_core_answer(question):
     q = question.strip().lower()
@@ -663,7 +684,7 @@ def direct_keyword_answer(query):
         if "kiyès" in q_lower or "who" in q_lower or "kreyatè" in q_lower:
             return "Ti Malice se yon lojisyèl edikatif ki fèt pa Gesner Deslandes pou anseye Kreyòl Ayisyen atravè jwèt ak istwa."
         if "chapit" in q_lower or "chapter" in q_lower:
-            return "Ti Malice gen 12 chapit. Chapit 1: Alfabè, Chapit 2: Nonm, Chapit 3: Koulè, Chapit 4: Fanmi, Chapit 5: Manje, Chapit 6: Bèt, Chapit 7: Vèb, Chapit 8: Tan, Chapit 9: Fraz senp, Chapit 10: Konvèsasyon, Chapit 11: Pwovèb, Chapit 12: Istwa."
+            return "Ti Malice gen 12 chapit. Chapit 1: Alfabè, Chapit 2: Nonm, Chapit 3: Koulè ak fòm, Chapit 4: Fanmi, Chapit 5: Manje, Chapit 6: Bèt, Chapit 7: Vèb, Chapit 8: Tan, Chapit 9: Fraz senp, Chapit 10: Konvèsasyon, Chapit 11: Pwovèb, Chapit 12: Istwa."
         if "telechaje" in q_lower or "download" in q_lower:
             return "Ou ka telechaje Ti Malice sou sitwèb globalinternet.py."
         return "Ti Malice se yon lojisyèl k ap anseye Kreyòl Ayisyen. Li gen 12 chapit ak egzèsis. Pou plis enfòmasyon, mande m 'chapit Ti Malice' oswa 'telechaje Ti Malice'."
@@ -707,7 +728,6 @@ def reason_answer(query, retrieved_facts):
     if len(retrieved_facts) == 1:
         return retrieved_facts[0]
     q_lower = query.lower()
-    # Prioritize Haitian knowledge
     priority_keywords = ["ayiti", "haiti", "kolon", "tousen", "desalin", "kristòf", "bwa kayiman", "endepandan", "pòtoprens", "kapital", "kanaval", "diri", "soup joumou"]
     prioritized = []
     for f in retrieved_facts:
@@ -715,10 +735,14 @@ def reason_answer(query, retrieved_facts):
             prioritized.append(f)
     if prioritized:
         return ". ".join(prioritized[:2])
-    # Fallback to first fact
     return retrieved_facts[0]
 
 def generate_response(user_input):
+    # 0. Handle "show me color" requests (images)
+    show_result = handle_show_request(user_input)
+    if show_result:
+        return show_result, False, False
+    
     # 1. Core answers dictionary
     core_answer = get_core_answer(user_input)
     if core_answer:
