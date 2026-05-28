@@ -160,7 +160,7 @@ def call_grok_api(prompt, system_prompt="You are Gesner AI, a helpful assistant 
         "max_tokens": 500
     }
     try:
-        response = requests.post(endpoint, headers=headers, json=payload, timeout=3)  # shorter timeout
+        response = requests.post(endpoint, headers=headers, json=payload, timeout=3)
         if response.status_code == 200:
             data = response.json()
             return data["choices"][0]["message"]["content"].strip()
@@ -329,7 +329,11 @@ def generate_response(user_input, uploaded_image_bytes=None):
     try:
         # Image handling
         if uploaded_image_bytes:
-            return identify_image_with_grok(uploaded_image_bytes, user_input), False, False
+            ans = identify_image_with_grok(uploaded_image_bytes, user_input)
+            if ans and ans.strip():
+                return ans, False, False
+            else:
+                return "Mwen pa ka wè imaj la. Tanpri dekri li.", True, False
         
         # Fast hardcoded answers
         core_answer = get_core_answer(user_input)
@@ -351,21 +355,23 @@ def generate_response(user_input, uploaded_image_bytes=None):
         # FAISS / TF‑IDF retrieval
         facts = retrieve_facts_hybrid(user_input, k=7)
         if facts:
-            return reason_answer(user_input, facts), False, False
+            reasoned = reason_answer(user_input, facts)
+            if reasoned:
+                return reasoned, False, False
         
         # Try Grok only if API key is set
         grok_answer = call_grok_api(user_input)
-        if grok_answer:
+        if grok_answer and grok_answer.strip():
             return grok_answer, False, False
         
-        # Ultimate local fallback
-        fallback = ("Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon "
-                    "oswa ajoute yon egzanp kognitif. "
-                    "Ou ka di m 'Aprann: [fraz ou vle m aprann]'.")
-        return fallback, True, False
     except Exception as e:
-        # If anything crashes, return a safe message
-        return f"Gen yon erè teknik. Tanpri eseye ankò. (Detay: {str(e)})", True, False
+        # Log the error silently and fall through
+        print(f"Error in generate_response: {e}")
+    
+    # ULTIMATE FALLBACK - always returns something
+    return ("Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon "
+            "oswa ajoute yon egzanp kognitif. "
+            "Ou ka di m 'Aprann: [fraz ou vle m aprann]'."), True, False
 
 # ---------- HELPER FUNCTIONS FOR INDEX, VOICE, ETC. ----------
 def save_all():
@@ -646,7 +652,7 @@ def chat_interface(t):
     st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Mwen reponn sèlman an Kreyòl. Poze m kesyon oswa telechaje yon imaj.</p>", unsafe_allow_html=True)
     
-    # Conversation display (read‑only text area) - fixed empty label
+    # Conversation display (read‑only text area)
     conversation_lines = []
     for msg in st.session_state.conversation_history:
         if msg["role"] == "user":
@@ -686,7 +692,7 @@ def chat_interface(t):
             st.session_state.conversation_history.append(user_msg)
             answer, is_fallback, skip_audio = generate_response(user_input, None)
         
-        # Extra safety: ensure answer is never empty
+        # Final safety: ensure answer is never empty
         if not answer or not answer.strip():
             answer = "Mwen pa gen repons kounye a. Tanpri eseye ankò."
         
