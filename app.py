@@ -6,7 +6,6 @@ import faiss
 import re
 import os
 import requests
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 # =========================
 # DATA
@@ -32,7 +31,7 @@ def save_training():
         json.dump(st.session_state.training_data, f, indent=2, ensure_ascii=False)
 
 # =========================
-# INIT SESSION
+# SESSION INIT
 # =========================
 if "training_data" not in st.session_state:
     st.session_state.training_data = load_training()
@@ -50,7 +49,7 @@ if "texts" not in st.session_state:
     st.session_state.texts = []
 
 # =========================
-# HAITIAN CORE KNOWLEDGE
+# CORE ANSWERS
 # =========================
 CORE = {
     "kijan ou rele": "Mwen rele Gesner AI, asistan Gesner Deslandes.",
@@ -59,24 +58,15 @@ CORE = {
     "kisa kapital ayiti ye": "Pòtoprens se kapital Ayiti."
 }
 
-# =========================
-# NORMALIZATION FIX
-# =========================
 def normalize(q):
     q = q.lower().strip()
     q = re.sub(r"\s+", " ", q)
-
-    q = q.replace("site", "ki")
     q = q.replace("konbyen", "ki kantite")
-    q = q.replace("let", "lèt")
     q = q.replace("alfabe", "alfabè")
+    q = q.replace("let", "lèt")
     q = q.replace("genhen", "gen")
-
     return q
 
-# =========================
-# CORE ANSWER (FIXED)
-# =========================
 def core_answer(q):
     qn = normalize(q)
 
@@ -90,25 +80,25 @@ def core_answer(q):
     return None
 
 # =========================
-# TRAINING MATCH (UPGRADED)
+# TRAINING MATCH
 # =========================
 def training_match(q):
     q = q.lower()
     best = None
-    score_best = 0
+    best_score = 0
 
     for item in st.session_state.training_data:
         text = item.get("text", "").lower()
         score = sum(1 for w in q.split() if w in text)
 
-        if score > score_best:
-            score_best = score
+        if score > best_score:
+            best_score = score
             best = item["text"]
 
-    return best if score_best >= 2 else None
+    return best if best_score >= 2 else None
 
 # =========================
-# FAISS BUILD SAFE
+# FAISS
 # =========================
 def rebuild_index():
     valid = [x for x in st.session_state.training_data if "embedding" in x]
@@ -138,28 +128,7 @@ def rebuild_index():
     st.session_state.texts = texts
 
 # =========================
-# INIT DEFAULT TRAINING
-# =========================
-DEFAULTS = [
-    "Pòtoprens se kapital Ayiti.",
-    "Ayiti pran endepandans 1 janvye 1804.",
-    "Konpa se mizik Ayiti."
-]
-
-def init_training():
-    if not st.session_state.training_data:
-        for fact in DEFAULTS:
-            emb = st.session_state.model.encode([fact])[0]
-            st.session_state.training_data.append({
-                "text": fact,
-                "embedding": emb.tolist()
-            })
-
-        save_training()
-        rebuild_index()
-
-# =========================
-# GROK (LAST RESORT ONLY)
+# GROK (OPTIONAL)
 # =========================
 def call_grok(q):
     key = st.secrets.get("GROK_API_KEY", None)
@@ -176,7 +145,7 @@ def call_grok(q):
             json={
                 "model": "grok-1",
                 "messages": [
-                    {"role": "system", "content": "Answer in Haitian Creole."},
+                    {"role": "system", "content": "Answer in Haitian Creole only."},
                     {"role": "user", "content": q}
                 ]
             },
@@ -191,21 +160,21 @@ def call_grok(q):
     return None
 
 # =========================
-# INTELLIGENCE ENGINE (FIXED ORDER)
+# INTELLIGENCE ENGINE
 # =========================
 def generate_response(q):
 
-    # 1. CORE (MANDATORY FIRST)
+    # 1. CORE
     ans = core_answer(q)
     if ans:
         return ans
 
-    # 2. TRAINING CENTER
+    # 2. TRAINING
     t = training_match(q)
     if t:
         return t
 
-    # 3. FAISS SEARCH
+    # 3. FAISS
     if st.session_state.index:
         try:
             emb = st.session_state.model.encode([q])[0].astype("float32").reshape(1, -1)
@@ -216,41 +185,12 @@ def generate_response(q):
         except:
             pass
 
-    # 4. GROK (LAST)
+    # 4. GROK
     g = call_grok(q)
     if g:
         return g
 
-    # 5. FALLBACK
-    return "Mwen pa gen repons sa kounye a. Eseye anseye m li nan Training Center."
-
-# =========================
-# UI
-# =========================
-st.set_page_config(page_title="Gesner AI", layout="wide")
-
-st.markdown("""
-<style>
-.stApp {
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-}
-* {
-    color: white !important;
-}
-.stTextInput input {
-    background:black !important;
-    color:white !important;
-}
-.stTextArea textarea {
-    background:black !important;
-    color:white !important;
-}
-.stButton button {
-    background:#e11d48 !important;
-    color:white !important;
-}
-</style>
-""", unsafe_allow_html=True)
+    return "Mwen pa gen repons sa kounye a."
 
 # =========================
 # TRAINING CENTER
@@ -270,12 +210,11 @@ def training_center():
         rebuild_index()
         st.success("Ajoute!")
 
-    st.write("### Done:")
     for i, t in enumerate(st.session_state.training_data):
         st.write(f"{i+1}. {t['text']}")
 
 # =========================
-# CHAT
+# CHAT (FIX: NO QUESTION REPEAT)
 # =========================
 def chat():
     st.title("🧠 Gesner AI Ultra")
@@ -284,19 +223,47 @@ def chat():
 
     if st.button("Voye") and q:
         r = generate_response(q)
-        st.session_state.conversation.append(("You", q))
-        st.session_state.conversation.append(("AI", r))
 
-    for r in st.session_state.conversation[::-1]:
-        st.write(f"**{r[0]}:** {r[1]}")
+        # FIX: no repetition of question in AI memory
+        clean_answer = r.strip()
+
+        st.session_state.conversation.append(clean_answer)
+
+    for msg in st.session_state.conversation[::-1]:
+        st.write(f"🤖 {msg}")
+
+# =========================
+# SIDEBAR (UPDATED + SAME STYLE)
+# =========================
+def sidebar():
+    st.sidebar.markdown("""
+    <style>
+    [data-testid="stSidebar"] {
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.sidebar.title("🧠 Gesner AI")
+
+    st.sidebar.markdown("""
+**Company:** Globalinternet.py / Software  
+**Built by:** Gesner Deslandes  
+**Phone:** (509) 4738-5663  
+**Email:** deslandes78@gmail.com  
+""")
 
 # =========================
 # START
 # =========================
+st.set_page_config(page_title="Gesner AI", layout="wide")
+
+sidebar()
+
 menu = st.sidebar.radio("Menu", ["Chat", "Training Center"])
 
-init_training()
-rebuild_index()
+if not st.session_state.index:
+    rebuild_index()
 
 if menu == "Chat":
     chat()
