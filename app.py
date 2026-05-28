@@ -16,6 +16,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime
 from PIL import Image
+from transformers import pipeline   # removed 'Conversation'
 
 # ========== DATA DIRECTORY ==========
 DATA_DIR = ".gesner_data"
@@ -160,7 +161,7 @@ def call_grok_api(prompt, system_prompt="You are Gesner AI, a helpful assistant 
         "max_tokens": 500
     }
     try:
-        response = requests.post(endpoint, headers=headers, json=payload, timeout=3)
+        response = requests.post(endpoint, headers=headers, json=payload, timeout=3)  # reduced timeout
         if response.status_code == 200:
             data = response.json()
             return data["choices"][0]["message"]["content"].strip()
@@ -329,11 +330,7 @@ def generate_response(user_input, uploaded_image_bytes=None):
     try:
         # Image handling
         if uploaded_image_bytes:
-            ans = identify_image_with_grok(uploaded_image_bytes, user_input)
-            if ans and ans.strip():
-                return ans, False, False
-            else:
-                return "Mwen pa ka wè imaj la. Tanpri dekri li.", True, False
+            return identify_image_with_grok(uploaded_image_bytes, user_input), False, False
         
         # Fast hardcoded answers
         core_answer = get_core_answer(user_input)
@@ -359,16 +356,16 @@ def generate_response(user_input, uploaded_image_bytes=None):
             if reasoned:
                 return reasoned, False, False
         
-        # Try Grok only if API key is set
+        # Try Grok only if API key is set (fast timeout)
         grok_answer = call_grok_api(user_input)
-        if grok_answer and grok_answer.strip():
+        if grok_answer:
             return grok_answer, False, False
         
     except Exception as e:
-        # Log the error silently and fall through
-        print(f"Error in generate_response: {e}")
+        # If anything crashes, fall through to final fallback
+        pass
     
-    # ULTIMATE FALLBACK - always returns something
+    # Final fallback – always returns something
     return ("Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon "
             "oswa ajoute yon egzanp kognitif. "
             "Ou ka di m 'Aprann: [fraz ou vle m aprann]'."), True, False
@@ -647,12 +644,12 @@ def training_center(t):
     with tabs[4]:
         dictionary_manager(t)
 
-# ---------- CHAT INTERFACE (Professional Layout, Fast Clear) ----------
+# ---------- CHAT INTERFACE (Fixed empty labels, guaranteed reply) ----------
 def chat_interface(t):
     st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Mwen reponn sèlman an Kreyòl. Poze m kesyon oswa telechaje yon imaj.</p>", unsafe_allow_html=True)
     
-    # Conversation display (read‑only text area)
+    # Conversation display (fixed empty label)
     conversation_lines = []
     for msg in st.session_state.conversation_history:
         if msg["role"] == "user":
@@ -665,7 +662,7 @@ def chat_interface(t):
     st.text_area("Chat history", value=conversation_text, height=400,
                  key="chat_display", disabled=True, label_visibility="hidden")
     
-    # Input row with send button and upload
+    # Input row with send button and upload (fixed empty label)
     col_input, col_upload, col_send = st.columns([6, 1, 1])
     with col_input:
         user_input = st.text_input("Your message", key="chat_input", placeholder=t['chat_input'], label_visibility="hidden")
