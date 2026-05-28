@@ -3,29 +3,109 @@ import json
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import faiss
+import time
 import hashlib
 import re
 import base64
 import csv
 import io
 import os
+import shutil
 import requests
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime
 from PIL import Image
+from transformers import pipeline
 
-# =========================
-# DATA DIRECTORY
-# =========================
+# ================= DATA DIRECTORY =================
 DATA_DIR = ".gesner_data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
 TRAINING_FILE = os.path.join(DATA_DIR, "training_data.json")
+DICT_FILE = os.path.join(DATA_DIR, "dictionaries.json")
+VOICE_FILE = os.path.join(DATA_DIR, "voice_cache.json")
+COGNITIVE_FILE = os.path.join(DATA_DIR, "cognitive_examples.json")
 
-# =========================
-# GROK CONFIG
-# =========================
+# ================= PERSISTENCE =================
+def save_training_data():
+    with open(TRAINING_FILE, "w", encoding="utf-8") as f:
+        json.dump(st.session_state.training_data, f, ensure_ascii=False, indent=2)
+
+def load_training_data():
+    if os.path.exists(TRAINING_FILE):
+        with open(TRAINING_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+def save_dictionaries():
+    with open(DICT_FILE, "w", encoding="utf-8") as f:
+        json.dump(st.session_state.dictionaries, f, ensure_ascii=False, indent=2)
+
+def load_dictionaries():
+    if os.path.exists(DICT_FILE):
+        with open(DICT_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"ht": {}, "fr": {}, "en": {}}
+
+def save_voice_cache():
+    serializable = {}
+    for key, audio_bytes in VOICE_CACHE.items():
+        serializable[key] = base64.b64encode(audio_bytes).decode("utf-8")
+    with open(VOICE_FILE, "w", encoding="utf-8") as f:
+        json.dump(serializable, f, ensure_ascii=False)
+
+def load_voice_cache():
+    if os.path.exists(VOICE_FILE):
+        with open(VOICE_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        cache = {}
+        for key, b64 in data.items():
+            cache[key] = base64.b64decode(b64)
+        return cache
+    return {}
+
+def save_cognitive_examples():
+    with open(COGNITIVE_FILE, "w", encoding="utf-8") as f:
+        json.dump(st.session_state.cognitive_examples, f, ensure_ascii=False, indent=2)
+
+def load_cognitive_examples():
+    if os.path.exists(COGNITIVE_FILE):
+        with open(COGNITIVE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+# ================= HAITIAN KNOWLEDGE =================
+HAITIAN_KNOWLEDGE_FACTS = [
+    "Kristòf Kolon te dekouvri zile Ispanyola (kote Ayiti ye jodi a) nan 5 desanm 1492.",
+    "Kolon te rele zile a 'La Isla Española'. Pita fransè yo te rele l 'Saint-Domingue'.",
+    "Anvan Kolon, Endyen Taino yo te rete sou zile a depi anviwon 300 anvan epòk nou an.",
+    "Pòtoprens se kapital Ayiti. Li sou kòt lwès peyi a.",
+    "Ayiti sitiye nan Karayib la, sou zile Ispanyola ki gen tou Repiblik Dominikèn.",
+    "Ayiti gen yon sipèfisi 27,750 kilomèt kare. Li se twazyèm pi gwo peyi Karayib la.",
+    "Tousen Louverture te yon lidè enpòtan nan revolisyon esklav la.",
+    "Jan Jak Desalin te pwoklame endepandans Ayiti 1ye janvye 1804.",
+    "Anri Kristòf te bati Sitadèl Laferyè a.",
+    "Tranblemanntè 12 janvye 2010 te fè gwo ravaj nan Pòtoprens.",
+    "Vodou se yon relijyon ki fèt nan melanj tradisyon Afriken ak Krisyanis.",
+    "Diri ak pwa se manje nasyonal Ayiti.",
+    "Soup joumou se manje endepandans Ayiti."
+]
+
+# ================= CORE ANSWERS =================
+CORE_ANSWERS = {
+    "kijan ou rele": "Non mwen se Gesner AI, kreye pa Gesner Deslandes.",
+    "ki moun ki dekouvri ayiti": "Kristòf Kolon te dekouvri Ayiti an 1492.",
+    "ki kote ayiti ye": "Ayiti sitiye nan Karayib la sou zile Ispanyola.",
+    "ki dat ayiti endepandan": "Ayiti te vin endepandan 1ye janvye 1804.",
+    "kisa soup joumou ye": "Soup joumou se manje endepandans Ayiti."
+}
+
+def get_core_answer(q):
+    q = q.lower().strip()
+    return CORE_ANSWERS.get(q)
+
+# ================= GROK API =================
 def get_grok_api_key():
     try:
         return st.secrets["GROK_API_KEY"]
@@ -38,7 +118,6 @@ def call_grok_api(prompt):
         return None
 
     endpoint = "https://api.x.ai/v1/chat/completions"
-
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
@@ -47,7 +126,7 @@ def call_grok_api(prompt):
     payload = {
         "model": "grok-1",
         "messages": [
-            {"role": "system", "content": "You are Gesner AI. Answer clearly in Haitian Creole."},
+            {"role": "system", "content": "You are Gesner AI. Respond in Haitian Creole."},
             {"role": "user", "content": prompt}
         ],
         "temperature": 0.7,
@@ -59,185 +138,96 @@ def call_grok_api(prompt):
         if r.status_code == 200:
             return r.json()["choices"][0]["message"]["content"]
     except:
-        return None
+        pass
+    return None
 
-# =========================
-# LOAD / SAVE TRAINING
-# =========================
-def load_training_data():
-    if os.path.exists(TRAINING_FILE):
-        with open(TRAINING_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return []
+# ================= RETRIEVAL =================
+def retrieve_facts(query):
+    results = []
+    q = query.lower()
+    for f in st.session_state.training_data:
+        if q in f["text"].lower():
+            results.append(f["text"])
+    return results[:5]
 
-def save_training_data():
-    with open(TRAINING_FILE, "w", encoding="utf-8") as f:
-        json.dump(st.session_state.training_data, f, indent=2)
+# ================= RESPONSE ENGINE =================
+def generate_response(user_input):
+    core = get_core_answer(user_input)
+    if core:
+        return core
 
-# =========================
-# KNOWLEDGE BASE (KEEPED)
-# =========================
-HAITIAN_KNOWLEDGE_FACTS = [
-    "Kristòf Kolon te dekouvri Ayiti an 1492.",
-    "Pòtoprens se kapital Ayiti.",
-    "Ayiti endepandan depi 1804.",
-    "Tousen Louverture se yon lidè revolisyon.",
-    "Jan Jak Desalin se papa endepandans Ayiti."
-]
+    facts = retrieve_facts(user_input)
+    if facts:
+        return facts[0]
 
-# =========================
-# INIT MODEL
-# =========================
-if "embedding_model" not in st.session_state:
-    st.session_state.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+    grok = call_grok_api(user_input)
+    if grok:
+        return grok
+
+    return "Mwen pa jwenn repons sa. Eseye aprann mwen li nan Training Center."
+
+# ================= TRAINING INIT =================
+def initialize_training():
+    if not st.session_state.training_data:
+        for f in HAITIAN_KNOWLEDGE_FACTS:
+            st.session_state.training_data.append({"text": f})
+        save_training_data()
+
+# ================= UI =================
+def chat_interface():
+    st.markdown("<h1 style='text-align:center;color:white;'>Gesner AI</h1>", unsafe_allow_html=True)
+
+    for msg in st.session_state.chat:
+        if msg["role"] == "user":
+            st.markdown(f"<div style='color:white;font-weight:bold;'>🧑 {msg['text']}</div>", unsafe_allow_html=True)
+        else:
+            st.markdown(f"<div style='color:white;font-weight:bold;'>🤖 {msg['text']}</div>", unsafe_allow_html=True)
+
+    user_input = st.text_input("Message", label_visibility="collapsed")
+
+    if st.button("Send"):
+        if user_input:
+            st.session_state.chat.append({"role": "user", "text": user_input})
+            reply = generate_response(user_input)
+            st.session_state.chat.append({"role": "bot", "text": reply})
+            st.rerun()
+
+    if st.button("Clear Chat"):
+        st.session_state.chat = []
+        st.rerun()
+
+def training_center():
+    st.subheader("Training Center")
+
+    new_fact = st.text_area("Add Knowledge")
+    if st.button("Add"):
+        if new_fact:
+            st.session_state.training_data.append({"text": new_fact})
+            save_training_data()
+            st.success("Saved")
+
+    st.markdown("Existing Data:")
+    for i, f in enumerate(st.session_state.training_data):
+        st.write(f["text"])
+
+# ================= SESSION INIT =================
+if "chat" not in st.session_state:
+    st.session_state.chat = []
 
 if "training_data" not in st.session_state:
     st.session_state.training_data = load_training_data()
 
-if "conversation_history" not in st.session_state:
-    st.session_state.conversation_history = []
+if "dictionaries" not in st.session_state:
+    st.session_state.dictionaries = load_dictionaries()
 
-# =========================
-# BUILD INDEX
-# =========================
-def rebuild_index():
-    if st.session_state.training_data:
-        embeddings = [np.array(x["embedding"], dtype=np.float32) for x in st.session_state.training_data]
-        dim = len(embeddings[0])
-        st.session_state.index = faiss.IndexFlatL2(dim)
-        st.session_state.index.add(np.array(embeddings))
-        st.session_state.texts = [x["text"] for x in st.session_state.training_data]
-    else:
-        st.session_state.index = None
-        st.session_state.texts = []
+VOICE_CACHE = load_voice_cache()
 
-# =========================
-# INITIAL TRAINING (IMPORTANT - KEPT DATA)
-# =========================
-def initialize_training():
-    if not st.session_state.training_data:
-        for fact in HAITIAN_KNOWLEDGE_FACTS:
-            emb = st.session_state.embedding_model.encode([fact])[0]
-            st.session_state.training_data.append({
-                "text": fact,
-                "embedding": emb.tolist()
-            })
-        save_training_data()
-
-# =========================
-# FIND ANSWER LOCALLY
-# =========================
-def find_local_answer(query):
-    if not st.session_state.training_data:
-        return None
-
-    query_emb = st.session_state.embedding_model.encode([query])[0].astype("float32").reshape(1, -1)
-    distances, indices = st.session_state.index.search(query_emb, k=3)
-
-    results = []
-    for i in indices[0]:
-        if i != -1:
-            results.append(st.session_state.training_data[i]["text"])
-
-    if results:
-        return results[0]
-
-    return None
-
-# =========================
-# SAFE RESPONSE ENGINE (WITH GROK FALLBACK)
-# =========================
-def generate_response(user_input, uploaded_image=None):
-
-    if uploaded_image:
-        return "📷 Mwen resevwa imaj la, men mwen pa ka analize li kounye a."
-
-    # 1. LOCAL TRAINING FIRST
-    local = find_local_answer(user_input)
-    if local:
-        return local
-
-    # 2. GROK FALLBACK (ONLINE LOGIC)
-    grok_answer = call_grok_api(user_input)
-    if grok_answer:
-        return grok_answer
-
-    # 3. FINAL FALLBACK
-    return "Mwen pa jwenn repons nan sistèm lan."
-
-# =========================
-# TRAINING CENTER
-# =========================
-def training_center():
-    st.markdown("<h2 style='color:#FFD700;'>📚 Training Center</h2>", unsafe_allow_html=True)
-
-    new_fact = st.text_area("Ajoute nouvo konesans")
-
-    if st.button("Ajoute"):
-        if new_fact.strip():
-            emb = st.session_state.embedding_model.encode([new_fact])[0]
-            st.session_state.training_data.append({
-                "text": new_fact,
-                "embedding": emb.tolist()
-            })
-            save_training_data()
-            rebuild_index()
-            st.success("Ajoute!")
-
-# =========================
-# CHAT UI
-# =========================
-def chat_interface():
-
-    st.markdown("""
-    <style>
-    .stApp {
-        background: linear-gradient(135deg,#0f0c29,#302b63,#24243e);
-    }
-    .user-msg, .bot-msg {
-        color: white !important;
-        font-weight: 900 !important;
-        font-size: 18px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.title("🧠 Gesner AI")
-
-    for msg in st.session_state.conversation_history:
-        if msg["role"] == "user":
-            st.markdown(f"<div class='user-msg'>🧑‍💻 {msg['content']}</div>", unsafe_allow_html=True)
-        else:
-            st.markdown(f"<div class='bot-msg'>🤖 {msg['content']}</div>", unsafe_allow_html=True)
-
-    user_input = st.text_input("Ekri mesaj ou")
-
-    uploaded = st.file_uploader("Upload image", type=["png","jpg","jpeg"])
-
-    if st.button("Send"):
-        st.session_state.conversation_history.append({"role":"user","content":user_input})
-
-        img = uploaded.read() if uploaded else None
-        reply = generate_response(user_input, img)
-
-        # FORCE STRONG WHITE OUTPUT
-        if not reply:
-            reply = "Mwen pa gen repons kounye a."
-
-        st.session_state.conversation_history.append({"role":"assistant","content":reply})
-        st.rerun()
-
-    if st.button("Clear Chat"):
-        st.session_state.conversation_history = []
-        st.rerun()
-
-# =========================
-# INIT SYSTEM
-# =========================
 initialize_training()
-rebuild_index()
 
-menu = st.sidebar.radio("Menu", ["Chat", "Training Center"])
+# ================= APP =================
+st.set_page_config(page_title="Gesner AI", layout="wide")
+
+menu = st.sidebar.selectbox("Menu", ["Chat", "Training Center"])
 
 if menu == "Chat":
     chat_interface()
