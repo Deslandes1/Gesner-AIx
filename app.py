@@ -5,7 +5,6 @@ import faiss
 import os
 import re
 import requests
-from datetime import datetime
 from sentence_transformers import SentenceTransformer
 
 # =========================
@@ -19,13 +18,12 @@ os.makedirs(DATA_DIR, exist_ok=True)
 TRAINING_FILE = os.path.join(DATA_DIR, "training.json")
 
 # =========================
-# LIGHT UI THEME (UPDATED)
+# LIGHT THEME
 # =========================
 st.markdown("""
 <style>
 .stApp {
     background-color: #f5f7ff;
-    color: #111;
 }
 [data-testid="stSidebar"] {
     background-color: #eef2ff;
@@ -33,37 +31,33 @@ st.markdown("""
 .stTextInput input, .stTextArea textarea {
     background-color: white !important;
     color: black !important;
-    border-radius: 10px;
 }
 .stButton button {
     background-color: #4f46e5 !important;
     color: white !important;
-    border-radius: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
-# TRAINING CENTER DATA
+# TRAINING DATA
 # =========================
 HAITIAN_KNOWLEDGE_FACTS = [
     "Kristòf Kolon te dekouvri Ayiti nan 1492.",
     "Pòtoprens se kapital Ayiti.",
     "Ayiti sitiye nan Karayib la.",
-    "Jan Jak Desalin te pwoklame endepandans 1804.",
-    "Tousen Louverture se yon lidè revolisyon ayisyen."
+    "Jan Jak Desalin te pwoklame endepandans 1804."
 ]
 
 CORE_ANSWERS = {
     "kijan ou rele": "Mwen rele Gesner AI.",
     "ki moun ki dekouvri ayiti": "Kristòf Kolon te dekouvri Ayiti nan 1492.",
     "ki kote ayiti ye": "Ayiti sitiye nan Karayib la.",
-    "site konbyen let ki genhen nan alfabe kreyol la":
-        "Gen 32 lèt nan alfabè kreyòl la."
+    "soup joumou": "Soup joumou se manje endepandans Ayiti."
 }
 
 # =========================
-# LOAD MODEL
+# MODEL
 # =========================
 if "model" not in st.session_state:
     st.session_state.model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -79,33 +73,30 @@ if "index" not in st.session_state:
     st.session_state.texts = []
 
 # =========================
-# BUILD INDEX SAFE
+# SAFE INDEX BUILD
 # =========================
 def rebuild_index():
-    try:
-        texts = []
-        vectors = []
+    texts = []
+    vectors = []
 
-        for item in st.session_state.training_data:
-            if "text" in item:
-                texts.append(item["text"])
-                emb = st.session_state.model.encode(item["text"])
-                vectors.append(emb)
+    for item in st.session_state.training_data:
+        if "text" in item:
+            texts.append(item["text"])
+            vec = st.session_state.model.encode(item["text"])
+            vectors.append(vec)
 
-        if len(vectors) == 0:
-            return
+    if len(vectors) == 0:
+        return
 
-        dim = len(vectors[0])
-        index = faiss.IndexFlatL2(dim)
-        index.add(np.array(vectors).astype("float32"))
+    dim = len(vectors[0])
+    index = faiss.IndexFlatL2(dim)
+    index.add(np.array(vectors).astype("float32"))
 
-        st.session_state.index = index
-        st.session_state.texts = texts
-    except:
-        st.session_state.index = None
+    st.session_state.index = index
+    st.session_state.texts = texts
 
 # =========================
-# ADD TRAINING FACTS
+# INIT TRAINING
 # =========================
 def init_training():
     existing = {x["text"] for x in st.session_state.training_data if "text" in x}
@@ -121,78 +112,107 @@ init_training()
 # =========================
 # CORE ANSWER
 # =========================
-def get_core_answer(q):
-    q = q.lower().strip()
-    return CORE_ANSWERS.get(q)
+def core_answer(q):
+    return CORE_ANSWERS.get(q.lower().strip())
 
 # =========================
-# RETRIEVAL
+# INTENT DETECTOR (IMPORTANT FIX)
+# =========================
+def intent_router(q):
+    q = q.lower()
+
+    if "kijan ou rele" in q:
+        return "Mwen rele Gesner AI."
+
+    if "ki kote ayiti ye" in q:
+        return "Ayiti sitiye nan Karayib la."
+
+    if "ki moun ki dekouvri ayiti" in q:
+        return "Kristòf Kolon te dekouvri Ayiti nan 1492."
+
+    if "soup joumou" in q:
+        return "Soup joumou se manje endepandans Ayiti."
+
+    return None
+
+# =========================
+# MEMORY SEARCH
 # =========================
 def search_memory(query):
     if st.session_state.index is None:
         return []
 
-    q_vec = st.session_state.model.encode(query).astype("float32").reshape(1, -1)
-    _, idx = st.session_state.index.search(q_vec, 3)
+    vec = st.session_state.model.encode(query).astype("float32").reshape(1, -1)
+    _, idx = st.session_state.index.search(vec, 3)
 
     results = []
     for i in idx[0]:
         if i != -1 and i < len(st.session_state.texts):
             results.append(st.session_state.texts[i])
+
     return results
 
 # =========================
 # GROK API
 # =========================
-def call_grok(prompt):
+def grok_call(prompt):
     try:
         key = st.secrets.get("GROK_API_KEY")
         if not key:
             return None
 
-        res = requests.post(
+        r = requests.post(
             "https://api.x.ai/v1/chat/completions",
             headers={"Authorization": f"Bearer {key}"},
             json={
                 "model": "grok-1",
                 "messages": [
-                    {"role": "system", "content": "Answer directly in Haitian Creole only."},
+                    {"role": "system", "content": "Answer ONLY in Haitian Creole."},
                     {"role": "user", "content": prompt}
                 ]
             },
             timeout=5
         )
 
-        if res.status_code == 200:
-            return res.json()["choices"][0]["message"]["content"]
+        if r.status_code == 200:
+            return r.json()["choices"][0]["message"]["content"]
     except:
         return None
 
 # =========================
-# MAIN AI ENGINE
+# MAIN ENGINE (FIXED LOGIC)
 # =========================
 def generate_answer(user_input):
     q = user_input.lower().strip()
 
-    # 1. CORE ANSWERS
-    if get_core_answer(q):
-        return get_core_answer(q)
+    # 1. CORE ANSWER
+    if core_answer(q):
+        return core_answer(q)
 
-    # 2. MEMORY SEARCH
+    # 2. INTENT FIX (STRONG PRIORITY)
+    intent = intent_router(q)
+    if intent:
+        return intent
+
+    # 3. MEMORY (ONLY IF RELEVANT)
     mem = search_memory(user_input)
     if mem:
-        return mem[0]
+        best = mem[0]
 
-    # 3. GROK FALLBACK
-    grok = call_grok(user_input)
+        # filter bad matches (IMPORTANT FIX)
+        if any(w in best.lower() for w in q.split()[:2]):
+            return best
+
+    # 4. GROK FALLBACK
+    grok = grok_call(user_input)
     if grok:
         return grok
 
-    # 4. FINAL FALLBACK
+    # 5. FINAL FALLBACK
     return "Mwen pa gen repons sa kounye a."
 
 # =========================
-# CHAT UI (FIXED NO REPEAT)
+# CHAT UI
 # =========================
 def chat():
     st.title("🧠 Gesner AI")
@@ -200,40 +220,36 @@ def chat():
     if "chat" not in st.session_state:
         st.session_state.chat = []
 
-    for msg in st.session_state.chat:
-        role, text = msg
-        if role == "user":
-            st.write("🧑", text)
-        else:
-            st.write("🤖", text)
+    for r, t in st.session_state.chat:
+        st.write("🧑" if r == "user" else "🤖", t)
 
-    user = st.text_input("Mande Gesner AI")
+    user = st.text_input("Poze kestyon")
 
     if st.button("Send") and user:
         st.session_state.chat.append(("user", user))
 
         answer = generate_answer(user)
 
-        # IMPORTANT FIX: no repetition, clean output only
+        # REMOVE repetition (IMPORTANT FIX)
         answer = answer.replace(user, "").strip()
 
         st.session_state.chat.append(("ai", answer))
         st.rerun()
 
 # =========================
-# SIDEBAR (UPDATED)
+# SIDEBAR
 # =========================
 def sidebar():
     st.sidebar.markdown("## 🧠 Gesner AI")
     st.sidebar.markdown("""
-**Company:** Globalinternet.py/software  
-**Built by:** Gesner Deslandes  
+**Globalinternet.py/software**  
+Built by Gesner Deslandes  
 📞 (509)-47385663  
 📧 deslandes78@gmail.com  
 """)
 
 # =========================
-# RUN APP
+# RUN
 # =========================
 sidebar()
 chat()
