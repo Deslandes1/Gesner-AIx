@@ -633,32 +633,27 @@ def training_center(t):
     with tabs[4]:
         dictionary_manager(t)
 
-# ---------- CHAT INTERFACE (Fixed) ----------
+# ---------- CHAT INTERFACE (SINGLE TEXT AREA FOR CONVERSATION) ----------
 def chat_interface(t):
     st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Mwen reponn sèlman an Kreyòl. Poze m kesyon oswa telechaje yon imaj.</p>", unsafe_allow_html=True)
     
-    # Chat history container
-    chat_container = st.container()
-    with chat_container:
-        for idx, msg in enumerate(st.session_state.conversation_history):
-            if msg["role"] == "user":
-                st.markdown(f'<div class="chat-message user-message">🧑‍💻 {msg["content"]}</div>', unsafe_allow_html=True)
-                if msg.get("image"):
-                    st.image(msg["image"], width=200)
-            else:
-                with st.container():
-                    col_text, col_btn = st.columns([10, 1])
-                    with col_text:
-                        st.markdown(f'<div class="assistant-message" style="padding:0.5rem; border-radius:20px;">🤖 {msg["content"]}</div>', unsafe_allow_html=True)
-                    with col_btn:
-                        if not msg.get("skip_audio", False):
-                            user_q = st.session_state.conversation_history[idx-1]["content"] if idx > 0 else ""
-                            show_audio_button(msg["content"], user_q, f"chat_{idx}")
-                st.markdown("")
+    # Build the conversation text
+    conversation_lines = []
+    for msg in st.session_state.conversation_history:
+        if msg["role"] == "user":
+            conversation_lines.append(f"🧑‍💻 {msg['content']}")
+            if msg.get("image"):
+                conversation_lines.append("[Image uploaded]")
+        else:
+            conversation_lines.append(f"🤖 {msg['content']}")
+    conversation_text = "\n\n".join(conversation_lines)
     
-    # Input area with file uploader and send button
-    col_input, col_upload, col_send = st.columns([6, 2, 1])
+    # Single read‑only text area showing the whole conversation
+    st.text_area("", value=conversation_text, height=400, key="chat_display", disabled=True, label_visibility="collapsed")
+    
+    # Input row
+    col_input, col_upload, col_send = st.columns([6, 1, 1])
     with col_input:
         user_input = st.text_input("", key="chat_input", placeholder=t['chat_input'], label_visibility="collapsed")
     with col_upload:
@@ -666,15 +661,12 @@ def chat_interface(t):
     with col_send:
         send_clicked = st.button(t['send'], key="send_btn", use_container_width=True)
     
-    # Process message
     if send_clicked and user_input.strip():
-        # Add user message to history
         user_msg = {"role": "user", "content": user_input}
         if uploaded_file:
             img_bytes = uploaded_file.read()
             user_msg["image"] = img_bytes
             st.session_state.conversation_history.append(user_msg)
-            # Generate response including image
             answer, is_fallback, skip_audio = generate_response(user_input, img_bytes)
         else:
             st.session_state.conversation_history.append(user_msg)
@@ -687,7 +679,6 @@ def chat_interface(t):
         })
         st.rerun()
     
-    # Clear chat button
     if st.button(t['clear'], use_container_width=True, key="clear_btn"):
         st.session_state.conversation_history = []
         st.rerun()
@@ -735,6 +726,12 @@ st.markdown(
         border: none;
     }
     .stTextInput input {
+        background-color: #0f3460 !important;
+        color: white !important;
+        border-radius: 12px;
+        border: 1px solid #e94560;
+    }
+    .stTextArea textarea {
         background-color: #0f3460 !important;
         color: white !important;
         border-radius: 12px;
