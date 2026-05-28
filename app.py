@@ -160,7 +160,7 @@ def call_grok_api(prompt, system_prompt="You are Gesner AI, a helpful assistant 
         "max_tokens": 500
     }
     try:
-        response = requests.post(endpoint, headers=headers, json=payload, timeout=5)
+        response = requests.post(endpoint, headers=headers, json=payload, timeout=3)  # shorter timeout
         if response.status_code == 200:
             data = response.json()
             return data["choices"][0]["message"]["content"].strip()
@@ -646,7 +646,7 @@ def chat_interface(t):
     st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Mwen reponn sèlman an Kreyòl. Poze m kesyon oswa telechaje yon imaj.</p>", unsafe_allow_html=True)
     
-    # Conversation display (read‑only text area)
+    # Conversation display (read‑only text area) - fixed empty label
     conversation_lines = []
     for msg in st.session_state.conversation_history:
         if msg["role"] == "user":
@@ -656,14 +656,15 @@ def chat_interface(t):
         else:
             conversation_lines.append(f"🤖 {msg['content']}")
     conversation_text = "\n\n".join(conversation_lines)
-    st.text_area("", value=conversation_text, height=400, key="chat_display", disabled=True, label_visibility="collapsed")
+    st.text_area("Chat history", value=conversation_text, height=400,
+                 key="chat_display", disabled=True, label_visibility="hidden")
     
     # Input row with send button and upload
     col_input, col_upload, col_send = st.columns([6, 1, 1])
     with col_input:
-        user_input = st.text_input("", key="chat_input", placeholder=t['chat_input'], label_visibility="collapsed")
+        user_input = st.text_input("Your message", key="chat_input", placeholder=t['chat_input'], label_visibility="hidden")
     with col_upload:
-        uploaded_file = st.file_uploader("📷", type=["jpg", "jpeg", "png", "gif"], key="image_upload", label_visibility="collapsed")
+        uploaded_file = st.file_uploader("Upload image", type=["jpg", "jpeg", "png", "gif"], key="image_upload", label_visibility="hidden")
     with col_send:
         send_clicked = st.button("📤 Send", key="send_btn", use_container_width=True)
     
