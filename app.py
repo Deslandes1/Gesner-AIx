@@ -160,17 +160,15 @@ def call_grok_api(prompt, system_prompt="You are Gesner AI, a helpful assistant 
         "max_tokens": 500
     }
     try:
-        response = requests.post(endpoint, headers=headers, json=payload, timeout=5)  # reduced timeout
+        response = requests.post(endpoint, headers=headers, json=payload, timeout=5)
         if response.status_code == 200:
             data = response.json()
             return data["choices"][0]["message"]["content"].strip()
-    except Exception as e:
-        # silently fail – we'll fallback to local response
+    except Exception:
         pass
     return None
 
 def identify_image_with_grok(image_bytes, user_question=""):
-    """Try to identify an image using Grok (fallback to text description)."""
     if user_question:
         prompt = f"The user uploaded an image and asked: '{user_question}'. Since I cannot see the image, please provide a general answer based on the question. If the question asks to identify something, say you cannot see the image."
     else:
@@ -327,42 +325,47 @@ def reason_answer(query, retrieved_facts):
     return retrieved_facts[0]
 
 def generate_response(user_input, uploaded_image_bytes=None):
-    # Image handling first
-    if uploaded_image_bytes:
-        return identify_image_with_grok(uploaded_image_bytes, user_input), False, False
-    
-    # Fast hardcoded answers
-    core_answer = get_core_answer(user_input)
-    if core_answer:
-        return core_answer, False, False
-    
-    direct = direct_keyword_answer(user_input)
-    if direct:
-        return direct, False, False
-    
-    math_result = reason_about_question(user_input)
-    if math_result:
-        return math_result, False, False
-    
-    cog_match = find_cognitive_match(user_input)
-    if cog_match:
-        return apply_cognitive_format(user_input, cog_match), False, False
-    
-    # FAISS / TF‑IDF retrieval
-    facts = retrieve_facts_hybrid(user_input, k=7)
-    if facts:
-        return reason_answer(user_input, facts), False, False
-    
-    # Try Grok only if API key is set (with short timeout)
-    grok_answer = call_grok_api(user_input)
-    if grok_answer:
-        return grok_answer, False, False
-    
-    # Ultimate local fallback – always replies instantly
-    fallback = ("Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon "
-                "oswa ajoute yon egzanp kognitif. "
-                "Ou ka di m 'Aprann: [fraz ou vle m aprann]'.")
-    return fallback, True, False
+    """Always returns a non‑empty string (answer, is_fallback, skip_audio)."""
+    try:
+        # Image handling
+        if uploaded_image_bytes:
+            return identify_image_with_grok(uploaded_image_bytes, user_input), False, False
+        
+        # Fast hardcoded answers
+        core_answer = get_core_answer(user_input)
+        if core_answer:
+            return core_answer, False, False
+        
+        direct = direct_keyword_answer(user_input)
+        if direct:
+            return direct, False, False
+        
+        math_result = reason_about_question(user_input)
+        if math_result:
+            return math_result, False, False
+        
+        cog_match = find_cognitive_match(user_input)
+        if cog_match:
+            return apply_cognitive_format(user_input, cog_match), False, False
+        
+        # FAISS / TF‑IDF retrieval
+        facts = retrieve_facts_hybrid(user_input, k=7)
+        if facts:
+            return reason_answer(user_input, facts), False, False
+        
+        # Try Grok only if API key is set
+        grok_answer = call_grok_api(user_input)
+        if grok_answer:
+            return grok_answer, False, False
+        
+        # Ultimate local fallback
+        fallback = ("Mwen poko konn sa. Tanpri anseye m nan Sant Fòmasyon "
+                    "oswa ajoute yon egzanp kognitif. "
+                    "Ou ka di m 'Aprann: [fraz ou vle m aprann]'.")
+        return fallback, True, False
+    except Exception as e:
+        # If anything crashes, return a safe message
+        return f"Gen yon erè teknik. Tanpri eseye ankò. (Detay: {str(e)})", True, False
 
 # ---------- HELPER FUNCTIONS FOR INDEX, VOICE, ETC. ----------
 def save_all():
@@ -681,6 +684,11 @@ def chat_interface(t):
         else:
             st.session_state.conversation_history.append(user_msg)
             answer, is_fallback, skip_audio = generate_response(user_input, None)
+        
+        # Extra safety: ensure answer is never empty
+        if not answer or not answer.strip():
+            answer = "Mwen pa gen repons kounye a. Tanpri eseye ankò."
+        
         st.session_state.conversation_history.append({
             "role": "assistant",
             "content": answer,
