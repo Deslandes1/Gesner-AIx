@@ -1,21 +1,23 @@
 import streamlit as st
-import json
-import numpy as np
-import faiss
-import os
-import re
 import requests
-from sentence_transformers import SentenceTransformer
+import json
+import os
 
 # =========================
 # CONFIG
 # =========================
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 
-DATA_DIR = ".gesner_data"
-os.makedirs(DATA_DIR, exist_ok=True)
-
-TRAINING_FILE = os.path.join(DATA_DIR, "training.json")
+# =========================
+# DATA (TRAINING CENTER ONLY DISPLAY)
+# =========================
+HAITIAN_KNOWLEDGE_FACTS = [
+    "Kristòf Kolon te dekouvri Ayiti an 1492.",
+    "Pòtoprens se kapital Ayiti.",
+    "Ayiti pran endepandans 1 janvye 1804.",
+    "Ayiti sitiye nan Karayib la sou zile Ispanyola.",
+    "Tousen Louverture te yon lidè revolisyon Ayiti."
+]
 
 # =========================
 # GROK API
@@ -29,10 +31,10 @@ def get_grok_key():
 def call_grok(prompt):
     key = get_grok_key()
     if not key:
-        return None
+        return "Grok API key pa jwenn nan secrets."
 
     try:
-        r = requests.post(
+        response = requests.post(
             "https://api.x.ai/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {key}",
@@ -41,122 +43,39 @@ def call_grok(prompt):
             json={
                 "model": "grok-1",
                 "messages": [
-                    {"role": "system", "content": "You are Gesner AI. Answer directly, do NOT repeat the question."},
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are Gesner AI. "
+                            "Answer ALL questions directly in Haitian Creole. "
+                            "Do NOT repeat the question. "
+                            "Be accurate and concise."
+                        )
+                    },
                     {"role": "user", "content": prompt}
                 ],
                 "temperature": 0.7,
-                "max_tokens": 400
+                "max_tokens": 500
             },
-            timeout=6
+            timeout=8
         )
 
-        if r.status_code == 200:
-            return r.json()["choices"][0]["message"]["content"]
-    except:
-        return None
+        if response.status_code == 200:
+            return response.json()["choices"][0]["message"]["content"]
+
+        return "Erè nan Grok API."
+
+    except Exception:
+        return "Mwen pa ka konekte ak Grok kounye a."
 
 # =========================
-# TRAINING DATA
-# =========================
-DEFAULT_FACTS = [
-    "Pòtoprens se kapital Ayiti.",
-    "Ayiti nan Karayib la.",
-    "Ayiti pran endepandans an 1804."
-]
-
-def load_training():
-    if os.path.exists(TRAINING_FILE):
-        return json.load(open(TRAINING_FILE, "r", encoding="utf-8"))
-    return [{"text": x} for x in DEFAULT_FACTS]
-
-def save_training():
-    json.dump(st.session_state.training, open(TRAINING_FILE, "w", encoding="utf-8"), indent=2)
-
-# =========================
-# INIT STATE
-# =========================
-if "training" not in st.session_state:
-    st.session_state.training = load_training()
-
-if "model" not in st.session_state:
-    st.session_state.model = SentenceTransformer("all-MiniLM-L6-v2")
-
-if "chat" not in st.session_state:
-    st.session_state.chat = []
-
-if "index" not in st.session_state:
-    st.session_state.index = None
-
-if "texts" not in st.session_state:
-    st.session_state.texts = []
-
-# =========================
-# BUILD INDEX
-# =========================
-def rebuild():
-    texts = [x["text"] for x in st.session_state.training]
-    st.session_state.texts = texts
-
-    if len(texts) == 0:
-        st.session_state.index = None
-        return
-
-    emb = st.session_state.model.encode(texts).astype("float32")
-    index = faiss.IndexFlatL2(emb.shape[1])
-    index.add(emb)
-
-    st.session_state.index = index
-
-rebuild()
-
-# =========================
-# CLEAN OUTPUT
-# =========================
-def clean(text):
-    if not text:
-        return text
-    return text.replace("?", "").strip()
-
-# =========================
-# SEARCH TRAINING MEMORY
-# =========================
-def search_training(query):
-    if st.session_state.index is None:
-        return None
-
-    q = st.session_state.model.encode([query]).astype("float32")
-    D, I = st.session_state.index.search(q, 1)
-
-    idx = I[0][0]
-    if idx != -1:
-        return st.session_state.texts[idx]
-    return None
-
-# =========================
-# AI ENGINE (GROK FIRST)
-# =========================
-def generate_answer(user_input):
-    user_input = user_input.strip()
-
-    # 1. GROK FIRST
-    grok = call_grok(user_input)
-    if grok:
-        return clean(grok)
-
-    # 2. TRAINING MEMORY
-    memory = search_training(user_input)
-    if memory:
-        return clean(memory)
-
-    # 3. FINAL FALLBACK
-    return "Mwen pa gen repons sa kounye a."
-
-# =========================
-# LIGHT UI
+# UI STYLE (LIGHT MODE)
 # =========================
 st.markdown("""
 <style>
-.stApp { background: #f6f8fc; }
+.stApp {
+    background: #f6f8fc;
+}
 
 [data-testid="stSidebar"] {
     background: #e9eef7;
@@ -169,11 +88,13 @@ h1,h2,h3,p,div,label {
 .stTextInput input {
     background: white !important;
     color: black !important;
+    border-radius: 10px;
 }
 
 .stButton button {
     background: #4a6cff !important;
     color: white !important;
+    border-radius: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -192,54 +113,52 @@ Built by Gesner Deslandes
 📧 deslandes78@gmail.com  
 """)
 
-    if st.button("Rebuild AI"):
-        rebuild()
-        st.success("Updated")
+    st.markdown("---")
+    st.markdown("### 📚 Training Center (Read Only)")
+    for fact in HAITIAN_KNOWLEDGE_FACTS:
+        st.write("• " + fact)
 
 # =========================
-# CHAT UI (FIXED CRASH)
+# CHAT MEMORY
 # =========================
-st.title("🧠 Gesner AI")
+if "chat" not in st.session_state:
+    st.session_state.chat = []
 
-for c in st.session_state.chat:
-    role = c.get("role", "bot")
-    text = c.get("text", "")
+# =========================
+# CHAT DISPLAY
+# =========================
+st.title("🧠 Gesner AI (Grok Powered)")
+
+for msg in st.session_state.chat:
+    role = msg.get("role", "bot")
+    text = msg.get("text", "")
 
     if role == "user":
         st.markdown("🧑 " + text)
     else:
         st.markdown("🤖 " + text)
 
-msg = st.text_input("Ask something...")
+# =========================
+# INPUT
+# =========================
+user_input = st.text_input("Ask anything...")
 
 if st.button("Send"):
-    if msg and msg.strip():
+    if user_input and user_input.strip():
 
+        # save user message
         st.session_state.chat.append({
             "role": "user",
-            "text": msg.strip()
+            "text": user_input.strip()
         })
 
-        answer = generate_answer(msg)
+        # GROK ONLY RESPONSE
+        answer = call_grok(user_input)
 
+        # save bot message
         st.session_state.chat.append({
             "role": "bot",
             "text": answer
         })
 
         st.rerun()
-
-# =========================
-# TRAINING CENTER
-# =========================
-st.markdown("---")
-st.subheader("🧠 Training Center")
-
-new_fact = st.text_input("Add knowledge")
-
-if st.button("Add"):
-    if new_fact and new_fact.strip():
-        st.session_state.training.append({"text": new_fact.strip()})
-        save_training()
-        rebuild()
-        st.success("Saved")
