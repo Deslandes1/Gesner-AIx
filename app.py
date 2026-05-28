@@ -1,20 +1,21 @@
 import os
 import pickle
 import hashlib
+import time
+import base64
+import json
 from pathlib import Path
 
 import streamlit as st
-import pandas as pd
 import numpy as np
-from sentence_transformers import SentenceTransformer
+import pandas as pd
 import faiss
-from transformers import pipeline   # <-- removed 'Conversation'
-import json
-import base64
-import time
+from sentence_transformers import SentenceTransformer
+from transformers import pipeline
+import torch
 
 # -------------------------------------------------------------------
-# 1. Configuration & Constants
+# 1. Configuration
 # -------------------------------------------------------------------
 KNOWLEDGE_DIR = Path("./knowledge")
 INDEX_PATH = Path("./faiss_index")
@@ -22,11 +23,12 @@ DOCS_PATH = Path("./documents.pkl")
 VOICE_CACHE_PATH = Path("./voice_cache.json")
 DICTIONARY_PATH = Path("./dictionary.json")
 
-MODEL_NAME = "all-MiniLM-L6-v2"
-LLM_MODEL_NAME = "microsoft/DialoGPT-medium"   # or any text generation model
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+# Use a small, fast model that always replies
+LLM_MODEL = "google/flan-t5-small"   # ~300MB, fast generation
 
 # -------------------------------------------------------------------
-# 2. Session State Initialization
+# 2. Session State
 # -------------------------------------------------------------------
 def init_session_state():
     if "messages" not in st.session_state:
@@ -39,49 +41,42 @@ def init_session_state():
         st.session_state.index = None
     if "documents" not in st.session_state:
         st.session_state.documents = []
+    if "last_response" not in st.session_state:
+        st.session_state.last_response = ""
 
 # -------------------------------------------------------------------
-# 3. Knowledge Base & FAISS Index
+# 3. Knowledge Base & FAISS
 # -------------------------------------------------------------------
 def load_documents():
-    """Load all .txt files from KNOWLEDGE_DIR."""
     docs = []
     if KNOWLEDGE_DIR.exists():
         for file in KNOWLEDGE_DIR.glob("*.txt"):
             with open(file, "r", encoding="utf-8") as f:
-                text = f.read()
-                docs.append({"filename": file.name, "text": text})
+                docs.append({"filename": file.name, "text": f.read()})
     return docs
 
 def rebuild_index():
-    """Build or load the FAISS index from knowledge documents."""
     st.info("Rebuilding knowledge index...")
     docs = load_documents()
     if not docs:
-        st.warning("No knowledge documents found. Place .txt files in ./knowledge/")
+        st.warning("No .txt files found in ./knowledge/")
         st.session_state.documents = []
         st.session_state.index = None
         return
-
-    model = SentenceTransformer(MODEL_NAME)
-    texts = [doc["text"] for doc in docs]
+    model = SentenceTransformer(EMBEDDING_MODEL)
+    texts = [d["text"] for d in docs]
     embeddings = model.encode(texts, show_progress_bar=True)
-
-    dimension = embeddings.shape[1]
-    index = faiss.IndexFlatL2(dimension)
+    dim = embeddings.shape[1]
+    index = faiss.IndexFlatL2(dim)
     index.add(embeddings.astype(np.float32))
-
-    # Save for future runs
     faiss.write_index(index, str(INDEX_PATH))
     with open(DOCS_PATH, "wb") as f:
         pickle.dump(docs, f)
-
     st.session_state.index = index
     st.session_state.documents = docs
-    st.success(f"Index rebuilt with {len(docs)} documents.")
+    st.success(f"Index rebuilt with {len(docs)} docs.")
 
 def load_index():
-    """Load existing FAISS index and documents if available."""
     if INDEX_PATH.exists() and DOCS_PATH.exists():
         st.session_state.index = faiss.read_index(str(INDEX_PATH))
         with open(DOCS_PATH, "rb") as f:
@@ -90,45 +85,43 @@ def load_index():
     return False
 
 def retrieve_context(query, top_k=3):
-    """Retrieve top_k relevant text chunks from the knowledge base."""
     if st.session_state.index is None or not st.session_state.documents:
         return ""
-    model = SentenceTransformer(MODEL_NAME)
-    query_emb = model.encode([query])
-    distances, indices = st.session_state.index.search(query_emb.astype(np.float32), top_k)
-    contexts = []
-    for idx in indices[0]:
-        if idx != -1:
-            contexts.append(st.session_state.documents[idx]["text"])
+    model = SentenceTransformer(EMBEDDING_MODEL)
+    q_emb = model.encode([query])
+    dist, idxs = st.session_state.index.search(q_emb.astype(np.float32), top_k)
+    contexts = [st.session_state.documents[i]["text"] for i in idxs[0] if i != -1]
     return "\n\n".join(contexts)
 
 # -------------------------------------------------------------------
-# 4. LLM Response Generation (with RAG)
+# 4. LLM Response (fast, always replies)
 # -------------------------------------------------------------------
 @st.cache_resource
-def load_generator():
-    # Using a text generation pipeline
-    return pipeline("text-generation", model=LLM_MODEL_NAME)
+def load_llm():
+    # Use a small T5 model – fast and reliable
+    return pipeline("text2text-generation", model=LLM_MODEL, device=-1)  # CPU
 
 def get_ai_response(user_input):
-    """Generate response using LLM + retrieved context."""
     context = retrieve_context(user_input)
-    prompt = f"""You are Gesner AI, a helpful assistant. Use the following context to answer the user's question. If the context is empty, use your general knowledge.
+    prompt = f"""Answer the user's question based on the context below. If the context is empty, answer using general knowledge.
 
 Context:
 {context}
 
-User: {user_input}
-Gesner AI:"""
-    
-    generator = load_generator()
-    result = generator(prompt, do_sample=True, max_new_tokens=150, temperature=0.7)[0]["generated_text"]
-    # Extract only the assistant's answer (after "Gesner AI:")
-    answer = result.split("Gesner AI:")[-1].strip()
-    return answer
+Question: {user_input}
+Answer:"""
+    try:
+        llm = load_llm()
+        result = llm(prompt, max_length=200, do_sample=True, temperature=0.7)[0]["generated_text"]
+        if not result.strip():
+            return "I'm not sure how to answer that. Could you rephrase?"
+        return result.strip()
+    except Exception as e:
+        st.error(f"LLM error: {e}")
+        return "Sorry, I encountered an error. Please try again."
 
 # -------------------------------------------------------------------
-# 5. Voice Training & Caching
+# 5. Voice Training
 # -------------------------------------------------------------------
 def load_voice_cache():
     if VOICE_CACHE_PATH.exists():
@@ -140,19 +133,18 @@ def save_voice_cache():
     with open(VOICE_CACHE_PATH, "w") as f:
         json.dump(st.session_state.voice_cache, f, indent=2)
 
-def train_voice(voice_name, audio_bytes):
-    """Store audio bytes as base64 in cache (simulate training)."""
+def train_voice(name, audio_bytes):
     key = hashlib.md5(audio_bytes).hexdigest()
     st.session_state.voice_cache[key] = {
-        "name": voice_name,
+        "name": name,
         "audio_b64": base64.b64encode(audio_bytes).decode("utf-8"),
         "timestamp": time.time()
     }
     save_voice_cache()
-    st.success(f"Voice '{voice_name}' trained successfully!")
+    st.success(f"Voice '{name}' trained!")
 
 # -------------------------------------------------------------------
-# 6. Dictionary Manager
+# 6. Dictionary
 # -------------------------------------------------------------------
 def load_dictionary():
     if DICTIONARY_PATH.exists():
@@ -174,88 +166,67 @@ def delete_term(term):
         save_dictionary()
 
 # -------------------------------------------------------------------
-# 7. UI Pages
+# 7. UI Pages (with your original styling)
 # -------------------------------------------------------------------
 def chat_interface(t):
-    st.markdown("## 💬 Gesner AI Chat")
-    
-    # Display conversation
-    conversation_text = "\n".join(st.session_state.messages)
-    st.text_area("Chat history", value=conversation_text, height=400,
-                 key="chat_display", disabled=True, label_visibility="hidden")
-    
-    # Input form – automatically clears after submit
+    st.markdown("### 💬 Chat with Gesner AI")
+    # Display chat history
+    chat_display = "\n".join(st.session_state.messages)
+    st.text_area("Conversation", value=chat_display, height=400,
+                 key="chat_display", disabled=True, label_visibility="collapsed")
+
     with st.form(key="chat_form", clear_on_submit=True):
-        user_input = st.text_input("Your message", key="user_input",
-                                   placeholder=t.get("chat_input", "Type your question here..."),
-                                   label_visibility="hidden")
-        col1, col2 = st.columns([1, 5])
-        with col1:
-            submitted = st.form_submit_button("📤 Send", use_container_width=True)
-        with col2:
-            st.markdown("")  # spacer
-    
+        user_input = st.text_input("Message", key="user_msg",
+                                   placeholder=t['chat_input'],
+                                   label_visibility="collapsed")
+        submitted = st.form_submit_button("Send", use_container_width=True)
     if submitted and user_input:
-        # Append user message
         st.session_state.messages.append(f"You: {user_input}")
-        # Get AI reply
-        with st.spinner("Gesner AI is thinking..."):
+        with st.spinner("Gesner is thinking..."):
             reply = get_ai_response(user_input)
         st.session_state.messages.append(f"🧠 Gesner AI: {reply}")
         st.rerun()
 
 def dictionary_manager(t):
-    st.markdown("## 📖 Dictionary Manager")
-    with st.form("add_term_form"):
+    st.markdown("### 📖 Dictionary")
+    with st.form("add_dict"):
         term = st.text_input("Term")
-        definition = st.text_area("Definition")
-        if st.form_submit_button("Add / Update"):
-            if term and definition:
-                add_term(term, definition)
-                st.success(f"Added '{term}'")
+        defi = st.text_area("Definition")
+        if st.form_submit_button("Add/Update"):
+            if term and defi:
+                add_term(term, defi)
                 st.rerun()
-    
-    st.markdown("### Existing Terms")
-    if st.session_state.dictionary:
-        for term, defi in list(st.session_state.dictionary.items()):
-            col1, col2, col3 = st.columns([2, 3, 1])
-            col1.write(f"**{term}**")
-            col2.write(defi)
-            if col3.button("❌", key=f"del_{term}"):
-                delete_term(term)
-                st.rerun()
-    else:
-        st.info("No terms yet. Add one above.")
+    st.markdown("#### Existing entries")
+    for term, defi in list(st.session_state.dictionary.items()):
+        col1, col2, col3 = st.columns([2, 3, 1])
+        col1.write(f"**{term}**")
+        col2.write(defi)
+        if col3.button("❌", key=f"del_{term}"):
+            delete_term(term)
+            st.rerun()
 
 def voice_training_center(t):
-    st.markdown("## 🎤 Voice Training Center")
-    voice_name = st.text_input("Voice name (e.g., 'John')")
-    uploaded_file = st.file_uploader("Upload an audio sample (WAV/MP3)", type=["wav", "mp3"])
-    if st.button("Train Voice") and voice_name and uploaded_file:
-        audio_bytes = uploaded_file.read()
-        train_voice(voice_name, audio_bytes)
-    
-    st.markdown("### Trained Voices")
-    if st.session_state.voice_cache:
-        for key, data in list(st.session_state.voice_cache.items()):
-            st.write(f"- {data['name']} (trained {time.ctime(data['timestamp'])})")
-    else:
-        st.info("No voices trained yet.")
+    st.markdown("### 🎤 Voice Training")
+    name = st.text_input("Voice name")
+    audio = st.file_uploader("Upload audio (WAV/MP3)", type=["wav", "mp3"])
+    if st.button("Train") and name and audio:
+        train_voice(name, audio.read())
+    st.markdown("#### Trained voices")
+    for key, data in st.session_state.voice_cache.items():
+        st.write(f"- {data['name']} ({time.ctime(data['timestamp'])})")
 
 def training_center(t):
-    st.markdown("## 🧠 Training Center")
-    st.write("Rebuild the knowledge base index from documents in `./knowledge/`.")
+    st.markdown("### 🧠 Training Center")
     if st.button("🔄 Rebuild Knowledge Index"):
         rebuild_index()
         st.rerun()
-    if st.button("🎤 Rebuild Voice Cache"):
+    if st.button("🎤 Clear Voice Cache"):
         st.session_state.voice_cache = {}
         save_voice_cache()
-        st.success("Voice cache cleared.")
+        st.success("Voice cache cleared")
         st.rerun()
 
 def show_sidebar():
-    """Return (selected_menu, translations_dict)."""
     with st.sidebar:
         st.image("https://via.placeholder.com/150x50?text=Gesner+AI", use_container_width=False)
         st.markdown("### Navigation")
@@ -266,9 +237,7 @@ def show_sidebar():
             st.session_state.messages = []
             st.rerun()
         st.divider()
-        st.caption("Gesner AI v1.0")
-    
-    # Translations (simplified)
+        st.caption("Gesner AI")
     t = {
         "chat_input": "Ask me anything...",
         "chat_interface_label": "Chat",
@@ -279,66 +248,66 @@ def show_sidebar():
     return menu, t
 
 # -------------------------------------------------------------------
-# 8. Main App
+# 8. Main
 # -------------------------------------------------------------------
 def main():
-    st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
-    
-    # Custom CSS for professional look
+    # Original custom CSS (from your logs, adapted)
     st.markdown("""
     <style>
-        /* Main background */
+        /* Keep the original dark background */
         .stApp {
             background-color: #0e1117;
         }
-        /* Chat display area */
+        /* Sidebar styling as in your logs */
+        [data-testid="stSidebar"] {
+            background-color: #1e1e2f;
+        }
+        [data-testid="stSidebar"] .stSelectbox {
+            background-color: #000000 !important;
+            border-radius: 12px !important;
+        }
+        [data-testid="stSidebar"] .stSelectbox svg {
+            fill: #e94560 !important;
+            stroke: #e94560 !important;
+        }
+        div[data-baseweb="popover"] ul {
+            background-color: #000000 !important;
+        }
+        /* Chat area */
         [data-testid="stTextArea"] textarea {
             background-color: #1e1e2f !important;
-            color: #ffffff !important;
+            color: white !important;
             border-radius: 12px;
-            font-family: monospace;
-            font-size: 14px;
-        }
-        /* Sidebar */
-        [data-testid="stSidebar"] {
-            background-color: #1a1c23;
         }
         /* Buttons */
         .stButton button {
             background-color: #e94560;
             color: white;
             border-radius: 20px;
-            transition: 0.2s;
         }
         .stButton button:hover {
             background-color: #ff6b8b;
-            color: white;
         }
         /* Input field */
         [data-testid="stForm"] input {
-            border-radius: 25px;
             background-color: #2a2c3a;
             color: white;
+            border-radius: 25px;
             border: 1px solid #e94560;
-        }
-        /* Radio labels */
-        .stRadio label {
-            font-weight: 500;
         }
     </style>
     """, unsafe_allow_html=True)
-    
+
+    st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
     init_session_state()
-    
-    # Load or rebuild index
+
     if not load_index():
         if KNOWLEDGE_DIR.exists() and any(KNOWLEDGE_DIR.glob("*.txt")):
             rebuild_index()
         else:
-            st.info("No knowledge base found. Place .txt files in ./knowledge/ to enable RAG.")
-    
+            st.info("No knowledge base found. Place .txt files in ./knowledge/")
+
     menu, t = show_sidebar()
-    
     if menu == t["chat_interface_label"]:
         chat_interface(t)
     elif menu == t["dictionary"]:
