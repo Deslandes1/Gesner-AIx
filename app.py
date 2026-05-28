@@ -73,7 +73,7 @@ def load_cognitive_examples():
             return json.load(f)
     return []
 
-# ========== WORKRISE POLICY FACTS (partial – add your full list) ==========
+# ========== WORKRISE POLICY FACTS (partial) ==========
 WORKRISE_POLICY_FACTS = [
     "Workrise pap peye konpansasyon aksidan travay pou blesi ki rive pandan anplwaye patisipe volontè nan aktivite lwazi, sosyal, oswa espòtif lè li pa nan travay, si aktivite sa a pa fè pati devwa travay li.",
     "Workrise bay benefis pou anplwaye regilye aplentan (full-time) ak anplwaye a tan pasyèl (part-time) k ap travay 30 èdtan oswa plis pa semèn.",
@@ -127,7 +127,6 @@ def get_default_training_facts():
         "François Duvalier (Papa Dok) te vin prezidan an 1957.",
         "Tranblemanntè 12 janvye 2010 te touye plis pase 200,000 moun.",
         "Jovenel Moïse te asasine 7 jiyè 2021.",
-        # Bwa Kayiman fact (strong, clear, will be hardcoded as well)
         "Bwa Kayiman se kote seremoni sekrè esklav yo te fèt 21 out 1791 pou lanse revolisyon esklav la. Se te yon reyinyon ki te dirije pa Boukmann Dutty ak yon prèt vodou. Sa te kòmanse revolisyon ayisyen an."
     ]
     return facts
@@ -142,7 +141,6 @@ def initialize_default_training():
         rebuild_index()
         save_training_data()
     else:
-        # Ensure Workrise facts are present
         existing = {item["text"] for item in st.session_state.training_data}
         added = 0
         for fact in WORKRISE_POLICY_FACTS:
@@ -150,7 +148,6 @@ def initialize_default_training():
                 embedding = st.session_state.embedding_model.encode([fact])[0]
                 st.session_state.training_data.append({"text": fact, "embedding": embedding.tolist()})
                 added += 1
-        # Also ensure Bwa Kayiman fact exists
         bwa_fact = "Bwa Kayiman se kote seremoni sekrè esklav yo te fèt 21 out 1791 pou lanse revolisyon esklav la. Se te yon reyinyon ki te dirije pa Boukmann Dutty ak yon prèt vodou. Sa te kòmanse revolisyon ayisyen an."
         if bwa_fact not in existing:
             embedding = st.session_state.embedding_model.encode([bwa_fact])[0]
@@ -161,7 +158,7 @@ def initialize_default_training():
             save_training_data()
             st.session_state._workrise_added = added
 
-# ---------- GROK API ----------
+# ========== GROK API ==========
 def get_grok_api_key():
     try:
         return st.secrets["GROK_API_KEY"]
@@ -195,7 +192,7 @@ def call_grok_api(prompt, system_prompt="You are Gesner AI, a helpful assistant 
         st.error(f"Grok API error: {e}")
     return None
 
-# ---------- COGNITIVE TRAINING ----------
+# ========== COGNITIVE TRAINING ==========
 def add_cognitive_example(input_text, output_format, description=""):
     example = {
         "input": input_text.strip(),
@@ -233,10 +230,44 @@ def apply_cognitive_format(query, matched_example):
     output = output.replace("{query}", query)
     return output
 
+# ========== CENTRAL CORE ANSWERS DICTIONARY ==========
+# Add any question and its exact answer here. The AI will check this first.
+CORE_ANSWERS = {
+    # Alphabet
+    "site konbyen let ki genhen nan alfabe kreyol la": "A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z",
+    "konbyen let ki genhen nan alfabe kreyol la": "Nan alfabe kreyol la genhen 32 let.",
+    "konbyen let ki gehen nan alfabe kreyol la": "Nan alfabe kreyol la gen 32 let.",
+    "kijan ou rele": "Non pa mwen se Gesner L'AI kreyate mwen se Gesner Deslandes nan Globalinternet.py.",
+    
+    # History
+    "kisa bwa kayiman ye": "Bwa Kayiman se kote seremoni sekrè esklav yo te fèt 21 out 1791 pou lanse revolisyon esklav la. Se te yon reyinyon ki te dirije pa Boukmann Dutty ak yon prèt vodou. Sa te kòmanse revolisyon ayisyen an.",
+    "ki dat ayiti te vin endepandan": "Ayiti te vin endepandan 1ye janvye 1804.",
+    "ki moun ki te papa dok": "François Duvalier (Papa Dok) te vin prezidan an 1957 e li te kreye yon diktati.",
+    "kisa tranblemanntè 2010 te fè": "Tranblemanntè 12 janvye 2010 te touye plis pase 200,000 moun, li te detwi Pòtoprens, epi li te deplase 1.5 milyon moun.",
+    
+    # Other common ones (add as many as you want)
+    "ki moun ki kreye gesner ai": "Gesner AI te kreye pa Gesner Deslandes, fondatè GlobalInternet.py.",
+    "kijan ou fè tan pase an kreyòl": "Pou fè tan pase, mete 'te' anvan vèb la. Egzanp: Mwen te manje (I ate).",
+    "kijan ou di mwen renmen ou an kreyòl": "Mwen renmen ou.",
+}
+
+def get_core_answer(question):
+    """Check if the normalized question matches any key in CORE_ANSWERS."""
+    q = question.strip().lower()
+    q = re.sub(r'\s+', ' ', q)
+    # First try exact match
+    if q in CORE_ANSWERS:
+        return CORE_ANSWERS[q]
+    # Then try partial match (if a key is contained in the question)
+    for key, answer in CORE_ANSWERS.items():
+        if key in q:
+            return answer
+    return None
+
 # ---------- STREAMLIT PAGE CONFIG ----------
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 
-# ---------- CSS (unchanged – same as previous) ----------
+# ---------- CSS (same as before) ----------
 st.markdown(
     """
     <style>
@@ -675,43 +706,34 @@ def reason_answer(query, retrieved_facts):
             return ". ".join(history_facts[:3])
     return retrieved_facts[0]
 
-# ========== ENHANCED generate_response with hardcoded Bwa Kayiman ==========
+# ========== ENHANCED generate_response with core answers ==========
 def generate_response(user_input):
-    normalized = user_input.strip().lower()
+    # 1. Check the core answers dictionary first
+    core_answer = get_core_answer(user_input)
+    if core_answer:
+        return core_answer, False, False
     
-    # Hardcoded special cases
-    if "site konbyen let ki genhen nan alfabe kreyol la" in normalized:
-        return "A, AN, B, CH, D, E, È, EN, F, G, H, I, J, K, L, M, N, NG, O, Ò, ON, OU, OUN, P, R, S, T, UI, V, W, Y, Z", False, False
-    if re.search(r"konbyen let ki (genhen|gehen) nan alfabe kreyol la", normalized):
-        return "Nan alfabe kreyol la genhen 32 let.", False, False
-    if "kijan ou rele" in normalized or "ki jan ou rele" in normalized:
-        return "Non pa mwen se Gesner L'AI kreyate mwen se Gesner Deslandes nan Globalinternet.py.", False, False
-    
-    # NEW: Hardcoded Bwa Kayiman question
-    if "bwa kayiman" in normalized:
-        return "Bwa Kayiman se kote seremoni sekrè esklav yo te fèt 21 out 1791 pou lanse revolisyon esklav la. Se te yon reyinyon ki te dirije pa Boukmann Dutty ak yon prèt vodou. Sa te kòmanse revolisyon ayisyen an.", False, False
-    
-    # Direct keyword answers
+    # 2. Direct keyword answers (Ti Malice, levels)
     direct = direct_keyword_answer(user_input)
     if direct:
         return direct, False, False
     
-    # Cognitive example match
-    cog_match = find_cognitive_match(user_input)
-    if cog_match:
-        return apply_cognitive_format(user_input, cog_match), False, False
-    
-    # Local retrieval
-    facts = retrieve_facts_hybrid(user_input, k=5)
-    if facts:
-        return reason_answer(user_input, facts), False, False
-    
-    # Math / logic
+    # 3. Math / simple logic
     math_result = reason_about_question(user_input)
     if math_result:
         return math_result, False, False
     
-    # Grok API
+    # 4. Cognitive example match
+    cog_match = find_cognitive_match(user_input)
+    if cog_match:
+        return apply_cognitive_format(user_input, cog_match), False, False
+    
+    # 5. Local retrieval from training
+    facts = retrieve_facts_hybrid(user_input, k=5)
+    if facts:
+        return reason_answer(user_input, facts), False, False
+    
+    # 6. Grok API
     grok_answer = call_grok_api(user_input)
     if grok_answer:
         return grok_answer, False, False
