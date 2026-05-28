@@ -18,7 +18,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 TRAINING_FILE = os.path.join(DATA_DIR, "training.json")
 
 # =========================
-# LIGHT THEME
+# LIGHT UI
 # =========================
 st.markdown("""
 <style>
@@ -40,7 +40,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================
-# TRAINING DATA
+# KNOWLEDGE BASE
 # =========================
 HAITIAN_KNOWLEDGE_FACTS = [
     "Kristòf Kolon te dekouvri Ayiti nan 1492.",
@@ -51,8 +51,8 @@ HAITIAN_KNOWLEDGE_FACTS = [
 
 CORE_ANSWERS = {
     "kijan ou rele": "Mwen rele Gesner AI.",
-    "ki moun ki dekouvri ayiti": "Kristòf Kolon te dekouvri Ayiti nan 1492.",
     "ki kote ayiti ye": "Ayiti sitiye nan Karayib la.",
+    "ki moun ki dekouvri ayiti": "Kristòf Kolon te dekouvri Ayiti nan 1492.",
     "soup joumou": "Soup joumou se manje endepandans Ayiti."
 }
 
@@ -73,7 +73,7 @@ if "index" not in st.session_state:
     st.session_state.texts = []
 
 # =========================
-# SAFE INDEX BUILD
+# SAFE INDEX
 # =========================
 def rebuild_index():
     texts = []
@@ -110,13 +110,13 @@ def init_training():
 init_training()
 
 # =========================
-# CORE ANSWER
+# CORE ANSWERS
 # =========================
 def core_answer(q):
     return CORE_ANSWERS.get(q.lower().strip())
 
 # =========================
-# INTENT DETECTOR (IMPORTANT FIX)
+# INTENT ROUTER
 # =========================
 def intent_router(q):
     q = q.lower()
@@ -153,7 +153,7 @@ def search_memory(query):
     return results
 
 # =========================
-# GROK API
+# GROK API (ONLINE BRAIN)
 # =========================
 def grok_call(prompt):
     try:
@@ -161,49 +161,48 @@ def grok_call(prompt):
         if not key:
             return None
 
-        r = requests.post(
+        res = requests.post(
             "https://api.x.ai/v1/chat/completions",
             headers={"Authorization": f"Bearer {key}"},
             json={
                 "model": "grok-1",
                 "messages": [
-                    {"role": "system", "content": "Answer ONLY in Haitian Creole."},
+                    {"role": "system", "content": "Answer ONLY in Haitian Creole. Be direct and concise."},
                     {"role": "user", "content": prompt}
                 ]
             },
-            timeout=5
+            timeout=6
         )
 
-        if r.status_code == 200:
-            return r.json()["choices"][0]["message"]["content"]
+        if res.status_code == 200:
+            return res.json()["choices"][0]["message"]["content"]
     except:
         return None
 
 # =========================
-# MAIN ENGINE (FIXED LOGIC)
+# MAIN INTELLIGENCE ENGINE (FIXED)
 # =========================
 def generate_answer(user_input):
     q = user_input.lower().strip()
 
-    # 1. CORE ANSWER
-    if core_answer(q):
-        return core_answer(q)
+    # 1. CORE
+    ca = core_answer(q)
+    if ca:
+        return ca
 
-    # 2. INTENT FIX (STRONG PRIORITY)
+    # 2. INTENT
     intent = intent_router(q)
     if intent:
         return intent
 
-    # 3. MEMORY (ONLY IF RELEVANT)
+    # 3. MEMORY (ONLY SAFE MATCH)
     mem = search_memory(user_input)
     if mem:
         best = mem[0]
-
-        # filter bad matches (IMPORTANT FIX)
         if any(w in best.lower() for w in q.split()[:2]):
             return best
 
-    # 4. GROK FALLBACK
+    # 4. GROK = PRIMARY ONLINE BRAIN FOR UNKNOWN QUESTIONS
     grok = grok_call(user_input)
     if grok:
         return grok
@@ -230,7 +229,7 @@ def chat():
 
         answer = generate_answer(user)
 
-        # REMOVE repetition (IMPORTANT FIX)
+        # CLEAN OUTPUT (no repetition)
         answer = answer.replace(user, "").strip()
 
         st.session_state.chat.append(("ai", answer))
@@ -249,7 +248,7 @@ Built by Gesner Deslandes
 """)
 
 # =========================
-# RUN
+# RUN APP
 # =========================
 sidebar()
 chat()
