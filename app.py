@@ -153,13 +153,9 @@ def call_grok_api(prompt, system_prompt="You are Gesner AI, a helpful assistant 
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": prompt}
     ]
-    # If image is provided, we need to use multimodal format (if supported)
-    # For now, we'll assume Grok doesn't support vision, so we'll add a note.
-    # In practice, you would need to use a vision model like GPT-4V or Claude.
-    # As a workaround, we'll send the image as a URL in the text.
     if image_base64:
-        # This is a placeholder – actual implementation would use a vision API.
-        # We'll add a fallback message.
+        # Grok may not support vision; we'll send as text and ignore image for now.
+        # In production, use a vision model.
         pass
     payload = {
         "model": "grok-1",
@@ -178,10 +174,6 @@ def call_grok_api(prompt, system_prompt="You are Gesner AI, a helpful assistant 
 
 def identify_image_with_grok(image_bytes, user_question=""):
     """Try to identify an image using Grok (fallback to text description)."""
-    # Since Grok may not support vision, we'll use a free online image captioning API as fallback.
-    # For simplicity, we'll return a placeholder and instruct the user to describe the image.
-    # In a production environment, you could integrate Replicate, HuggingFace, or Google Vision.
-    # We'll implement a basic online search using Grok's knowledge based on any text provided.
     if user_question:
         prompt = f"The user uploaded an image and asked: '{user_question}'. Since I cannot see the image, please provide a general answer based on the question. If the question asks to identify something, say you cannot see the image."
     else:
@@ -191,7 +183,7 @@ def identify_image_with_grok(image_bytes, user_question=""):
         return response
     return "Mwen pa ka wè imaj la. Tanpri dekri li pou mwen, oswa di m sa w vle konnen."
 
-# ---------- COGNITIVE TRAINING (unchanged) ----------
+# ---------- COGNITIVE TRAINING ----------
 def add_cognitive_example(input_text, output_format, description=""):
     example = {
         "input": input_text.strip(),
@@ -338,12 +330,9 @@ def reason_answer(query, retrieved_facts):
     return retrieved_facts[0]
 
 def generate_response(user_input, uploaded_image_bytes=None):
-    # If an image is uploaded, process it separately
     if uploaded_image_bytes:
-        # Try to identify the image using Grok (or fallback)
         return identify_image_with_grok(uploaded_image_bytes, user_input), False, False
     
-    # Normal text response
     core_answer = get_core_answer(user_input)
     if core_answer:
         return core_answer, False, False
@@ -486,7 +475,7 @@ def render_audio_player():
             st.audio(data, format=mime)
         st.session_state.play_audio = None
 
-# ---------- UI COMPONENTS (Training Center, Dictionary, Voice Training remain) ----------
+# ---------- UI COMPONENTS (Training Center, Dictionary, Voice Training) ----------
 def dictionary_manager(t):
     st.subheader(t['dictionary'])
     lang = st.selectbox("Select language", list(LANGUAGES.keys()), key="dict_lang")
@@ -644,12 +633,12 @@ def training_center(t):
     with tabs[4]:
         dictionary_manager(t)
 
-# ---------- NEW CHAT INTERFACE (Single scrollable container) ----------
+# ---------- CHAT INTERFACE (Fixed) ----------
 def chat_interface(t):
     st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Mwen reponn sèlman an Kreyòl. Poze m kesyon oswa telechaje yon imaj.</p>", unsafe_allow_html=True)
     
-    # Chat history container - using st.container for scrollable area
+    # Chat history container
     chat_container = st.container()
     with chat_container:
         for idx, msg in enumerate(st.session_state.conversation_history):
@@ -682,9 +671,8 @@ def chat_interface(t):
         # Add user message to history
         user_msg = {"role": "user", "content": user_input}
         if uploaded_file:
-            # Read image and store base64 or file data
             img_bytes = uploaded_file.read()
-            user_msg["image"] = img_bytes  # store raw bytes (will display later)
+            user_msg["image"] = img_bytes
             st.session_state.conversation_history.append(user_msg)
             # Generate response including image
             answer, is_fallback, skip_audio = generate_response(user_input, img_bytes)
@@ -697,9 +685,6 @@ def chat_interface(t):
             "is_fallback": is_fallback,
             "skip_audio": skip_audio
         })
-        # Clear input and uploaded file state
-        st.session_state.chat_input = ""
-        st.session_state.image_upload = None
         st.rerun()
     
     # Clear chat button
@@ -709,7 +694,7 @@ def chat_interface(t):
     
     render_audio_player()
 
-# ---------- STREAMLIT PAGE CONFIG & CSS (unchanged) ----------
+# ---------- STREAMLIT PAGE CONFIG & CSS ----------
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 st.markdown(
     """
