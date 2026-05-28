@@ -633,12 +633,12 @@ def training_center(t):
     with tabs[4]:
         dictionary_manager(t)
 
-# ---------- CHAT INTERFACE (SINGLE TEXT AREA WITH BLACK BACKGROUND & BOLD WHITE TEXT) ----------
+# ---------- CHAT INTERFACE (Professional Layout, Fast Clear) ----------
 def chat_interface(t):
     st.markdown(f"<h1 style='text-align:center; color:#ffd966;'>{t['app_title']}</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center;'>Mwen reponn sèlman an Kreyòl. Poze m kesyon oswa telechaje yon imaj.</p>", unsafe_allow_html=True)
     
-    # Build the conversation text
+    # Conversation display (read‑only text area)
     conversation_lines = []
     for msg in st.session_state.conversation_history:
         if msg["role"] == "user":
@@ -648,18 +648,23 @@ def chat_interface(t):
         else:
             conversation_lines.append(f"🤖 {msg['content']}")
     conversation_text = "\n\n".join(conversation_lines)
-    
-    # Single read‑only text area with black background, bold white text
     st.text_area("", value=conversation_text, height=400, key="chat_display", disabled=True, label_visibility="collapsed")
     
-    # Input row
+    # Input row with send button and clear button (moved to sidebar for speed, but we'll keep here for simplicity)
     col_input, col_upload, col_send = st.columns([6, 1, 1])
     with col_input:
         user_input = st.text_input("", key="chat_input", placeholder=t['chat_input'], label_visibility="collapsed")
     with col_upload:
         uploaded_file = st.file_uploader("📷", type=["jpg", "jpeg", "png", "gif"], key="image_upload", label_visibility="collapsed")
     with col_send:
-        send_clicked = st.button(t['send'], key="send_btn", use_container_width=True)
+        send_clicked = st.button("📤 Send", key="send_btn", use_container_width=True)
+    
+    # Clear chat button (small, fast)
+    col_clear, _ = st.columns([1, 5])
+    with col_clear:
+        if st.button("🗑️ Clear Chat", key="clear_btn", use_container_width=True):
+            st.session_state.conversation_history = []
+            st.rerun()
     
     if send_clicked and user_input.strip():
         user_msg = {"role": "user", "content": user_input}
@@ -679,13 +684,9 @@ def chat_interface(t):
         })
         st.rerun()
     
-    if st.button(t['clear'], use_container_width=True, key="clear_btn"):
-        st.session_state.conversation_history = []
-        st.rerun()
-    
     render_audio_player()
 
-# ---------- STREAMLIT PAGE CONFIG & CSS (with bold white text in textarea) ----------
+# ---------- STREAMLIT PAGE CONFIG & CSS ----------
 st.set_page_config(page_title="Gesner AI", page_icon="🧠", layout="wide")
 st.markdown(
     """
@@ -731,7 +732,7 @@ st.markdown(
         border-radius: 12px;
         border: 1px solid #e94560;
     }
-    /* Text area: black background, bold white text */
+    /* Chat display text area: black background, bold white text */
     .stTextArea textarea {
         background-color: #000000 !important;
         color: #ffffff !important;
@@ -740,22 +741,6 @@ st.markdown(
         font-size: 1rem;
         border: 1px solid #e94560;
         border-radius: 12px;
-    }
-    .chat-message {
-        padding: 1rem;
-        border-radius: 20px;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .user-message {
-        background: linear-gradient(135deg, #e94560, #ff6b6b);
-        color: white;
-    }
-    .assistant-message {
-        background: linear-gradient(135deg, #0f3460, #1a4a7a);
-        color: white;
     }
     .footer {
         text-align: center;
